@@ -1,30 +1,30 @@
 import toast from "react-hot-toast";
 import { Check, X, Info, Loader2 } from "lucide-react";
-import { motion, easeOut} from "framer-motion";
+import { motion, easeOut } from "framer-motion";
 
 const motionBase = {
-  initial: { y: -6, opacity: 0 },
+  initial: { y: -8, opacity: 0 },
   animate: { y: 0, opacity: 1 },
-  exit: { y: -6, opacity: 0 },
-  transition: { duration: 0.18, ease: easeOut },
+  exit: { y: -8, opacity: 0 },
+  transition: { duration: 0.15, ease: easeOut },
 };
 
 const baseClass =
-  "flex items-center gap-2 px-3 py-2 rounded-lg border bg-white text-gray-800 shadow-[0_4px_12px_rgba(0,0,0,0.06)]";
+  "flex items-center gap-2.5 px-4 py-2.5 rounded-none border border-[var(--color-rule)] bg-[var(--color-bg)] text-[var(--color-ink)] font-mono text-xs uppercase tracking-wider";
 
-export const Toaster = {
+export const ToasterObject = {
   success(msg: string) {
     toast.custom(
       (t) => (
         <motion.div
           {...motionBase}
           animate={t.visible ? motionBase.animate : motionBase.exit}
-          className={`${baseClass} border-zinc-200`}
+          className={`${baseClass} border-[var(--color-ink)]`}
         >
-          <Check size={14} className="text-gray-600" />
-          <span className="text-xs font-medium flex-1">{msg}</span>
-          <button onClick={() => toast.dismiss(t.id)}>
-            <X size={14} className="text-gray-400 hover:text-gray-600" />
+          <Check size={14} className="text-[var(--color-accent)]" />
+          <span className="font-semibold flex-1">{msg}</span>
+          <button onClick={() => toast.dismiss(t.id)} className="p-0.5 cursor-pointer hover:opacity-70">
+            <X size={13} className="text-[var(--color-ink-muted)]" />
           </button>
         </motion.div>
       ),
@@ -38,12 +38,12 @@ export const Toaster = {
         <motion.div
           {...motionBase}
           animate={t.visible ? motionBase.animate : motionBase.exit}
-          className={`${baseClass} border-zinc-300`}
+          className={`${baseClass} border-[var(--color-accent)]`}
         >
-          <X size={14} className="text-gray-600" />
-          <span className="text-xs font-medium flex-1">{msg}</span>
-          <button onClick={() => toast.dismiss(t.id)}>
-            <X size={14} className="text-gray-400 hover:text-gray-600" />
+          <X size={14} className="text-[var(--color-accent)]" />
+          <span className="font-semibold flex-1 text-[var(--color-accent)]">{msg}</span>
+          <button onClick={() => toast.dismiss(t.id)} className="p-0.5 cursor-pointer hover:opacity-70">
+            <X size={13} className="text-[var(--color-ink-muted)]" />
           </button>
         </motion.div>
       ),
@@ -57,12 +57,12 @@ export const Toaster = {
         <motion.div
           {...motionBase}
           animate={t.visible ? motionBase.animate : motionBase.exit}
-          className={`${baseClass} border-slate-200`}
+          className={`${baseClass}`}
         >
-          <Info size={14} className="text-gray-500" />
-          <span className="text-xs font-medium flex-1">{msg}</span>
-          <button onClick={() => toast.dismiss(t.id)}>
-            <X size={14} className="text-gray-400 hover:text-gray-600" />
+          <Info size={14} className="text-[var(--color-ink)]" />
+          <span className="flex-1">{msg}</span>
+          <button onClick={() => toast.dismiss(t.id)} className="p-0.5 cursor-pointer hover:opacity-70">
+            <X size={13} className="text-[var(--color-ink-muted)]" />
           </button>
         </motion.div>
       ),
@@ -73,17 +73,31 @@ export const Toaster = {
   loading(msg: string) {
     return toast.custom(
       () => (
-        <motion.div {...motionBase} className={`${baseClass} border-zinc-200`}>
+        <motion.div {...motionBase} className={`${baseClass}`}>
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ repeat: Infinity, duration: 0.9, ease: "linear" }}
           >
-            <Loader2 size={14} className="text-gray-500" />
+            <Loader2 size={14} className="text-[var(--color-ink)]" />
           </motion.div>
-          <span className="text-xs font-medium">{msg}</span>
+          <span className="font-medium">{msg}</span>
         </motion.div>
       ),
       { position: "top-right", duration: Infinity }
     );
   },
 };
+
+// Callable helper with attached methods so both Toaster("msg", "success") and Toaster.success("msg") work seamlessly
+type ToasterFn = ((msg: string, type?: "success" | "error" | "info") => void) & typeof ToasterObject;
+
+const toasterCallable = ((msg: string, type: "success" | "error" | "info" = "info") => {
+  if (type === "success") ToasterObject.success(msg);
+  else if (type === "error") ToasterObject.error(msg);
+  else ToasterObject.info(msg);
+}) as ToasterFn;
+
+Object.assign(toasterCallable, ToasterObject);
+
+export const Toaster = toasterCallable;
+export default Toaster;

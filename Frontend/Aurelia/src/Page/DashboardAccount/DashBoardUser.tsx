@@ -1,6 +1,5 @@
 
 import { useContext } from "react";
-import { Navbar } from "../../Components/HomeLayoutComponent/Navbar";
 import { AuthContext } from "../../contexts/Author";
 import { DashBoard } from "../../Components/AccountComponents/User/DashBoard";
 import { FormAuthor } from "../../Components/FormAuthorForUser";
@@ -14,7 +13,6 @@ export const Account = () => {
 const {isSignned}=useContext(AuthContext)
   return (
     <>
-      <Navbar />
        {isSignned?
        <DashBoard/>
       :

@@ -1,147 +1,153 @@
-
 import { useContext, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { AdminContext } from "../../contexts/AdminContext";
-import { ArrowBigLeftDash } from "lucide-react";
-
 
 export const Story = () => {
   const { StoryBanner } = useContext(AdminContext);
-  const banner=useMemo(
+  const banner = useMemo(
     () => (Array.isArray(StoryBanner) ? StoryBanner : []),
     [StoryBanner]
   );
 
-return (
-    <>
-    {
-      banner.map((data: any, index: number) => {
-        if (data.layout=== 'A') {
+  return (
+    <div className="w-full my-8 space-y-12">
+      {banner.map((data: any, index: number) => {
+        if (data.layout === "A") {
           return <StoryA key={index} data={data} />;
-        }
-        else if (data.layout === 'B') {
+        } else if (data.layout === "B") {
           return <StoryB key={index} data={data} />;
-        }
-        else if (data.layout === 'C') {
+        } else if (data.layout === "C") {
           return <StoryC key={index} data={data} />;
         }
         return null;
-      }
-      )
-    }
-    </>
-)
+      })}
+    </div>
+  );
 };
+
 export const StoryA = ({ data }: any) => {
+  const navigate = useNavigate();
+
   return (
-    <section className="relative w-full h-[90vh] flex items-center overflow-hidden bg-zinc-900 dark:bg-black">
+    <section className="relative w-full min-h-[520px] md:h-[620px] flex items-center overflow-hidden bg-[var(--color-cream-100)] rounded-[var(--radius-2xl)] my-8 max-w-7xl mx-auto border border-[var(--color-cream-300)]">
       <div className="absolute inset-0 w-full h-full">
         <img
-          alt="High-end fashion aesthetic background"
-          className="w-full h-full object-cover opacity-60 scale-105 animate-slow-zoom"
+          alt={data.mainTitle || "Story Banner"}
+          className="w-full h-full object-cover object-center opacity-85"
           src={data.linkUrl}
+          loading="lazy"
         />
-        <div className="absolute inset-0 banner-gradient"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/50 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-ink)]/80 via-[var(--color-ink)]/40 to-transparent" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-8 md:px-16 lg:px-24">
-        <div className="max-w-3xl animate-fade-in-up">
-          <div className="w-16 h-0.5 bg-primary mb-8"></div>
-          <p className="font-serif text-6xl md:text-8xl lg:text-9xl text-white leading-tight mb-8 tracking-tighter drop-shadow-lg">
-            {data.mainTitle}
-          </p>
-          <div className="flex flex-col md:row items-start md:items-center gap-6">
-            <h1 className="text-white/80 text-xl md:text-2xl font-serif tracking-widest uppercase">
-              {data.h1}
-            </h1>
-            <div className="hidden md:block w-12 h-px bg-white/20"></div>
-            <p className="text-white/60 text-base leading-relaxed font-light max-w-sm">
-              {data.pagaraph}
-            </p>
-          </div>
+      <div className="relative z-10 px-8 md:px-16 lg:px-20 max-w-2xl text-white">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[var(--radius-pill)] bg-white/20 backdrop-blur-xs text-xs font-semibold uppercase tracking-wider text-white mb-4">
+          <Sparkles size={13} className="text-[var(--color-peach-100)]" />
+          <span>{data.h1 || "Câu chuyện thiết kế"}</span>
         </div>
+
+        <h2 className="font-heading font-bold text-3xl sm:text-5xl lg:text-6xl leading-[1.1] mb-4 text-white">
+          {data.mainTitle}
+        </h2>
+
+        <p className="text-white/80 text-base sm:text-lg leading-relaxed mb-8 max-w-xl font-body">
+          {data.pagaraph}
+        </p>
+
+        <button
+          onClick={() => navigate("/Fashion/Products")}
+          className="btn btn-primary"
+        >
+          <span>Xem danh mục</span>
+          <ArrowRight size={16} />
+        </button>
       </div>
     </section>
   );
 };
 
-export const StoryB = ({ data }: {data: any}) => {
+export const StoryB = ({ data }: { data: any }) => {
+  const navigate = useNavigate();
+
   return (
-    <section className="w-full flex flex-col md:flex-row h-auto md:h-[500px] lg:h-[600px] bg-charcoal overflow-hidden shadow-2xl rounded-sm">
-      <div className="w-full md:w-[42%] flex flex-col justify-center p-10 md:p-16 lg:p-24 bg-black border-r border-white/5 relative">
-        <div className="absolute top-0 left-0 w-1 h-20 bg-primary opacity-50"></div>
-        <div className="flex flex-col gap-6 md:gap-8">
-          <span className=" text-xl md:text-2xl font-serif tracking-wide animate-in fade-in slide-in-from-left-4 duration-700">
+    <section className="max-w-7xl mx-auto rounded-[var(--radius-2xl)] overflow-hidden bg-white border border-[var(--color-cream-300)] shadow-[var(--shadow-card)] my-8">
+      <div className="flex flex-col md:flex-row items-stretch">
+        {/* Left Text Col */}
+        <div className="w-full md:w-1/2 p-8 sm:p-12 lg:p-16 flex flex-col justify-center bg-[var(--color-cream-50)]">
+          <span className="text-xs font-semibold uppercase tracking-widest text-[var(--color-accent)] mb-3">
             {data.mainTitle}
           </span>
-
-          <h1 className="text-white text-4xl md:text-5xl lg:text-7xl font-black leading-[1.1] tracking-tight animate-in fade-in slide-in-from-left-6 duration-1000">
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-heading font-bold text-[var(--color-ink)] leading-tight mb-4">
             {data.h1}
-          </h1>
-
-          <p className="text-white/50 text-base md:text-lg leading-relaxed max-w-sm animate-in fade-in slide-in-from-left-8 duration-1000 delay-200">
+          </h2>
+          <p className="text-sm sm:text-base text-[var(--color-ink-soft)] leading-relaxed mb-8">
             {data.pagaraph}
           </p>
-
-          <div className="mt-4 md:mt-6">
-            <button className="group relative overflow-hidden inline-flex items-center gap-4 text-xs font-bold uppercase tracking-[0.4em] text-white py-2">
-              <span className="relative z-10">Discover More</span>
-              <ArrowBigLeftDash className="w-5 h-5 transform rotate-180 transition-transform duration-500 group-hover:-translate-x-2" />
-              <span className="absolute bottom-0 left-0 w-8 h-px bg-primary transition-all duration-500 group-hover:w-full"></span>
+          <div>
+            <button
+              onClick={() => navigate("/Fashion/Products")}
+              className="btn btn-outline"
+            >
+              <span>Xem chi tiết</span>
+              <ArrowRight size={16} />
             </button>
           </div>
         </div>
-      </div>
 
-      <div className="w-full md:w-[58%] relative min-h-[400px] md:h-full group">
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10 md:hidden"></div>
-        <div className="absolute inset-0 bg-black/5 mix-blend-overlay z-10"></div>
-
-        <div
-          className="w-full h-full bg-center bg-no-repeat bg-cover transition-transform duration-[3000ms] group-hover:scale-110"
-          style={{ backgroundImage: `url("${data.linkUrl}")` }}
-          aria-label="Artistic close-up of luxury hangers"
-        ></div>
-        <div className="absolute bottom-8 right-8 z-20 hidden lg:flex items-center gap-4 bg-black/40 backdrop-blur-md p-4 border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-          <div className="w-8 h-px bg-primary"></div>
-          <span className="text-[10px] uppercase tracking-widest text-white/70">
-            Signature Series // SS24
-          </span>
+        {/* Right Image Col */}
+        <div className="w-full md:w-1/2 min-h-[360px] md:min-h-full relative overflow-hidden bg-[var(--color-cream-200)]">
+          <img
+            src={data.linkUrl}
+            alt={data.h1 || "Story"}
+            className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+            loading="lazy"
+          />
         </div>
       </div>
     </section>
   );
 };
 
-export const StoryC = ({ data }: {data: any}) => {
+export const StoryC = ({ data }: { data: any }) => {
+  const navigate = useNavigate();
+
   return (
-    <section className="relative w-full h-[600px] flex items-center overflow-hidden bg-luxury-charcoal dark:bg-black">
+    <section className="relative w-full min-h-[460px] flex items-center overflow-hidden bg-[var(--color-cream-100)] rounded-[var(--radius-2xl)] my-8 max-w-7xl mx-auto border border-[var(--color-cream-300)]">
       <div className="absolute inset-0 w-full h-full">
-        <img 
-          alt="High-end silver designer hangers" 
-          className="w-full h-full object-cover object-right opacity-80" 
+        <img
+          alt={data.mainTitle || "Story"}
+          className="w-full h-full object-cover object-right opacity-80"
           src={data.linkUrl}
           onError={(e) => {
-            (e.target as HTMLImageElement).src = 'https://picsum.photos/1920/600?grayscale';
+            (e.target as HTMLImageElement).src =
+              "https://picsum.photos/1200/600";
           }}
+          loading="lazy"
         />
-        <div className="absolute inset-0 banner-gradient"></div>
-      </div>
-      
-      <div className="relative z-10 container mx-auto px-8 md:px-16 lg:px-24">
-        <div className="max-w-2xl">
-          <p className=" text-5xl md:text-7xl lg:text-8xl text-white font-serif  leading-tight mb-6  animate-fade-in-up">
-            {data.mainTitle}
-          </p>
-          <h1 className="text-white text-2xl md:text-3xl font-light mb-4 tracking-wide uppercase">
-            {data.h1}
-          </h1>
-          <p className="text-white/80 text-lg leading-relaxed font-light max-w-md">
-            {data.pagaraph}
-          </p>
-        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-cream-50)] via-[var(--color-cream-50)]/80 to-transparent" />
       </div>
 
+      <div className="relative z-10 px-8 md:px-16 lg:px-20 max-w-xl">
+        <span className="text-xs font-semibold tracking-wider uppercase text-[var(--color-accent)] mb-2 block">
+          {data.mainTitle}
+        </span>
+        <h2 className="text-3xl sm:text-4xl font-heading font-bold text-[var(--color-ink)] mb-3">
+          {data.h1}
+        </h2>
+        <p className="text-[var(--color-ink-soft)] text-sm sm:text-base leading-relaxed mb-6 font-body">
+          {data.pagaraph}
+        </p>
+        <button
+          onClick={() => navigate("/Fashion/Products")}
+          className="btn btn-primary btn-sm"
+        >
+          <span>Xem bộ sưu tập</span>
+          <ArrowRight size={15} />
+        </button>
+      </div>
     </section>
   );
-}
+};
+
+export default Story;

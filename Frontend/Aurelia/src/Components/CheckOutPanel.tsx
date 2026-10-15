@@ -36,6 +36,7 @@ export const CheckOutPanel = () => {
 
   const now = new Date();
   const isoUTC = now.toISOString().replace("Z", "+00:00");
+
   useEffect(() => {
     if (!formData.address) return;
     const timeout = setTimeout(async () => {
@@ -77,7 +78,7 @@ export const CheckOutPanel = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!CartDataAdd.length) {
-      Toaster.error("Giỏ hàng của bạn đang trống!");
+      Toaster("Giỏ hàng của bạn đang trống!", "error");
       return;
     }
 
@@ -90,38 +91,42 @@ export const CheckOutPanel = () => {
           diaChi: formData.address,
           email: formData.email,
         });
-        Toaster.success("Đã lưu địa chỉ thành công!");
+        Toaster("Đã lưu địa chỉ thành công!", "success");
       }
       await new Promise((resolve) => setTimeout(resolve, 500));
       navigate(`/payment/${formData.payment}`);
     } catch {
-      Toaster.error("Lưu địa chỉ thất bại! Vui lòng thử lại.");
+      Toaster("Lưu địa chỉ thất bại! Vui lòng thử lại.", "error");
     } finally {
       setIsSubmitting(false);
       LayPhiVanCHuyen(false);
     }
   };
+
   return (
     <>
       <LoadingOverlay
         isLoading={isSubmitting}
         message="Đang xử lý đơn hàng..."
       />
-      <main className="min-h-[100vh] mt-16 pb-20 px-6 md:px-20 bg-white">
+      <div className="w-full pb-12">
         <ListCoupon
           isOpen={isOpen}
           setIsOpen={setIsOpen}
           dataOrder={CartDataAdd}
           order={order}
         />
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="md:text-5xl text-3xl font-extrabold text-center text-gray-900 mb-16"
-        >
-          Thanh toán
-        </motion.h1>
-        <div>
+
+        <div className="mb-8 pb-4 border-b border-[var(--color-rule)]">
+          <div className="font-mono text-[11px] uppercase tracking-wider text-[var(--color-ink-muted)] mb-1">
+            CHECKOUT SETTLEMENT
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-[var(--color-ink)] uppercase tracking-tight">
+            Xác Nhận Đơn Hàng
+          </h1>
+        </div>
+
+        <div className="space-y-8">
           <CheckOutForm
             formData={formData}
             setFormData={setFormData}
@@ -129,35 +134,46 @@ export const CheckOutPanel = () => {
             typeShip={typeShip}
             setTypeShip={setTypeShip}
           />
-          <PaymentOptions value={formData.payment} onChange={handleChange} />
-          <div className="flex items-center gap-2 mt-4">
+
+          <div className="pt-4 border-t border-[var(--color-rule)]">
+            <div className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-ink-muted)] mb-2">
+              METHOD SELECTION
+            </div>
+            <PaymentOptions value={formData.payment} onChange={handleChange} />
+          </div>
+
+          <div className="flex items-center gap-2 pt-2">
             <input
               type="checkbox"
+              id="saveAddressCheck"
               checked={saveAddressCheck}
               onChange={(e) => setSaveAddressCheck(e.target.checked)}
-              className="w-4 h-4 accent-gray-700"
+              className="h-3.5 w-3.5 rounded-none border border-[var(--color-rule)] text-[var(--color-ink)] cursor-pointer"
             />
-            <label className="text-gray-700 text-sm">
-              Lưu địa chỉ vào tài khoản
+            <label htmlFor="saveAddressCheck" className="text-xs font-mono text-[var(--color-ink-muted)] cursor-pointer select-none">
+              Lưu địa chỉ này vào hồ sơ tài khoản
             </label>
           </div>
-          <div className="flex flex-col-reverse gap-6 md:flex-row md:items-center md:justify-between pt-4">
-            <a
-              className="flex items-center gap-2 text-sm transition-colors hover:text-gray-600  dark:hover:text-gray-300"
-              href="#"
+
+          <div className="flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between pt-6 border-t border-[var(--color-rule)]">
+            <button
+              onClick={() => navigate("/cart")}
+              className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
             >
-              <ChevronLeft size={16} />
-              Return to shipping
-            </a>
+              <ChevronLeft size={14} />
+              <span>Quay lại giỏ hàng</span>
+            </button>
             <button
               onClick={handleSubmit}
-              className="flex h-14 w-full md:w-auto md:min-w-[240px] items-center justify-center rounded-sm bg-primary px-8 text-sm font-bold tracking-widest  transition-all hover:bg-black/80 hover:text-white hover:shadow-lg dark:bg-white dark:text-primary dark:hover:bg-gray-200"
+              className="btn btn-primary py-3.5 px-8 rounded-none font-mono text-xs uppercase tracking-wider"
             >
-              PAY NOW
+              HOÀN TẤT ĐẶT HÀNG
             </button>
           </div>
         </div>
-      </main>
+      </div>
     </>
   );
 };
+
+export default CheckOutPanel;

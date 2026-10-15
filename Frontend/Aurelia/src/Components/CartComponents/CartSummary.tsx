@@ -1,99 +1,105 @@
-import { useContext, useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 import { CartContext } from "../../contexts/CartContext";
 import { Toaster } from "../Toaster";
 import { useNavigate } from "react-router-dom";
+import { ArrowRight, ShieldCheck, Truck } from "lucide-react";
+import { formatVND } from "../../lib/formatters";
 
 interface CartSummaryProps {
   tax: number;
 }
 
 export const CartSummary: React.FC<CartSummaryProps> = ({ tax }) => {
-  const { CartDataAdd,formatPrice } = useContext(CartContext);
+  const { CartDataAdd } = useContext(CartContext);
   const navigate = useNavigate();
+
   const subtotal = useMemo(
-    () => CartDataAdd.reduce((s, i) => s + i.price * i.quantity, 0),
-    [CartDataAdd],
+    () => (CartDataAdd || []).reduce((s, i) => s + i.price * i.quantity, 0),
+    [CartDataAdd]
   );
-  const total = subtotal + tax;
-  const checkOut = () => {
-    if (CartDataAdd.length === 0) {
-      Toaster.error("Giỏ hàng của bạn đang trống!");
+
+  const shippingFee = subtotal >= 500000 || subtotal === 0 ? 0 : 30000;
+  const total = subtotal + tax + shippingFee;
+
+  const handleCheckout = () => {
+    if (!CartDataAdd || CartDataAdd.length === 0) {
+      Toaster("Giỏ hàng của bạn đang trống!", "info");
       return;
-    } else {
-      navigate("/payment");
     }
+    navigate("/payment");
   };
+
   return (
-    <div className="lg:sticky lg:top-32">
-      <h2 className="serif-title text-3xl mb-12 tracking-wide font-light">
-        Cart Overview
-      </h2>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center text-[12px] uppercase tracking-widest font-light">
-          <span className="text-neutral-500 dark:text-neutral-400">
-            Subtotal
+    <div className="bg-[var(--color-surface)] rounded-none border border-[var(--color-rule)] p-5 sm:p-6 space-y-5">
+      <div className="border-b border-[var(--color-rule)] pb-3">
+        <div className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-ink-muted)]">
+          SUMMARY
+        </div>
+        <h3 className="font-heading font-bold text-lg text-[var(--color-ink)] uppercase tracking-wide">
+          Tóm Tắt Đơn Hàng
+        </h3>
+      </div>
+
+      <div className="space-y-3 text-xs sm:text-sm font-mono">
+        <div className="flex justify-between text-[var(--color-ink-muted)]">
+          <span>TẠM TÍNH ({CartDataAdd?.length || 0} MỤC)</span>
+          <span className="font-bold text-[var(--color-ink)] tabular-nums">{formatVND(subtotal)}</span>
+        </div>
+
+        <div className="flex justify-between text-[var(--color-ink-muted)]">
+          <span>PHÍ VẬN CHUYỂN</span>
+          <span>
+            {shippingFee === 0 ? (
+              <span className="text-[var(--color-ink)] font-bold uppercase">MIỄN PHÍ</span>
+            ) : (
+              <span className="text-[var(--color-ink)] tabular-nums">{formatVND(shippingFee)}</span>
+            )}
           </span>
-          <span>{formatPrice?.(subtotal) ?? subtotal}</span>
         </div>
-        <div className="flex justify-between items-center text-[12px] uppercase tracking-widest font-light">
-          <span className="text-neutral-500 dark:text-neutral-400">
-            Estimated Shipping
+
+        {tax > 0 && (
+          <div className="flex justify-between text-[var(--color-ink-muted)]">
+            <span>THUẾ VAT</span>
+            <span className="text-[var(--color-ink)] tabular-nums">{formatVND(tax)}</span>
+          </div>
+        )}
+
+        <div className="pt-3 border-t border-[var(--color-rule)] flex justify-between items-baseline">
+          <span className="font-mono font-bold text-sm text-[var(--color-ink)] uppercase">
+            TỔNG CỘNG
           </span>
-          <span>Calculated at checkout</span>
-        </div>
-        <div className="flex justify-between items-center text-[12px] uppercase tracking-widest font-light">
-          <span className="text-neutral-500 dark:text-neutral-400">Tax</span>
-          <span>{formatPrice?.(tax) ?? tax}</span>
-        </div>
-
-        <div className="pt-8 mt-4 border-t border-silver dark:border-neutral-800">
-          <div className="flex justify-between items-baseline mb-12">
-            <span className="serif-title text-2xl tracking-wide">
-              Total Estimate
-            </span>
-            <span className="text-xl font-light tracking-widest">
-              {formatPrice?.(total) ?? total}
-            </span>
-          </div>
-
-          <button
-            className="w-full bg-primary text-white dark:bg-white dark:text-black py-5 text-[12px] uppercase tracking-[0.3em] font-medium hover:bg-black hover:text-white transition-all active:scale-[0.99] mb-6"
-            onClick={checkOut}
-          >
-            Checkout Now
-          </button>
-
-          <div className="space-y-4">
-            <p className="text-[10px] text-neutral-400 text-center tracking-widest leading-relaxed">
-              COMPLIMENTARY SHIPPING ON ALL ORDERS OVER {formatPrice?.(500) ?? "500 €"}
-            </p>
-            <div className="flex justify-center gap-4 opacity-30 grayscale pt-4">
-              <span className="material-symbols-outlined text-sm">
-                credit_card
-              </span>
-              <span className="material-symbols-outlined text-sm">
-                account_balance
-              </span>
-              <span className="material-symbols-outlined text-sm">
-                contactless
-              </span>
-            </div>
-          </div>
+          <span className="font-heading font-extrabold text-xl text-[var(--color-accent)] tabular-nums">
+            {formatVND(total)}
+          </span>
         </div>
       </div>
 
-      <div className="mt-20 p-8 bg-neutral-50 dark:bg-neutral-900/50">
-        <p className="serif-title italic text-lg text-neutral-600 dark:text-neutral-400 leading-relaxed mb-4">
-          "True luxury is not just what you wear, but the feeling of effortless
-          elegance in every step."
-        </p>
-        <a
-          href="#"
-          className="text-[10px] uppercase tracking-[0.2em] font-medium border-b border-black dark:border-white pb-1 hover:opacity-60 transition-opacity"
-        >
-          Read the Manifesto
-        </a>
+      <button
+        onClick={handleCheckout}
+        className="btn btn-primary w-full py-3.5 rounded-none font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 group"
+      >
+        <span>TIẾN HÀNH THANH TOÁN</span>
+        <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+      </button>
+
+      {/* Free shipping progress notice */}
+      <div className="p-3 rounded-none bg-[var(--color-bg)] border border-[var(--color-rule)] text-[11px] font-mono text-[var(--color-ink-muted)] space-y-1">
+        <div className="flex items-center gap-2">
+          <Truck size={14} className="text-[var(--color-accent)] flex-shrink-0" />
+          <span>
+            {subtotal >= 500000
+              ? "✓ ĐÃ ĐẠT TIÊU CHUẨN MIỄN PHÍ GIAO HÀNG TOÀN QUỐC"
+              : `MUA THÊM ${formatVND(500000 - subtotal)} ĐỂ ĐƯỢC FREESHIP`}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center gap-2 text-[11px] font-mono text-[var(--color-ink-muted)] pt-1 uppercase">
+        <ShieldCheck size={13} className="text-[var(--color-accent)]" />
+        <span>BẢO MẬT GIAO DỊCH CHUẨN SSL 256-BIT</span>
       </div>
     </div>
   );
 };
+
+export default CartSummary;

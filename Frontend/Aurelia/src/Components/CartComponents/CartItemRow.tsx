@@ -1,88 +1,97 @@
-import React, { useContext } from 'react';
-import type { Cart } from '../../types/type';
-import { CartContext } from '../../contexts/CartContext';
+import React, { useContext } from "react";
+import type { Cart } from "../../types/type";
+import { CartContext } from "../../contexts/CartContext";
+import { Trash2, Plus, Minus } from "lucide-react";
+import { formatVND } from "../../lib/formatters";
 
 interface CartItemRowProps {
   item: Cart;
 }
 
-export const CartItemRow: React.FC<CartItemRowProps> = ({ item}) => {
-  const { CartDataAdd, setCartDataAdd,formatPrice } = useContext(CartContext);
-   for(let i=0;i<CartDataAdd.length;i++){
-     for(let j=i+1;j<CartDataAdd.length;j++){
-       if(CartDataAdd[i].itemid===CartDataAdd[j].itemid){
-         CartDataAdd.splice(j,1);
-         CartDataAdd[i].quantity+=1;
-         j--;
-       }
-     }
-   }
+export const CartItemRow: React.FC<CartItemRowProps> = ({ item }) => {
+  const { CartDataAdd, setCartDataAdd } = useContext(CartContext);
 
-     
   const updateQty = (id: string, newQty: number) => {
-    setCartDataAdd((prev) =>
-      prev.map((i) =>
-        i.itemid === id ? { ...i, quantity: Math.max(newQty, 1) } : i
-      )
+    const updated = CartDataAdd.map((i) =>
+      i.itemid === id ? { ...i, quantity: Math.max(newQty, 1) } : i
     );
-    localStorage.setItem("cartItems", JSON.stringify(CartDataAdd));
+    setCartDataAdd(updated);
+    localStorage.setItem("cartItems", JSON.stringify(updated));
   };
 
   const removeItem = (id: string) => {
-    setCartDataAdd((prev) => prev.filter((i) => i.itemid !== id));
-    localStorage.removeItem("cartItems");
-    setCartDataAdd(CartDataAdd.filter((i) => i.itemid !== id));
-    localStorage.setItem("cartItems", JSON.stringify(CartDataAdd.filter((i) => i.itemid !== id)));
+    const filtered = CartDataAdd.filter((i) => i.itemid !== id);
+    setCartDataAdd(filtered);
+    localStorage.setItem("cartItems", JSON.stringify(filtered));
   };
+
   return (
-    <div className="flex flex-col md:flex-row gap-8 pb-12 border-b border-silver dark:border-neutral-800 last:border-0 animate-fadeIn">
-      <div className="w-full md:w-48 aspect-[3/4] bg-neutral-100 dark:bg-neutral-900 overflow-hidden">
-        <img 
-          src={item.thumnail} 
-          alt={item.name} 
-          className="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-700" 
+    <div className="flex flex-col sm:flex-row gap-4 p-4 bg-[var(--color-bg)] rounded-none border border-[var(--color-rule)] hover:border-[var(--color-ink)] transition-colors">
+      {/* Thumbnail */}
+      <div className="w-full sm:w-24 aspect-[3/4] sm:aspect-square rounded-none overflow-hidden bg-[var(--color-surface)] border border-[var(--color-rule)] flex-shrink-0">
+        <img
+          src={item.thumnail}
+          alt={item.name}
+          className="w-full h-full object-cover"
         />
       </div>
-      <div className="flex flex-col justify-between flex-1 py-1">
-        <div>
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="serif-title text-2xl tracking-wide">{item.name}</h3>
-            <span className="text-sm font-light tracking-widest">{formatPrice?.(item.price) ?? item.price}</span>
-          </div>
-          <p className="text-[11px] uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-6">
-            {item.color} / {item.size}
-          </p>
-          <div className="flex items-center gap-8 text-[11px] uppercase tracking-widest font-light">
-            <div className="flex items-center border border-silver dark:border-neutral-800 px-3 py-1 select-none">
-              <button 
-                onClick={() => updateQty(item.itemid, item.quantity - 1)}
-                className="hover:text-neutral-400 w-6 text-center disabled:opacity-30"
-                disabled={item.quantity <= 1}
-              >
-                －
-              </button>
-              <span className="px-6 min-w-[3rem] text-center">{item.quantity.toString().padStart(2, '0')}</span>
-              <button 
-                onClick={() => updateQty(item.itemid, item.quantity + 1)}
-                className="hover:text-neutral-400 w-6 text-center"
-              >
-                ＋
-              </button>
+
+      {/* Info & Controls */}
+      <div className="flex flex-col justify-between flex-1 gap-3">
+        <div className="flex justify-between items-start gap-4">
+          <div>
+            <div className="text-[10px] font-mono text-[var(--color-ink-muted)] uppercase tracking-wider mb-1">
+              SKU: {item.id || item.itemid}
             </div>
-            <button 
-              onClick={() => removeItem(item.itemid)}
-              className="underline underline-offset-4 decoration-silver hover:decoration-black dark:hover:decoration-white transition-colors"
+            <h3 className="font-heading font-semibold text-base text-[var(--color-ink)]">
+              {item.name}
+            </h3>
+            <p className="text-xs font-mono text-[var(--color-ink-muted)] mt-1 uppercase tracking-wide">
+              MÀU: <span className="font-bold text-[var(--color-ink)]">{item.color}</span> / CỠ:{" "}
+              <span className="font-bold text-[var(--color-ink)]">{item.size}</span>
+            </p>
+          </div>
+
+          <span className="font-heading font-bold text-base text-[var(--color-ink)] tabular-nums flex-shrink-0">
+            {formatVND(item.price * item.quantity)}
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between pt-3 border-t border-[var(--color-rule)]">
+          {/* Quantity Stepper */}
+          <div className="flex items-center bg-[var(--color-surface)] rounded-none border border-[var(--color-rule)]">
+            <button
+              onClick={() => updateQty(item.itemid, item.quantity - 1)}
+              disabled={item.quantity <= 1}
+              className="p-1.5 hover:bg-[var(--color-bg)] disabled:opacity-30 text-[var(--color-ink)] transition-colors cursor-pointer"
+              aria-label="Giảm số lượng"
             >
-              Remove
+              <Minus size={13} />
+            </button>
+            <span className="w-8 text-center text-xs font-mono font-bold text-[var(--color-ink)] tabular-nums">
+              {item.quantity}
+            </span>
+            <button
+              onClick={() => updateQty(item.itemid, item.quantity + 1)}
+              className="p-1.5 hover:bg-[var(--color-bg)] text-[var(--color-ink)] transition-colors cursor-pointer"
+              aria-label="Tăng số lượng"
+            >
+              <Plus size={13} />
             </button>
           </div>
-        </div>
-        <div className="mt-8">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-neutral-400">
-            Expected Delivery: {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('de-DE')}
-          </span>
+
+          {/* Remove button */}
+          <button
+            onClick={() => removeItem(item.itemid)}
+            className="inline-flex items-center gap-1.5 text-xs font-mono text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] transition-colors cursor-pointer uppercase tracking-wider"
+          >
+            <Trash2 size={13} />
+            <span>XÓA</span>
+          </button>
         </div>
       </div>
     </div>
   );
 };
+
+export default CartItemRow;
