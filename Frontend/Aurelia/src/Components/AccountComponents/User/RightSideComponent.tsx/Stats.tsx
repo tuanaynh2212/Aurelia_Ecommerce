@@ -1,73 +1,96 @@
+import React from "react";
 import { Clock, Heart, ShieldCheck, ShoppingBag } from "lucide-react";
+import { formatVND, formatDateOnly, getRelativeTimeVi } from "../../../../utils/formatters";
 
-export const Stats = ({
-  tongThuChi,
-  soLuongDonHang,
+type StatsProps = {
+  tongThuChi?: number | string | null;
+  soLuongDonHang?: number | null;
+  lastPurchaseDate?: string | number | Date | null;
+  userRole?: string | null;
+  dataFavouriteItemUser?: any[] | null;
+};
+
+export const Stats: React.FC<StatsProps> = ({
+  tongThuChi = 0,
+  soLuongDonHang = 0,
   lastPurchaseDate,
-  userRole,
-  dataFavouriteItemUser,
-}: any) => {
+  userRole = "Bronze",
+  dataFavouriteItemUser = [],
+}) => {
+  const safeDonHang = Number(soLuongDonHang) || 0;
+  const safeFavourites = Array.isArray(dataFavouriteItemUser) ? dataFavouriteItemUser.length : 0;
+  const safeSpent = formatVND(tongThuChi);
+  const relativeDate = lastPurchaseDate ? getRelativeTimeVi(lastPurchaseDate) : "";
+
   const stats = [
     {
       title: "Tổng Chi Tiêu",
-      value: `${tongThuChi}₫`,
-      subtitle: `${soLuongDonHang} đơn`,
+      value: safeSpent,
+      subtitle: `${safeDonHang} đơn hàng`,
       icon: ShoppingBag,
-      color: "from-blue-500 to-indigo-500",
     },
     {
       title: "Mua Gần Nhất",
-      value: lastPurchaseDate
-        ? "Chưa có đơn"
-        : new Date(lastPurchaseDate).toLocaleDateString("vi-VN"),
-      subtitle: "Lần mua gần đây",
+      value: lastPurchaseDate ? formatDateOnly(lastPurchaseDate) : "Chưa có đơn",
+      subtitle: relativeDate ? `Gần đây (${relativeDate})` : "Chưa phát sinh",
       icon: Clock,
-      color: "from-purple-500 to-pink-500",
     },
     {
-      title: "Trạng Thái",
-      value: "Hoạt động",
-      subtitle: `Thành viên ${userRole ?? ""}`,
+      title: "Hạng Thành Viên",
+      value: `Hạng ${userRole || "Bronze"}`,
+      subtitle: "Tài khoản đang hoạt động",
       icon: ShieldCheck,
-      color: "from-green-500 to-emerald-500",
     },
     {
-      title: "Sản Phẩm Yêu Thích",
-      value: `${dataFavouriteItemUser?.length}`,
-      subtitle: "Đã lưu",
+      title: "Đã Lưu Yêu Thích",
+      value: `${safeFavourites} sản phẩm`,
+      subtitle: "Bộ sưu tập cá nhân",
       icon: Heart,
-      color: "from-rose-500 to-pink-500",
     },
   ];
+
   return (
-    <div className="grid grid-cols-2 gap-8 max-w-md">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
       {stats.map((s, i) => {
         const Icon = s.icon;
         return (
           <div
             key={i}
             className="
-          bg-white
-          border border-neutral-200
-          p-6
-          flex flex-col
-          justify-between
-          min-h-[150px]
-          transition-all
-          hover:border-neutral-300
-        "
+              relative
+              bg-paper
+              border border-rule/80
+              rounded-tag
+              p-5
+              flex flex-col
+              justify-between
+              min-h-[136px]
+              transition-all
+              hover:border-ink/30
+              hover:shadow-tag
+              shadow-sm
+            "
           >
+            {/* Tag hole punch imitation */}
             <div className="flex items-center justify-between">
-              <span className="text-[11px] tracking-widest uppercase text-neutral-500">
-                {s.title}
-              </span>
-              <Icon className="text-neutral-400" size={18} />
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-hole bg-kraft/70 border border-ink/20" />
+                <span className="text-[10px] font-mono tracking-widest uppercase text-ink-muted">
+                  {s.title}
+                </span>
+              </div>
+              <div className="w-7 h-7 rounded-tag bg-kraft/15 border border-kraft-dark/20 flex items-center justify-center text-ink-muted">
+                <Icon size={14} />
+              </div>
             </div>
-            <div>
-              <p className="text-3xl font-light text-neutral-900 mt-4">
-                {s.value.length > 7 ? "—" : s.value}
+
+            <div className="mt-4">
+              <p className="text-xl md:text-2xl font-mono font-semibold text-ink tracking-tight">
+                {s.value}
               </p>
-              <p className="text-xs text-neutral-400 mt-1">{s.subtitle}</p>
+              <p className="text-xs font-mono text-ink-muted mt-1.5 flex items-center gap-1">
+                {s.subtitle}
+              </p>
             </div>
           </div>
         );
@@ -75,3 +98,4 @@ export const Stats = ({
     </div>
   );
 };
+

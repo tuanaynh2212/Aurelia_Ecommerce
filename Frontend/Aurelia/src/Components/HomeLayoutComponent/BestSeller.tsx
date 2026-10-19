@@ -3,7 +3,7 @@ import { FilterProductContext } from "../../contexts/FIlterProduct";
 import type { Product } from "../../types/type";
 import { Section } from "../layout/Section";
 import { ProductGrid } from "../product/ProductGrid";
-import { cn } from "../../lib/cn";
+import { cn } from "../../utils/cn";
 
 export const BestSeller = () => {
   const [activeTab, setActiveTab] = useState<"Newest" | "Popular">("Popular");

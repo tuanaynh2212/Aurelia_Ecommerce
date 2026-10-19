@@ -2,7 +2,7 @@ import * as React from "react";
 import type { Product } from "../../types/type";
 import { ProductCard } from "./ProductCard";
 import { Skeleton } from "../ui/Skeleton";
-import { cn } from "../../lib/cn";
+import { cn } from "../../utils/cn";
 
 export interface ProductGridProps {
   products: Product[];

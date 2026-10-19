@@ -10,7 +10,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { CartContext } from "../../contexts/CartContext";
-import { cn } from "../../lib/cn";
+import { cn } from "../../utils/cn";
 import logo from "../../assets/aurelia_logo_svg.svg";
 
 const NAV_LINKS = [

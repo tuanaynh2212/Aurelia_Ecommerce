@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Heart } from "lucide-react";
-import { cn } from "../../lib/cn";
+import { cn } from "../../utils/cn";
 
 export interface WishlistButtonProps {
   productId?: string | number;

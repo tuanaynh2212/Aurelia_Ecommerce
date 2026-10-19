@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import type { Cart } from "../../types/type";
 import { CartContext } from "../../contexts/CartContext";
 import { Trash2, Plus, Minus } from "lucide-react";
-import { formatVND } from "../../lib/formatters";
+import { formatVND } from "../../utils/formatters";
 
 interface CartItemRowProps {
   item: Cart;

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ShoppingBag, Eye } from "lucide-react";
 import type { Product } from "../../types/type";
-import { cn } from "../../lib/cn";
+import { cn } from "../../utils/cn";
 import { PriceTag } from "./PriceTag";
 import { WishlistButton } from "./WishlistButton";
 import { ColorSwatch } from "./ColorSwatch";

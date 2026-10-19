@@ -1,4 +1,4 @@
-import { cn } from "../../lib/cn";
+import { cn } from "../../utils/cn";
 import { forwardRef } from "react";
 
 interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {

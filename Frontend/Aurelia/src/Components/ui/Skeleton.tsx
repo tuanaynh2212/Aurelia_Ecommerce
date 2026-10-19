@@ -1,4 +1,4 @@
-import { cn } from "../../lib/cn";
+import { cn } from "../../utils/cn";
 
 interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Width (e.g. "100%", "200px") — defaults to full width */

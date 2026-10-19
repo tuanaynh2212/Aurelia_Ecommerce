@@ -3,7 +3,7 @@ import { SlidersHorizontal, Search, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { FilterProductContext } from "../../contexts/FIlterProduct";
 import { DanhMuc } from "../HomeLayoutComponent/DanhMucSanPham";
-import { cn } from "../../lib/cn";
+import { cn } from "../../utils/cn";
 import { Drawer } from "../ui/Drawer";
 
 export const FilterType = () => {

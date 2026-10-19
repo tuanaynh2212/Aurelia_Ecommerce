@@ -1,5 +1,5 @@
 import { useState, useId } from "react";
-import { cn } from "../../lib/cn";
+import { cn } from "../../utils/cn";
 
 export interface TabItem<T extends string = string> {
   value: T;

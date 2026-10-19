@@ -1,6 +1,6 @@
 import * as React from "react";
-import { cn } from "../../lib/cn";
-import { formatVND } from "../../lib/formatters";
+import { cn } from "../../utils/cn";
+import { formatVND } from "../../utils/formatters";
 
 export interface PriceTagProps {
   price: number;

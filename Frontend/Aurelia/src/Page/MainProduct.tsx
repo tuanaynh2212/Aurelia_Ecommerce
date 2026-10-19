@@ -38,7 +38,7 @@ import { Container } from "../Components/layout/Container";
 import { PriceTag } from "../Components/product/PriceTag";
 import { Rating } from "../Components/ui/Rating";
 import { Modal } from "../Components/ui/Modal";
-import { cn } from "../lib/cn";
+import { cn } from "../utils/cn";
 
 export const MainProduct = () => {
   const { id } = useParams();

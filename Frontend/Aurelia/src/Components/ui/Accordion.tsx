@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { cn } from "../../lib/cn";
-import { motion, AnimatePresence } from "framer-motion";
-import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { cn } from "../../utils/cn";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 export interface AccordionItem {
   id: string;

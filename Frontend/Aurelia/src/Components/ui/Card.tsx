@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "../../lib/cn";
+import { cn } from "../../utils/cn";
 import { forwardRef } from "react";
 
 const cardVariants = cva("card", {

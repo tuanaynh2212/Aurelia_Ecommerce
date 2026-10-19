@@ -1,10 +1,21 @@
 import React, { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { useCanRender3D } from "../../hooks/useCanRender3D";
-import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { WebGLErrorBoundary } from "./WebGLErrorBoundary";
 import { SceneFallback } from "./SceneFallback";
+
+function checkCanRender3D(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const canvas = document.createElement("canvas");
+    return !!(
+      window.WebGLRenderingContext &&
+      (canvas.getContext("webgl") || canvas.getContext("experimental-webgl"))
+    );
+  } catch {
+    return false;
+  }
+}
 
 export interface SceneCanvasProps {
   children: React.ReactNode;
@@ -23,8 +34,10 @@ export function SceneCanvas({
   fallbackLabel = "3D Interactive Showcase",
   cameraPosition = [0, 0, 5],
 }: SceneCanvasProps) {
-  const canRender = useCanRender3D();
-  const prefersReduced = useReducedMotion();
+  const canRender = checkCanRender3D();
+  const prefersReduced =
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
   // If WebGL is unavailable or user requested reduced motion, show high-fidelity 2D fallback
   if (!canRender || prefersReduced) {

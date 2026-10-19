@@ -3,7 +3,7 @@ import { CartContext } from "../../contexts/CartContext";
 import { Toaster } from "../Toaster";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, ShieldCheck, Truck } from "lucide-react";
-import { formatVND } from "../../lib/formatters";
+import { formatVND } from "../../utils/formatters";
 
 interface CartSummaryProps {
   tax: number;
