@@ -1,5 +1,4 @@
 import { CreditCard, Truck, Wallet } from "lucide-react";
-import { motion } from "framer-motion";
 
 type PaymentOptionsProps = {
   value: string;
@@ -9,36 +8,31 @@ type PaymentOptionsProps = {
 const paymentOptions = [
   {
     value: "cod",
-    label: "Thanh toán khi nhận hàng",
-    icon: <Truck size={32} className="text-gray-700" />,
+    label: "Thanh toán khi nhận hàng (COD)",
+    icon: <Truck size={22} />,
   },
   {
     value: "card",
-    label: "Thẻ tín dụng / ghi nợ",
-    icon: <CreditCard size={32} className="text-gray-700" />,
+    label: "Thẻ Tín Dụng / Thẻ Ghi Nợ",
+    icon: <CreditCard size={22} />,
   },
   {
     value: "paypal",
-    label: "PayPal",
-    icon: <Wallet size={32} className="text-gray-700" />,
+    label: "Cổng Thanh Toán Quốc Tế",
+    icon: <Wallet size={22} />,
   },
 ];
 
 export const PaymentOptions = ({ value, onChange }: PaymentOptionsProps) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
       {paymentOptions.map((opt) => (
-        <motion.label
+        <label
           key={opt.value}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className={`flex flex-col items-center justify-center gap-3 border rounded-2xl p-6 cursor-pointer transition ${
+          className={`flex flex-col items-center justify-center gap-2.5 border rounded-none p-4 cursor-pointer transition-colors text-center ${
             value === opt.value
-              ? "border-black bg-gray-50 shadow-md"
-              : "border-gray-300 hover:border-gray-500"
+              ? "border-[var(--color-ink)] bg-[var(--color-surface)] ring-1 ring-[var(--color-ink)] text-[var(--color-ink)]"
+              : "border-[var(--color-rule)] bg-[var(--color-bg)] hover:border-[var(--color-ink)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
           }`}
         >
           <input
@@ -49,12 +43,16 @@ export const PaymentOptions = ({ value, onChange }: PaymentOptionsProps) => {
             onChange={onChange}
             className="hidden"
           />
-          {opt.icon}
-          <span className="text-sm font-medium text-gray-800 text-center">
+          <div className={value === opt.value ? "text-[var(--color-accent)]" : "text-[var(--color-ink-muted)]"}>
+            {opt.icon}
+          </div>
+          <span className="text-xs font-mono uppercase tracking-wide leading-tight">
             {opt.label}
           </span>
-        </motion.label>
+        </label>
       ))}
     </div>
   );
 };
+
+export default PaymentOptions;

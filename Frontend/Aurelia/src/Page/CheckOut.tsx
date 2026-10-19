@@ -54,22 +54,23 @@ export const Checkout = () => {
   return (
     <>
       <Navbar />
-      <motion.main
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
-        className="mx-auto flex w-full max-w-[1440px] flex-col lg:flex-row"
-      >
-         <div className="flex-1 px-6 py-10 md:px-12 lg:px-20 lg:py-16 bg-white dark:bg-background-dark">
-          <CheckOutPanel
-          />
-        </div>
-        <div className="w-full lg:w-[480px] lg:border-l lg:border-[#f2f2f2]  dark:border-white/10">
-          <OrderSummary shippingCost="" subtotal={subtotal} isOpen={isOpen} setIsOpen={setIsOpen} />
-        </div>
+      <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-ink)] flex flex-col">
+        <motion.main
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="mx-auto flex w-full max-w-7xl flex-col lg:flex-row flex-1 border-x border-[var(--color-rule)]"
+        >
+          <div className="flex-1 px-6 py-8 md:px-10 lg:px-12 bg-[var(--color-bg)]">
+            <CheckOutPanel />
+          </div>
+          <div className="w-full lg:w-[460px] lg:border-l border-[var(--color-rule)] bg-[var(--color-surface)]">
+            <OrderSummary shippingCost="" subtotal={subtotal} isOpen={isOpen} setIsOpen={setIsOpen} />
+          </div>
         </motion.main>
-      <Footer />
+        <Footer />
+      </div>
     </>
   );
 };

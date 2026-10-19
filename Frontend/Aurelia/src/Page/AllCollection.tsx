@@ -3,18 +3,27 @@ import { Footer } from "../Components/HomeLayoutComponent/Footer";
 import ArchivesSection from "../Components/Collection/ArchiveService";
 import SeasonGrid from "../Components/Collection/SeasonGrid";
 import Hero from "../Components/Collection/Hero";
+import { DynamicMetaTags } from "../Components/SEO/DynamicMetaTags";
 
 export const AllCollection = () => {
-
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      <main className="flex-grow max-w-[1440px] mx-auto px-6 lg:px-12 w-full pb-24">
-        <Hero />
-        <SeasonGrid />
-        <ArchivesSection />
-      </main>
-      <Footer />
-    </div>
+    <>
+      <DynamicMetaTags
+        title="Mục Lục Bộ Sưu Tập | Aurelia"
+        description="Mục lục lưu trữ và phân loại các bộ sưu tập thời trang theo niên độ tại Aurelia."
+        url={window.location.href}
+      />
+      <div className="flex flex-col min-h-screen bg-[var(--color-bg)] text-[var(--color-ink)]">
+        <Navbar />
+        <main id="main-content" className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-20">
+          <Hero />
+          <SeasonGrid />
+          <ArchivesSection />
+        </main>
+        <Footer />
+      </div>
+    </>
   );
 };
+
+export default AllCollection;

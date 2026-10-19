@@ -1,56 +1,90 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useContext } from "react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { CollectionContext } from "../../contexts/SeasonContext";
-import { LazyImage } from "../SEO/LazyImage";
+import { Section } from "../layout/Section";
 
 export const Collection = () => {
   const navigate = useNavigate();
-  const  {collectionData}=useContext(CollectionContext);
+  const { collectionData } = useContext(CollectionContext);
+
+  if (!collectionData || collectionData.length === 0) return null;
 
   return (
-    <div className="px-6 md:px-12 py-16 space-y-24 relative z-1 mt-20">
-      <h1 className="text-4xl md:text-5xl font-heading font-bold text-gray-900 text-center mb-12">
-        Các Bộ Sưu Tập Nổi Bật
-      </h1>
+    <Section
+      badge="Xu hướng mùa mới"
+      title="Các Bộ Sưu Tập Nổi Bật"
+      subtitle="Được giám tuyển kỹ lưỡng theo từng mùa và cảm hứng thời trang hiện đại"
+    >
+      <div className="space-y-16">
+        {collectionData.map((item, index) => {
+          const isReversed = index % 2 === 1;
 
-      {collectionData.map((item, index) => (
-        <motion.div
-          key={item.id}
-          whileHover={{ y: -4 }}
-          transition={{ duration: 0.3 }}
-          className={`flex flex-col md:flex-row items-center gap-8 ${
-            index % 2 === 1 ? "md:flex-row-reverse" : ""
-          }`}
-        >
-          <div className="md:w-1/2 relative rounded-3xl overflow-hidden shadow-xl">
-          <LazyImage src={item.banner} alt={item.name} className="w-full h-[420px] object-cover transform transition-transform duration-700 group-hover:scale-110" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent"></div>
-          </div>
-
-          <div className="md:w-1/2 w-full flex flex-col justify-center p-6 rounded-2xl bg-white/70 backdrop-blur-sm shadow-md">
-            <p className="text-sm uppercase tracking-widest text-gray-500 mb-1">
-              {item.slug}
-            </p>
-            <h2 className="text-3xl md:text-4xl font-serif font-bold mb-3 text-gray-900">
-              {item.name}
-            </h2>
-            <p className="text-lg md:text-xl text-gray-600 italic mb-4">
-              {item.slogan}
-            </p>
-            <p className="text-gray-700 mb-6 leading-relaxed">
-              {item.description}
-            </p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              onClick={() => navigate(`/Collection/${item.id}`)}
-              className="self-start bg-gradient-to-r from-gray-900 to-gray-700 text-white px-8 py-3 rounded-full font-semibold shadow-md hover:from-gray-800 hover:to-gray-600 transition cursor-pointer"
+          return (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.5 }}
+              className={`flex flex-col md:flex-row items-center gap-8 lg:gap-12 ${
+                isReversed ? "md:flex-row-reverse" : ""
+              }`}
             >
-              Xem sản phẩm
-            </motion.button>
-          </div>
-        </motion.div>
-      ))}
-    </div>
+              {/* Banner Image Card */}
+              <div className="w-full md:w-1/2 relative rounded-[var(--radius-2xl)] overflow-hidden shadow-[var(--shadow-card)] border border-[var(--color-cream-300)] group aspect-[4/3] bg-[var(--color-cream-200)]">
+                <img
+                  src={item.banner}
+                  alt={item.name}
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-ink)]/40 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute top-4 left-4">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[var(--radius-pill)] bg-white/90 backdrop-blur-xs text-xs font-semibold text-[var(--color-ink)] shadow-xs">
+                    <Sparkles size={12} className="text-[var(--color-accent)]" />
+                    <span>Bộ sưu tập 2026</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Text Info */}
+              <div className="w-full md:w-1/2 flex flex-col justify-center p-2 sm:p-6">
+                <span className="text-xs font-semibold uppercase tracking-widest text-[var(--color-accent)] mb-2">
+                  {item.slug || "Collection"}
+                </span>
+
+                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-[var(--color-ink)] mb-3">
+                  {item.name}
+                </h3>
+
+                {item.slogan && (
+                  <p className="text-base sm:text-lg font-heading italic text-[var(--color-ink-soft)] mb-4">
+                    "{item.slogan}"
+                  </p>
+                )}
+
+                <p className="text-sm sm:text-base text-[var(--color-ink-soft)] mb-8 leading-relaxed font-body">
+                  {item.description}
+                </p>
+
+                <div>
+                  <button
+                    onClick={() => navigate(`/Collection/${item.id}`)}
+                    className="btn btn-primary group inline-flex items-center gap-2"
+                  >
+                    <span>Xem chi tiết BST</span>
+                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </Section>
   );
 };
+
+export default Collection;

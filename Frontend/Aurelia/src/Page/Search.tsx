@@ -1,100 +1,126 @@
 import { Navbar } from "../Components/HomeLayoutComponent/Navbar";
 import { Footer } from "../Components/HomeLayoutComponent/Footer";
-import { motion } from "framer-motion";
 import { useContext, useState } from "react";
 import type { ChangeEvent } from "react";
-import { Search as SearchIcon } from "lucide-react";
+import { Search as SearchIcon, X } from "lucide-react";
 import { FilterProductContext } from "../contexts/FIlterProduct";
-import { useNavigate } from "react-router-dom";
-import { LazyImage } from "../Components/SEO/LazyImage";
+import { Container } from "../Components/layout/Container";
+import { ProductGrid } from "../Components/product/ProductGrid";
+import { DynamicMetaTags } from "../Components/SEO/DynamicMetaTags";
 
 export const Search = () => {
   const { key, setKey, dataFilter } = useContext(FilterProductContext);
-  const onChange = (e: ChangeEvent<HTMLInputElement>) => setKey(e.target.value);
-  const navigate = useNavigate();
-  const [more, setMore] = useState(20);
+  const [displayCount, setDisplayCount] = useState(16);
+
+  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setKey(e.target.value);
+  };
+
+  const clearSearch = () => {
+    setKey("");
+  };
+
+  const quickKeywords = ["Váy", "Áo", "Trang Sức", "Đồng Hồ", "Phụ Kiện", "Lụa", "Cotton"];
 
   return (
     <>
-      <Navbar />
-      <main className="min-h-[100vh] pt-40 px-6 md:px-10 py-16">
-        <div className="max-w-6xl mx-auto ">
-          <motion.h1
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-3xl font-semibold"
-          >
-            Tìm kiếm
-          </motion.h1>
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="mt-6 relative"
-          >
-            <input
-              value={key}
-              onChange={onChange}
-              placeholder="Tìm sản phẩm, thương hiệu..."
-              className="w-full rounded-2xl border border-gray-200 bg-white/80 backdrop-blur px-5 py-4 pr-12 outline-none focus:ring-2 focus:ring-gray-700"
+      <DynamicMetaTags
+        title={key ? `Tìm kiếm: "${key}" | Aurelia` : "Tìm Kiếm Sản Phẩm | Aurelia"}
+        description="Tra cứu sản phẩm may mặc và phụ kiện thời trang tại Aurelia."
+        url={window.location.href}
+      />
+
+      <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-ink)] flex flex-col">
+        <Navbar />
+
+        <main id="main-content" className="flex-1 py-8 md:py-12">
+          <Container>
+            {/* Header & Search Bar */}
+            <div className="max-w-2xl mx-auto text-center space-y-3 mb-10">
+              <div className="font-mono text-[11px] uppercase tracking-wider text-[var(--color-ink-muted)]">
+                INDEX QUERY · LIVE SEARCH
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-heading font-bold text-[var(--color-ink)] tracking-tight">
+                Tìm Kiếm Sản Phẩm
+              </h1>
+              <p className="text-xs font-mono text-[var(--color-ink-muted)]">
+                Tra cứu theo tên mã, danh mục, kết cấu chất liệu hoặc gam màu
+              </p>
+
+              {/* Input */}
+              <div className="relative mt-4">
+                <input
+                  type="search"
+                  value={key}
+                  onChange={onChange}
+                  placeholder="Nhập tên sản phẩm, đầm, áo, phụ kiện..."
+                  className="w-full py-3 pl-11 pr-10 text-sm font-mono bg-[var(--color-surface)]/60 border border-[var(--color-rule)] focus:border-[var(--color-ink)] focus:bg-[var(--color-bg)] rounded-none outline-none transition-colors"
+                  autoFocus
+                />
+                <SearchIcon
+                  size={16}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-ink-muted)] pointer-events-none"
+                />
+                {key && (
+                  <button
+                    onClick={clearSearch}
+                    aria-label="Xoá tìm kiếm"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 hover:bg-[var(--color-surface)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
+                  >
+                    <X size={15} />
+                  </button>
+                )}
+              </div>
+
+              {/* Quick Keywords */}
+              <div className="flex items-center justify-center gap-1.5 flex-wrap pt-2">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-[var(--color-ink-muted)] mr-1">
+                  GỢI Ý:
+                </span>
+                {quickKeywords.map((kw) => (
+                  <button
+                    key={kw}
+                    onClick={() => setKey(kw)}
+                    className="text-[11px] px-2.5 py-1 rounded-none bg-[var(--color-surface)] border border-[var(--color-rule)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:border-[var(--color-ink)] font-mono uppercase tracking-wider transition-colors cursor-pointer"
+                  >
+                    {kw}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Results Counter */}
+            <div className="flex items-center justify-between mb-6 pb-3 border-b border-[var(--color-rule)] text-xs font-mono text-[var(--color-ink-muted)] uppercase tracking-wider">
+              <span>
+                {key ? `KẾT QUẢ CHO "${key}":` : "TOÀN BỘ DANH MỤC:"}{" "}
+                <strong className="text-[var(--color-ink)] tabular-nums">{dataFilter?.length || 0} SẢN PHẨM</strong>
+              </span>
+            </div>
+
+            {/* Product Grid */}
+            <ProductGrid
+              products={dataFilter?.slice(0, displayCount) || []}
+              columns={4}
             />
-            <SearchIcon className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500" />
-          </motion.div>
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-gray-500 mt-3"
-          >
-            {dataFilter?.length} kết quả
-          </motion.p>
-
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6">
-            {dataFilter?.slice(0, more).map((item, idx) => (
-              <motion.div
-                onClick={() => navigate(`/Fashion/Products/${item.id}`)}
-                key={item.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 * idx }}
-                className="bg-white  shadow-sm overflow-hidden group cursor-pointer"
-              >
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.4 }}
-                  className="h-90 overflow-hidden"
+            {/* Load more */}
+            {dataFilter && displayCount < dataFilter.length && (
+              <div className="flex justify-center mt-12">
+                <button
+                  onClick={() => setDisplayCount((prev) => prev + 12)}
+                  className="btn btn-outline rounded-none font-mono text-xs uppercase tracking-wider"
                 >
-                  <LazyImage
-                    src={item.thumbnail}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                  />
-                </motion.div>
-                <div className="p-4">
-                  <div className="flex items-center flex-col gap-2">
-                    <h3 className="font-medium">{item.name}</h3>
-                    <span className="text-sm text-gray-600">
-                      {item.price.toLocaleString("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      })}
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-          <div className="w-full flex items-center justify-center mt-10">
-            <button
-              onClick={() => setMore((prev) => prev + 10)}
-              className="border-0.5 p-2 hover:bg-black hover:text-white cursor-pointer"
-            >
-              Xem Thêm
-            </button>
-          </div>
-        </div>
-      </main>
-      <Footer />
+                  Xem thêm kết quả
+                </button>
+              </div>
+            )}
+          </Container>
+        </main>
+
+        <Footer />
+      </div>
     </>
   );
 };
+
+export default Search;

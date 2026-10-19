@@ -1,44 +1,43 @@
 import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowRight, Tag } from "lucide-react";
 import { FilterProductContext } from "../../contexts/FIlterProduct";
-import ProductCard from "./ProductCard";
+import { Section } from "../layout/Section";
+import { ProductGrid } from "../product/ProductGrid";
 
 export const DiscountProducts = () => {
-  const { dataProduct } = useContext(FilterProductContext);
-  const productSale = dataProduct?.filter((p) => p.discountValue > 0);
+  const navigate = useNavigate();
+  const { dataProduct, isLoading } = useContext(FilterProductContext);
+  const saleProducts = dataProduct?.filter((p) => (p.discountValue ?? 0) > 0).slice(0, 4) || [];
+
+  if (!isLoading && saleProducts.length === 0) return null;
 
   return (
-    <main className="flex-grow pt-32 pb-24 overflow-hidden">
-      <section className="relative mb-48">
-        <h1 className="relative z-10 text-3xl font-serif italic text-slate-800 mb-12 flex items-center w-full text-center justify-center">
-          Sản phẩm giảm giá
-        </h1>
-
-        <div className="relative z-10 max-w-[1600px] mx-auto px-8 mt-24">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-24 gap-x-8">
-            {productSale?.slice(0, 4).map((product, idx) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                index={idx}
-                className={idx % 2 !== 0 ? "mt-12 lg:mt-24" : ""}
-                isSale={true}
-              />
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-24 gap-x-8 mt-24 lg:mt-[-4rem]">
-            {productSale?.slice(4,8).map((product, idx) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                index={idx + 4}
-                className={idx % 2 !== 0 ? "mt-12 lg:mt-24" : ""}
-                isSale={true}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-    </main>
+    <Section
+      badge="Ưu đãi giới hạn"
+      title="Sản Phẩm Đang Giảm Giá"
+      subtitle="Cơ hội sở hữu những mẫu thiết kế cao cấp với mức giá ưu đãi đặc biệt"
+      action={
+        <button
+          onClick={() => navigate("/Fashion/Products")}
+          className="btn btn-primary btn-sm group inline-flex items-center gap-1.5"
+        >
+          <Tag size={15} />
+          <span>Săn ưu đãi ngay</span>
+          <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+        </button>
+      }
+    >
+      <div className="bg-[var(--color-peach-100)]/40 p-6 sm:p-8 rounded-[var(--radius-2xl)] border border-[var(--color-peach-200)]/60">
+        <ProductGrid
+          products={saleProducts}
+          isLoading={isLoading}
+          columns={4}
+          isSale={true}
+        />
+      </div>
+    </Section>
   );
 };
+
+export default DiscountProducts;

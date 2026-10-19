@@ -72,11 +72,12 @@ function App() {
   const location = useLocation();
   const ref = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
+  const isWinter = [11, 0, 1].includes(new Date().getMonth()); // Dec, Jan, Feb only
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-    },  3500 );
+    }, 1200);
     return () => clearTimeout(timer);
   }, []);
   useEffect(() => {
@@ -90,25 +91,26 @@ function App() {
 
   return (
     <div ref={ref}>
-      {isLoading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white z-[9999] w-full h-full">
-          <LoadingScreen />
-        </div>
-      )}
+      {isLoading && <LoadingScreen />}
       <Toaster position="top-center" reverseOrder={false} />
-      <Snowfall
-        style={{
-          position: "fixed",
-          width: "100vw",
-          height: "100vh",
-        }}
-      />
+      {isWinter && (
+        <Snowfall
+          snowflakeCount={30}
+          style={{
+            position: "fixed",
+            width: "100vw",
+            height: "100vh",
+            pointerEvents: "none",
+            zIndex: 9998,
+          }}
+        />
+      )}
       <Suspense
         fallback={
-          <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+          <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)]">
             <div className="text-center">
-              <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600 font-medium">Đang tải...</p>
+              <div className="w-8 h-8 border border-[var(--color-rule)] border-t-[var(--color-ink)] rounded-full animate-spin mx-auto mb-3"></div>
+              <p className="text-[var(--color-ink-muted)] font-medium text-xs font-body tracking-wide">Đang tải...</p>
             </div>
           </div>
         }

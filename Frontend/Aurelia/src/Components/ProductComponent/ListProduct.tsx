@@ -1,50 +1,55 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useMemo } from "react";
 import { FilterProductContext } from "../../contexts/FIlterProduct";
-import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import { LazyImage } from "../SEO/LazyImage";
+import { ProductGrid } from "../product/ProductGrid";
+import { Container } from "../layout/Container";
+import { ArrowDown } from "lucide-react";
 
 export const ListProduct = () => {
+  const { key, dataProduct, isLoading } = useContext(FilterProductContext);
+  const [displayCount, setDisplayCount] = useState(16);
 
-  const {key,dataProduct}=useContext(FilterProductContext)
-  const filter=dataProduct.filter(a=>a.type===key);
-  const dataResult=key===""?dataProduct:filter;
-  const [Number,setNumber]=useState(20);
-  const navigate=useNavigate();
+  const filteredProducts = useMemo(() => {
+    if (!dataProduct) return [];
+    if (!key) return dataProduct;
+    return dataProduct.filter(
+      (p) => p.type?.toLowerCase() === key.toLowerCase() || p.subcategory?.toLowerCase() === key.toLowerCase()
+    );
+  }, [dataProduct, key]);
+
+  const visibleProducts = filteredProducts.slice(0, displayCount);
+
   return (
-    <>
-     <h1 className="mt-3 text-gray-500 font-extralight text-center">{dataResult.length} items</h1>
-      <motion.div
-       className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 justify-center items-center w-full gap-15 px-5  py-10">
-        {dataResult?.slice(0,Number).map((item) => {
-          return (
-            <div onClick={()=>navigate(`/Fashion/Products/${item.id}`)} className="flex flex-col items-center cursor-pointer hover:scale-105 duration-300 h-full" key={item.id} >
-              <LazyImage 
-                className="w-96 h-[450px] object-cover" 
-                src={item.thumbnail} 
-                alt={item.name || "Sản phẩm"}
-                width={384}
-                height={450}
-              />
-              <div className="text-center w-full">
-                <h1 className="text-2xl font-heading  mt-3">{item.name}</h1>
-                <h1>{item.price.toLocaleString("vi-Vn")} VND</h1>
-              </div>
-            </div>
-          );
-        })}
-      </motion.div>
-      {Number < dataResult.length && (
-        <div className="flex justify-center mb-10 cursor-pointer">
-          <button
-            onClick={() => setNumber(Number + 20)}
-            className="px-5 py-2 border border-gray-400 rounded-md hover:bg-gray-200"
-          >
-            Load More
-          </button>
+    <section className="py-8">
+      <Container>
+        {/* Item count summary */}
+        <div className="flex items-center justify-between mb-6 text-xs text-[var(--color-ink-soft)]">
+          <span>
+            Hiển thị {visibleProducts.length} trên tổng số {filteredProducts.length} sản phẩm
+          </span>
         </div>
-      )}
-    </>
-   
-  )
-}
+
+        {/* Product Grid */}
+        <ProductGrid
+          products={visibleProducts}
+          isLoading={isLoading}
+          columns={4}
+        />
+
+        {/* Load more button */}
+        {displayCount < filteredProducts.length && (
+          <div className="flex justify-center mt-12">
+            <button
+              onClick={() => setDisplayCount((prev) => prev + 12)}
+              className="btn btn-outline inline-flex items-center gap-2 group"
+            >
+              <span>Xem thêm sản phẩm</span>
+              <ArrowDown size={15} className="group-hover:translate-y-0.5 transition-transform" />
+            </button>
+          </div>
+        )}
+      </Container>
+    </section>
+  );
+};
+
+export default ListProduct;
