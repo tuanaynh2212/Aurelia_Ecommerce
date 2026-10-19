@@ -76,10 +76,10 @@ export function HeroHangTag() {
           </div>
 
           {/* ── Right: Hanging tags rail ────────────────────── */}
-          <div className="relative flex-1">
+          <div className="relative flex-1 pt-5">
             {/* Kraft rail horizontal line at top from which tags hang */}
             <div
-              className="absolute top-0 left-0 right-0 h-px"
+              className="absolute top-0 left-0 right-0 flex h-px"
               style={{ background: "rgba(42,33,27,0.20)" }}
               aria-hidden="true"
             />
@@ -114,7 +114,7 @@ export function HeroHangTag() {
 
             {/* Desktop wrapper */}
             <div
-              className="items-start hidden grid-cols-4 gap-4 px-6 pt-0 pb-8 lg:grid"
+              className="items-start hidden grid-cols-4 gap-5 px-6 pt-20 pb-8 lg:grid"
               role="list"
               aria-label="Sản phẩm nổi bật"
             >
