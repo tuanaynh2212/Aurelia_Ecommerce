@@ -21,7 +21,7 @@ const { coupons,handleDeleteCoupon,handleToggleCouponStatus } = useContext(Admin
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterActive, setFilterActive] = useState("all");
-  
+
   const [newCoupon, setNewCoupon] = useState({
     id: uuid(),
     code: "",
@@ -46,7 +46,7 @@ const { coupons,handleDeleteCoupon,handleToggleCouponStatus } = useContext(Admin
   const filteredCoupons = coupons.filter((coupon) => {
     const matchesSearch = coupon.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          coupon.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterActive === "all" || 
+    const matchesFilter = filterActive === "all" ||
                          (filterActive === "active" && coupon.isActive) ||
                          (filterActive === "inactive" && !coupon.isActive);
     return matchesSearch && matchesFilter;
@@ -205,11 +205,10 @@ const { coupons,handleDeleteCoupon,handleToggleCouponStatus } = useContext(Admin
         <AddCoupon showAddModal={showAddModal} setShowAddModal={setShowAddModal} newCoupon={newCoupon} setNewCoupon={setNewCoupon}/>
       </div>
 
-      {/* Edit Modal */}
       <div>
         <EditCoupon editing={editing} setEditing={setEditing} />
       </div>
     </div>
   );
-  
+
 }

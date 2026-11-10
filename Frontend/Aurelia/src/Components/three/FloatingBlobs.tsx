@@ -21,12 +21,11 @@ export function FloatingBlobs() {
 
   return (
     <group>
-      {/* Primary Organic Pastel Shape */}
       <Float speed={2} rotationIntensity={0.8} floatIntensity={1.2}>
         <mesh ref={meshRef1} position={[0, 0, 0]}>
           <sphereGeometry args={[1.5, 64, 64]} />
           <MeshDistortMaterial
-            color="#E89B85" // warm coral/peach
+            color="#E89B85"
             roughness={0.25}
             metalness={0.1}
             distort={0.45}
@@ -35,12 +34,11 @@ export function FloatingBlobs() {
         </mesh>
       </Float>
 
-      {/* Secondary Companion Ring / Torus */}
       <Float speed={1.5} rotationIntensity={1} floatIntensity={0.8}>
         <mesh ref={meshRef2} position={[1.4, -0.6, -0.8]} scale={0.65}>
           <torusGeometry args={[1.2, 0.4, 32, 64]} />
           <MeshDistortMaterial
-            color="#84A98C" // sage
+            color="#84A98C"
             roughness={0.3}
             metalness={0.15}
             distort={0.3}
@@ -49,12 +47,11 @@ export function FloatingBlobs() {
         </mesh>
       </Float>
 
-      {/* Floating Accent Sphere */}
       <Float speed={2.5} rotationIntensity={1.2} floatIntensity={1.5}>
         <mesh position={[-1.6, 1, -0.5]} scale={0.4}>
           <sphereGeometry args={[1, 32, 32]} />
           <MeshDistortMaterial
-            color="#EED5C2" // cream gold
+            color="#EED5C2"
             roughness={0.2}
             metalness={0.2}
             distort={0.2}

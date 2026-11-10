@@ -13,8 +13,6 @@ export default defineConfig({
           'chart-vendor': ['chart.js', 'react-chartjs-2', 'recharts'],
           'map-vendor': ['leaflet', 'react-leaflet'],
           'ai-vendor': ['@mediapipe/pose', '@mediapipe/camera_utils'],
-          // Use explicit Firebase subpath imports to avoid Vite/Rollup
-          // trying to resolve the deprecated root "firebase" entry.
           'firebase-vendor': ['firebase/app', 'firebase/auth'],
           'signalr-vendor': ['@microsoft/signalr'],
         },
@@ -22,9 +20,9 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 1000,
     minify: 'esbuild',
-    assetsInlineLimit: 4096, 
+    assetsInlineLimit: 4096,
     cssCodeSplit: true,
-    sourcemap: false, 
+    sourcemap: false,
   },
   optimizeDeps: {
     include: [
@@ -40,7 +38,7 @@ export default defineConfig({
       key: './localhost+2-key.pem',
       cert: './localhost+2.pem'
     },
-    port: 4121, 
+    port: 4121,
     open: true
   }
 });

@@ -22,7 +22,6 @@ export const FilterType = () => {
 
   return (
     <>
-      {/* Desktop Category Index Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-1">
         <div className="flex items-center justify-between gap-3 border-b border-[var(--color-rule)] pb-4">
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1">
@@ -67,7 +66,6 @@ export const FilterType = () => {
         </div>
       </div>
 
-      {/* Mobile Floating Filter Pill */}
       <div className="sm:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
         <button
           onClick={() => setOpenDrawer(true)}
@@ -78,7 +76,6 @@ export const FilterType = () => {
         </button>
       </div>
 
-      {/* Filter Drawer */}
       <Drawer
         open={openDrawer}
         onClose={() => setOpenDrawer(false)}

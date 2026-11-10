@@ -32,7 +32,6 @@ export const Collection = () => {
                 isReversed ? "md:flex-row-reverse" : ""
               }`}
             >
-              {/* Banner Image Card */}
               <div className="w-full md:w-1/2 relative rounded-[var(--radius-2xl)] overflow-hidden shadow-[var(--shadow-card)] border border-[var(--color-cream-300)] group aspect-[4/3] bg-[var(--color-cream-200)]">
                 <img
                   src={item.banner}
@@ -49,7 +48,6 @@ export const Collection = () => {
                 </div>
               </div>
 
-              {/* Text Info */}
               <div className="w-full md:w-1/2 flex flex-col justify-center p-2 sm:p-6">
                 <span className="text-xs font-semibold uppercase tracking-widest text-[var(--color-accent)] mb-2">
                   {item.slug || "Collection"}

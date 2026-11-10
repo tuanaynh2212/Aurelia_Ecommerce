@@ -29,8 +29,8 @@ export const ListCoupon = ({
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div
-        className="bg-gradient-to-br from-slate-200 to-slate-300 rounded-3xl 
-      max-w-3xl w-full max-h-[90vh] overflow-hidden shadow-2xl 
+        className="bg-gradient-to-br from-slate-200 to-slate-300 rounded-3xl
+      max-w-3xl w-full max-h-[90vh] overflow-hidden shadow-2xl
       border border-slate-400/40"
       >
         <div className="relative bg-gradient-to-r from-gray-300 to-gray-500 p-8">
@@ -51,7 +51,6 @@ export const ListCoupon = ({
           </div>
         </div>
 
-        {/* Body */}
         <div className="p-4 sm:p-8 overflow-y-auto max-h-[calc(92vh-150px)] scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
           {validationMessage && (
             <div className="mb-4 px-4 py-3 rounded-xl bg-yellow-500/10 border border-yellow-400/30 text-yellow-300 text-sm sm:text-base">

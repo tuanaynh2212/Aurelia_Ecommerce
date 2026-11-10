@@ -119,9 +119,7 @@ export default function AddCollectionForm({
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {/* === LEFT: Thông tin mùa === */}
           <div className="space-y-6">
-            {/* Thông tin cơ bản */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="text-sm font-semibold text-gray-700 mb-1 block">
@@ -149,7 +147,6 @@ export default function AddCollectionForm({
               </div>
             </div>
 
-            {/* Slogan & Mô tả */}
             <input
               name="slogan"
               value={form.slogan}
@@ -166,7 +163,6 @@ export default function AddCollectionForm({
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-2 focus:border-indigo-500 outline-none resize-none"
             />
 
-            {/* Banner */}
             <div>
               <label className="text-sm font-semibold text-gray-700 mb-1 block">
                 Banner URL
@@ -189,7 +185,6 @@ export default function AddCollectionForm({
               )}
             </div>
 
-            {/* Thuộc tính mùa */}
             <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-5 border border-purple-100">
               <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
                 🎨 Thuộc tính mùa
@@ -235,7 +230,6 @@ export default function AddCollectionForm({
             </div>
           </div>
 
-          {/* === RIGHT: Danh sách sản phẩm === */}
           <div className="flex flex-col h-full">
             <h1 className="font-semibold text-lg mb-2">Chọn sản phẩm</h1>
             <input
@@ -244,7 +238,6 @@ export default function AddCollectionForm({
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-2 mb-3 focus:border-orange-500 outline-none"
             />
 
-            {/* Bộ lọc season */}
             <div className="flex flex-wrap gap-2 mb-4">
               {Array.from(
                 new Set(dataProduct?.map((p) => p.season).filter(Boolean))
@@ -265,7 +258,6 @@ export default function AddCollectionForm({
               ))}
             </div>
 
-            {/* Danh sách sản phẩm */}
             <ul className="flex-1 overflow-y-auto border border-gray-300 rounded-lg p-3 bg-white/70 shadow-inner max-h-[400px]">
               {filteredList?.map((product: any) => {
                 const isSelected = selectedProducts.find(
@@ -302,7 +294,6 @@ export default function AddCollectionForm({
               })}
             </ul>
 
-            {/* Danh sách đã chọn */}
             {selectedProducts.length > 0 && (
               <div className="mt-4">
                 <div className="flex justify-between items-center mb-2">

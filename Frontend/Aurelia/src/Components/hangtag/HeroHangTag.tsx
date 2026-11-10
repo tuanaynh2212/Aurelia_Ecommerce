@@ -5,7 +5,6 @@ import { FilterProductContext } from "../../contexts/FIlterProduct";
 import { FeaturedTag, TagSkeleton } from "../hangtag/ProductTag";
 import type { Product } from "../../types/type";
 
-/* Tag configuration: string length and rotation angle per slot */
 const SLOT_CONFIG = [
   { length: 64, angle: -1.5 },
   { length: 44, angle:  1.2 },
@@ -17,7 +16,6 @@ export function HeroHangTag() {
   const navigate = useNavigate();
   const { dataProduct, isLoading } = useContext(FilterProductContext);
 
-  // Pick top 4 products: 1 featured sale + 3 varied
   const heroProducts = useMemo<Product[]>(() => {
     if (!dataProduct || dataProduct.length === 0) return [];
     const sorted = [...dataProduct].sort((a, b) => (b.sold ?? 0) - (a.sold ?? 0));
@@ -32,21 +30,17 @@ export function HeroHangTag() {
       className="w-full overflow-hidden border-b border-[var(--color-rule)]"
       style={{ background: "var(--color-kraft)" }}
     >
-      {/* Inner layout: text block left, tags right */}
       <div className="container-page">
         <div className="flex flex-col lg:flex-row gap-0 min-h-[600px] lg:min-h-[640px]">
 
-          {/* ── Left: Headline block ────────────────────────── */}
           <div
             className="flex flex-col justify-center py-12 lg:py-0 lg:w-[340px] lg:flex-shrink-0 border-b lg:border-b-0 lg:border-r border-[rgba(42,33,27,0.18)]"
             style={{ paddingRight: "2.5rem" }}
           >
-            {/* Eyebrow */}
             <p className="font-mono text-[11px] tracking-[0.2em] uppercase text-ink-muted mb-4">
               Aurellia — Thu/Đông 2026
             </p>
 
-            {/* h1 — one per page */}
             <h1
               className="font-heading text-[2.5rem] leading-[1.1] font-semibold text-ink mb-5"
               style={{ fontVariationSettings: "'opsz' 72" }}
@@ -58,7 +52,6 @@ export function HeroHangTag() {
               Mọi thông số — chất liệu, phom dáng, xuất xứ — được in trực tiếp trên từng chiếc mác sản phẩm.
             </p>
 
-            {/* Primary CTA */}
             <div className="flex flex-col items-start gap-3 sm:flex-row">
               <button
                 onClick={() => navigate("/Fashion/Products")}
@@ -69,23 +62,18 @@ export function HeroHangTag() {
               </button>
             </div>
 
-            {/* Policy footnote */}
             <p className="font-mono text-[10px] text-ink-faint mt-6 tracking-wide">
               * Đổi trả miễn phí trong 14 ngày · Giao hàng toàn quốc
             </p>
           </div>
 
-          {/* ── Right: Hanging tags rail ────────────────────── */}
           <div className="relative flex-1 pt-5">
-            {/* Kraft rail horizontal line at top from which tags hang */}
             <div
               className="absolute top-0 left-0 right-0 flex h-px"
               style={{ background: "rgba(42,33,27,0.20)" }}
               aria-hidden="true"
             />
 
-            {/* Tags — desktop: 4-column grid, mobile: horizontal snap */}
-            {/* Mobile wrapper */}
             <div className="gap-4 px-2 py-4 pt-6 snap-x-scroller lg:hidden"
               role="list"
               aria-label="Sản phẩm nổi bật"
@@ -106,13 +94,12 @@ export function HeroHangTag() {
                         product={p}
                         index={i}
                         stringLength={SLOT_CONFIG[i]?.length ?? 44}
-                        angle={0} // no angle on mobile, too tight
+                        angle={0}
                       />
                     </div>
                   ))}
             </div>
 
-            {/* Desktop wrapper */}
             <div
               className="items-start hidden grid-cols-4 gap-5 px-6 pt-20 pb-8 lg:grid"
               role="list"

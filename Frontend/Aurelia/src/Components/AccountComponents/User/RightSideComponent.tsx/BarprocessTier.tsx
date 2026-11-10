@@ -76,7 +76,6 @@ export const BarprocessTier: React.FC<{ userRole?: string }> = ({ userRole }) =>
 
   return (
     <section className="bg-paper border border-rule/80 rounded-tag shadow-tag p-6 mb-8 relative overflow-hidden">
-      {/* Grommet punch corner */}
       <div className="absolute top-4 right-4 flex items-center gap-1.5 opacity-60">
         <div className="w-2.5 h-2.5 rounded-hole bg-kraft border border-ink/20 shadow-inner" />
         <span className="font-mono text-[9px] uppercase tracking-widest text-ink-muted">
@@ -107,7 +106,6 @@ export const BarprocessTier: React.FC<{ userRole?: string }> = ({ userRole }) =>
         </div>
       </div>
 
-      {/* Progress Track */}
       <div className="relative h-2.5 w-full bg-kraft/25 rounded-tag overflow-hidden border border-rule mb-3">
         <div
           className="h-full bg-cobalt transition-all duration-700 ease-out"
@@ -115,7 +113,6 @@ export const BarprocessTier: React.FC<{ userRole?: string }> = ({ userRole }) =>
         />
       </div>
 
-      {/* Bottom stats & next perk */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs font-mono text-ink-muted gap-2 pt-2 border-t border-rule/40">
         <div className="flex items-center gap-1.5">
           <span>Tiếp theo:</span>

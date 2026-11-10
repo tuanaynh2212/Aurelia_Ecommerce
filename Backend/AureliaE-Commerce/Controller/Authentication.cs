@@ -2,17 +2,15 @@
 using AureliaE_Commerce.Dto;
 using AureliaE_Commerce.Model;
 using AureliaE_Commerce.Model.Shop;
-using DnsClient;
 using FirebaseAdmin.Auth;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AureliaE_Commerce.Controller
 {
@@ -20,9 +18,15 @@ namespace AureliaE_Commerce.Controller
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
+        private const int ClientDays = 7;
+        private const int ShopDays = 3;
+        private const int AdminDays = 7;
+        private const int BcryptWorkFactor = 12;
+
+        private static readonly string[] AccountTypes = { "client", "shop", "admin" };
+
         private readonly IMongoCollection<Client> _collection;
         private readonly IMongoCollection<ShopAccount> mongoCollection;
-        private readonly IMongoCollection<Shop> Collection;
         private readonly IMongoCollection<AdminAccount> collection;
         private readonly IConfiguration _configuration;
 
@@ -30,67 +34,213 @@ namespace AureliaE_Commerce.Controller
         {
             _collection = dbContext.Client;
             mongoCollection = dbContext.ShopAccount;
-            Collection = dbContext.Shop;
-            _configuration = configuration;
             collection = dbContext.AdminAccount;
+            _configuration = configuration;
         }
 
-        private string Generate(Client client)
+        #region JWT & Cookie
+
+        private byte[] GetKey() =>
+            Encoding.UTF8.GetBytes(
+                _configuration["Jwt:Key"] ?? throw new InvalidOperationException("Thiếu cấu hình Jwt:Key"));
+
+        private string GenerateToken(IEnumerable<Claim> claims, int expireDays)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(JwtRegisteredClaimNames.Sub, client.Id),
-                    new Claim(JwtRegisteredClaimNames.Email, client.Email),
-                    new Claim(ClaimTypes.Name, client.Name),
-                }),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddDays(expireDays),
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(GetKey()),
+                    SecurityAlgorithms.HmacSha256Signature)
             };
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            return tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
         }
-        private string GenerateAccount(ShopAccount shop)
+
+        private string Generate(Client client) => GenerateToken(new[]
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(JwtRegisteredClaimNames.Sub, shop.id),
-                    new Claim(JwtRegisteredClaimNames.Email, shop.email),
-                    new Claim(ClaimTypes.Name, shop.shopId),
-                }),
-                Expires = DateTime.UtcNow.AddDays(3),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
+            new Claim(JwtRegisteredClaimNames.Sub, client.Id),
+            new Claim(JwtRegisteredClaimNames.Email, client.Email),
+            new Claim(ClaimTypes.Name, client.Name),
+        }, ClientDays);
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
-        }
-        private string GenerateAdminAccount(AdminAccount adminAccount)
+        private string GenerateAccount(ShopAccount shop) => GenerateToken(new[]
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(JwtRegisteredClaimNames.Sub, adminAccount.Id),
-                    new Claim(JwtRegisteredClaimNames.Email, adminAccount.Email),
-                }),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
+            new Claim(JwtRegisteredClaimNames.Sub, shop.id),
+            new Claim(JwtRegisteredClaimNames.Email, shop.email),
+            new Claim("shopId", shop.shopId),
+        }, ShopDays);
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+        private string GenerateAdminAccount(AdminAccount admin) => GenerateToken(new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, admin.Id),
+            new Claim(JwtRegisteredClaimNames.Email, admin.Email),
+        }, AdminDays);
+
+        private static CookieOptions BaseCookieOptions() => new()
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None
+        };
+
+        private void SetAuthCookie(string cookieName, string token, int days)
+        {
+            var options = BaseCookieOptions();
+            options.Expires = DateTimeOffset.UtcNow.AddDays(days);
+            Response.Cookies.Append(cookieName, token, options);
         }
+
+        private string? GetUserIdFromToken(string token)
+        {
+            try
+            {
+                new JwtSecurityTokenHandler().ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(GetKey()),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                }, out var validated);
+
+                return ((JwtSecurityToken)validated).Subject;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        #endregion
+
+        #region Register
+
+        private async Task<IActionResult> RegisterAccount<T>(
+            string email,
+            string password,
+            IMongoCollection<T> collection,
+            Func<string, T> buildEntity,
+            Func<T, string> generateToken,
+            string cookieName,
+            int cookieDays,
+            string successMessage,
+            Expression<Func<T, bool>> emailExistsFilter)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            {
+                return BadRequest(new { success = false, message = "Không được để Email hoặc Mật khẩu trống" });
+            }
+
+            if (password.Length < 6)
+            {
+                return BadRequest(new { success = false, message = "Mật khẩu phải có ít nhất 6 ký tự" });
+            }
+
+            if (await collection.Find(emailExistsFilter).AnyAsync())
+            {
+                return BadRequest(new { success = false, message = "Email đã tồn tại" });
+            }
+
+            var hash = BCrypt.Net.BCrypt.HashPassword(password, workFactor: BcryptWorkFactor);
+            var entity = buildEntity(hash);
+            await collection.InsertOneAsync(entity);
+
+            SetAuthCookie(cookieName, generateToken(entity), cookieDays);
+            return Ok(new { success = true, message = successMessage });
+        }
+
+        [HttpPost("Register")]
+        public Task<IActionResult> RegisterUser([FromBody] SignUpDto dto)
+        {
+            if (dto == null || string.IsNullOrWhiteSpace(dto.UserName))
+            {
+                return Task.FromResult<IActionResult>(
+                    BadRequest(new { success = false, message = "Không được để trống Tên, Email hoặc Mật khẩu" }));
+            }
+
+            return RegisterAccount(
+                dto.Email,
+                dto.Password,
+                _collection,
+                hash => new Client
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Email = dto.Email,
+                    PassWord = hash,
+                    Name = dto.UserName,
+                    Point = 0,
+                    Tier = "Bronze",
+                    NgayTaoTaiKhoan = DateTime.Now
+                },
+                Generate,
+                "access_token_client",
+                ClientDays,
+                "Đăng ký thành công",
+                u => u.Email == dto.Email);
+        }
+
+        [HttpPost("ShopRegister")]
+        public Task<IActionResult> ShopRegister([FromBody] ShopSignUpDTo dto)
+        {
+            if (dto == null)
+            {
+                return Task.FromResult<IActionResult>(
+                    BadRequest(new { success = false, message = "Dữ liệu đăng ký không được để trống" }));
+            }
+
+            return RegisterAccount(
+                dto.Email,
+                dto.Password,
+                mongoCollection,
+                hash => new ShopAccount
+                {
+                    id = Guid.NewGuid().ToString(),
+                    email = dto.Email,
+                    password = hash,
+                    shopId = dto.shopId,
+                    NgayTaoTaiKhoan = DateTime.Now
+                },
+                GenerateAccount,
+                "access_token_shop",
+                ShopDays,
+                "Đăng ký shop thành công",
+                a => a.email == dto.Email);
+        }
+
+        [HttpPost("CreateAdminAccount")]
+        [Authorize(Roles = "SuperAdmin")]
+        public Task<IActionResult> CreateAdmin([FromBody] SignUpDto dto)
+        {
+            if (dto == null)
+            {
+                return Task.FromResult<IActionResult>(
+                    BadRequest(new { success = false, message = "Dữ liệu không được để trống" }));
+            }
+
+            return RegisterAccount(
+                dto.Email,
+                dto.Password,
+                collection,
+                hash => new AdminAccount
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Email = dto.Email,
+                    Password = hash
+                },
+                GenerateAdminAccount,
+                "access_token_admin",
+                AdminDays,
+                "Đăng ký thành công",
+                a => a.Email == dto.Email);
+        }
+
+        #endregion
+
+        #region Login
 
         [HttpPost("LogIn")]
         public async Task<IActionResult> LogInAccount([FromBody] LoginDto loginDto)
@@ -100,335 +250,164 @@ namespace AureliaE_Commerce.Controller
                 return BadRequest(new { success = false, message = "Không được để Email hoặc Mật khẩu trống" });
             }
 
-            var filter = Builders<Client>.Filter.Eq(a => a.Email, loginDto.Email);
-            var data = await _collection.Find(filter).FirstOrDefaultAsync();
+            var data = await _collection.Find(a => a.Email == loginDto.Email).FirstOrDefaultAsync();
 
             if (data == null)
             {
                 return BadRequest(new { success = false, message = "Không tìm thấy Email" });
             }
 
-            if (BCrypt.Net.BCrypt.Verify(loginDto.Password,data.PassWord)==true)
+            if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, data.PassWord))
             {
-                Console.WriteLine("=== LOGIN CLIENT SUCCESS ===");
-
-                var token = Generate(data);
-                Response.Cookies.Append("access_token_client", token, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.None,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7)
-                });
-                return Ok(new
-                {
-                    success = true,
-                    message = "Đăng nhập thành công"
-                }
-                );
+                return BadRequest(new { success = false, message = "Sai Email hoặc Mật khẩu" });
             }
 
-            return BadRequest(new { success = false, message = "Sai Email hoặc Mật khẩu" });
+            SetAuthCookie("access_token_client", Generate(data), ClientDays);
+            return Ok(new { success = true, message = "Đăng nhập thành công" });
         }
+
         [HttpPost("LogInWithFirebase")]
-        public async Task<IActionResult> LogInWithFirebase([FromQuery]  string token)
+        public async Task<IActionResult> LogInWithFirebase([FromQuery] string token)
         {
-            FirebaseToken decoded=await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
-            var uid=decoded.Uid;
-            if(string.IsNullOrEmpty(uid))
+            FirebaseToken decoded;
+            try
+            {
+                decoded = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
+            }
+            catch (FirebaseAuthException)
             {
                 return BadRequest(new { success = false, message = "Token không hợp lệ" });
             }
-            var filter = Builders<Client>.Filter.Eq(a => a.Id, uid);
-            var data = await _collection.Find(filter).FirstOrDefaultAsync();
-            if(data == null)
-            {
-                var user=new Client
-                {
-                    Id=uid,
-                    Email=decoded.Claims["email"].ToString(),
-                    Name=decoded.Claims["name"].ToString(),
-                    Point=0,
-                    Tier="Bronze",
-                    NgayTaoTaiKhoan=DateTime.Now
-                };
-                await _collection.InsertOneAsync(user);
-                data=user;
-                var tokenNew = Generate(data);
-                Response.Cookies.Append("access_token_client", tokenNew, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.None,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7)
-                });
-                return Ok(new
-                {
-                    success = true,
-                    message = "Đăng nhập thành công"
-                });
-            }
-            if(data != null)
-            {
-                var tokenExisting = Generate(data);
-                Response.Cookies.Append("access_token_client", tokenExisting, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.None,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7)
-                });
-                return Ok(new
-                {
-                    success = true,
-                    message = "Đăng nhập thành công"
-                });
-            }
-            return BadRequest(new { success = false, message = "Sai Email hoặc Mật khẩu" });
-        }
 
-
-        [HttpPost("Register")]
-        public async Task<IActionResult> RegisterUser([FromBody] SignUpDto signUpDto)
-        {
-            if (signUpDto == null || string.IsNullOrEmpty(signUpDto.UserName) || string.IsNullOrEmpty(signUpDto.Email) || string.IsNullOrEmpty(signUpDto.Password))
+            var uid = decoded.Uid;
+            if (string.IsNullOrEmpty(uid))
             {
-                return BadRequest(new { success = false, message = "Không được để trống Tên, Email hoặc Mật khẩu" });
+                return BadRequest(new { success = false, message = "Token không hợp lệ" });
             }
 
-            var existingUser = await _collection.Find(u => u.Email == signUpDto.Email).FirstOrDefaultAsync();
-            if (existingUser != null)
-            {
-                return BadRequest(new { success = false, message = "Email này đã được đăng ký" });
-            }
-            var filter = Builders<Client>.Filter.Eq(a => a.Email, signUpDto.Email);
-            var data = await _collection.Find(filter).FirstOrDefaultAsync();
-            var passwordHasher = BCrypt.Net.BCrypt.HashPassword(signUpDto.Password,workFactor:12);
-            var client = new Client
-            {
-                Id = Guid.NewGuid().ToString(),
-                Email = signUpDto.Email,
-                PassWord = passwordHasher,
-                Name = signUpDto.UserName,
-                Point = 0,
-                Tier = "Bronze",
-                NgayTaoTaiKhoan = DateTime.Now
-            };
+            var data = await _collection.Find(a => a.Id == uid).FirstOrDefaultAsync();
 
-            await _collection.InsertOneAsync(client);
-            var token = Generate(client);
-            Response.Cookies.Append("access_token_client", token, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
-            });
-            Console.WriteLine(Response.Cookies);
-            return Ok(new { success = true, message = "Đăng ký thành công"
-            });
-        }
-        [HttpPost("ShopRegister")]
-        public async Task<IActionResult> ShopRegister([FromBody] ShopSignUpDTo signUpDto)
-        {
-            try
-            {
-                if (signUpDto == null)
-                    return BadRequest(new { success = false, message = "Dữ liệu đăng ký không được để trống" });
-
-
-                var existingUser = await _collection.Find(u => u.Email == signUpDto.Email).FirstOrDefaultAsync();
-                if (existingUser != null)
-                    return BadRequest(new { success = false, message = "Email đã tồn tại trong hệ thống" });
-
-                var existingAdmin = await _collection.Find(u => u.Email == signUpDto.Email).FirstOrDefaultAsync();
-                if (existingAdmin != null)
-                    return BadRequest(new { success = false, message = "Email đã tồn tại trong hệ thống" });
-                var passwordHasher = BCrypt.Net.BCrypt.HashPassword(signUpDto.Password, workFactor: 12);
-                var newAdmin = new ShopAccount
-                {
-                    id = Guid.NewGuid().ToString(),
-                    email = signUpDto.Email,
-                    password = passwordHasher,
-                    shopId=signUpDto.shopId,
-                    NgayTaoTaiKhoan = DateTime.Now
-                };
-
-                await mongoCollection.InsertOneAsync(newAdmin);
-                var token = GenerateAccount(newAdmin);
-                Response.Cookies.Append("access_token_shop", token, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.None,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7)
-                });
-                return Ok(new
-                {
-                    success = true,
-                    message = "Đăng ký admin thành công",
-                });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("❌ Lỗi đăng ký admin: " + ex.Message);
-                return StatusCode(500, new { success = false, message = "Lỗi server: " + ex.Message });
-            }
-        }
-        [HttpPost("LogInShop")]
-        public async Task<IActionResult> LogInShop([FromBody]LoginDto login)
-        {
-            int currentFactory = 12;
-
-            if (login == null || string.IsNullOrEmpty(login.Email) || string.IsNullOrEmpty(login.Password))
-                {
-                    return BadRequest(new { success = false, message = "Không được để Email hoặc Mật khẩu trống" });
-                }
-            var data = await mongoCollection.Find(a => a.email == login.Email).FirstOrDefaultAsync();
             if (data == null)
             {
-                return BadRequest(new { success = false, message = "Email Không Tồn Tại " });
-            }
-            if (BCrypt.Net.BCrypt.Verify(login.Password, data.password) == false)
-            {
-                return BadRequest(new { success = false, message = "Sai Mật Khẩu " });
-            }
-            
-            var token = GenerateAccount(data);
-             Response.Cookies.Append("access_token_shop", token, new CookieOptions
+                data = new Client
                 {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.None,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7)
-                });
-                return Ok(new
-                {
-                    message = "Đăng Nhập Thành Công",
-                });
+                    Id = uid,
+                    Email = decoded.Claims["email"].ToString(),
+                    Name = decoded.Claims["name"].ToString(),
+                    Point = 0,
+                    Tier = "Bronze",
+                    NgayTaoTaiKhoan = DateTime.Now
+                };
+                await _collection.InsertOneAsync(data);
+            }
 
+            SetAuthCookie("access_token_client", Generate(data), ClientDays);
+            return Ok(new { success = true, message = "Đăng nhập thành công" });
         }
-        [HttpPost("CreateAdminAccount")]
-        public async Task<IActionResult> CreateAdmin([FromBody]SignUpDto signUpDto)
+
+        [HttpPost("LogInShop")]
+        public async Task<IActionResult> LogInShop([FromBody] LoginDto login)
         {
-            if (signUpDto == null || string.IsNullOrEmpty(signUpDto.UserName) || string.IsNullOrEmpty(signUpDto.Email) || string.IsNullOrEmpty(signUpDto.Password))
-            {
-                return BadRequest(new { success = false, message = "Không được để trống Tên, Email hoặc Mật khẩu" });
-            }
-
-            var existingUser = await _collection.Find(u => u.Email == signUpDto.Email).FirstOrDefaultAsync();
-            if (existingUser != null)
-            {
-                return BadRequest(new { success = false, message = "Email này đã được đăng ký" });
-            }
-            var passwordHasher = BCrypt.Net.BCrypt.HashPassword(signUpDto.Password, workFactor: 12);
-            var admin = new AdminAccount
-            {
-                Id = Guid.NewGuid().ToString(),
-                Email = signUpDto.Email,
-                Password = passwordHasher,
-            };
-
-            await collection.InsertOneAsync(admin);
-            var token = GenerateAdminAccount(admin);
-             Response.Cookies.Append("access_token_admin", token, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.None,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7)
-                });
-            return Ok(new
-            {
-                success = true,
-                message = "Đăng ký thành công",
-            });
-        }
-        [HttpPost("LogInAdminSite")]
-        public async Task<IActionResult> LogInAdminSite([FromBody]LoginDto login)
-        {
-            int currentFactory = 12;
-
             if (login == null || string.IsNullOrEmpty(login.Email) || string.IsNullOrEmpty(login.Password))
             {
                 return BadRequest(new { success = false, message = "Không được để Email hoặc Mật khẩu trống" });
             }
-            var filter = Builders<AdminAccount>.Filter.Eq(A => A.Email, login.Email);
-            var data = await collection.Find(filter).FirstOrDefaultAsync();
+
+            var data = await mongoCollection.Find(a => a.email == login.Email).FirstOrDefaultAsync();
+
             if (data == null)
             {
-                return BadRequest(new { success = false, message = "Email Không Tồn Tại " });
-            }
-            if (BCrypt.Net.BCrypt.Verify(login.Password, data.Password) == false)
-            {
-                return BadRequest(new { success = false, message = "Sai Mật Khẩu " });
-            }
-            if(BCrypt.Net.BCrypt.Verify(login.Password, data.Password) == true)
-            {
-                var token = GenerateAdminAccount(data);
-                 Response.Cookies.Append("access_token_admin", token, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.None,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7)
-                });
-                return Ok(new
-                {
-                    message = "Đăng Nhập Thành Công",
-                });
-            }
-            else
-            {
-                return BadRequest("Not Found");
+                return BadRequest(new { success = false, message = "Email Không Tồn Tại" });
             }
 
+            if (!BCrypt.Net.BCrypt.Verify(login.Password, data.password))
+            {
+                return BadRequest(new { success = false, message = "Sai Mật Khẩu" });
+            }
 
+            SetAuthCookie("access_token_shop", GenerateAccount(data), ShopDays);
+            return Ok(new { message = "Đăng Nhập Thành Công" });
         }
+
+        [HttpPost("LogInAdminSite")]
+        public async Task<IActionResult> LogInAdminSite([FromBody] LoginDto login)
+        {
+            if (login == null || string.IsNullOrEmpty(login.Email) || string.IsNullOrEmpty(login.Password))
+            {
+                return BadRequest(new { success = false, message = "Không được để Email hoặc Mật khẩu trống" });
+            }
+
+            var data = await collection.Find(a => a.Email == login.Email).FirstOrDefaultAsync();
+
+            if (data == null)
+            {
+                return BadRequest(new { success = false, message = "Email Không Tồn Tại" });
+            }
+
+            if (!BCrypt.Net.BCrypt.Verify(login.Password, data.Password))
+            {
+                return BadRequest(new { success = false, message = "Sai Mật Khẩu" });
+            }
+
+            SetAuthCookie("access_token_admin", GenerateAdminAccount(data), AdminDays);
+            return Ok(new { message = "Đăng Nhập Thành Công" });
+        }
+
+        #endregion
+
+        #region Session
+
         [HttpDelete("LogOut")]
         public IActionResult LogOut([FromQuery] string typeAccount)
         {
-            Response.Cookies.Delete($"access_token_{typeAccount}", new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
-            });
-            return Ok(new { success = true, message = "Đăng xuất thành công" });
-        }
-        [HttpGet("GetData")] 
-        public async Task<IActionResult> GetAllClients([FromQuery] string typeAccount)
-        {
-            var token= Request.Cookies[$"access_token_{typeAccount}"];
-            if (string.IsNullOrEmpty(token))
-            {
-                return Unauthorized(new { success = false, message = "Token không hợp lệ hoặc đã hết hạn",tokens=token });
-            }
-            var handle=new JwtSecurityTokenHandler();
-            var jwtToken=handle.ReadJwtToken(token);
-            var userId= jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
-            if (typeAccount == "client")
-            {
-                var clients = Builders<Client>.Filter.Eq(a => a.Id, userId);
-                var client = await _collection.Find(clients).FirstOrDefaultAsync();
-                return Ok(client);
-            }
-            else if (typeAccount == "shop")
-            {
-                var shops = Builders<ShopAccount>.Filter.Eq(a => a.id, userId);
-                var shop = await mongoCollection.Find(shops).FirstOrDefaultAsync();
-                return Ok(shop);
-            }
-            else if (typeAccount == "admin")
-            {
-                var admins = Builders<AdminAccount>.Filter.Eq(a => a.Id, userId);
-                var admin = await collection.Find(admins).FirstOrDefaultAsync();
-                return Ok(admins);
-            }
-            else
+            if (!AccountTypes.Contains(typeAccount))
             {
                 return BadRequest(new { success = false, message = "Loại tài khoản không hợp lệ" });
             }
+
+            Response.Cookies.Delete($"access_token_{typeAccount}", BaseCookieOptions());
+            return Ok(new { success = true, message = "Đăng xuất thành công" });
         }
+
+        [HttpGet("GetData")]
+        public async Task<IActionResult> GetAllClients([FromQuery] string typeAccount)
+        {
+            if (!AccountTypes.Contains(typeAccount))
+            {
+                return BadRequest(new { success = false, message = "Loại tài khoản không hợp lệ" });
+            }
+
+            var token = Request.Cookies[$"access_token_{typeAccount}"];
+            var userId = string.IsNullOrEmpty(token) ? null : GetUserIdFromToken(token);
+
+            if (userId == null)
+            {
+                return Unauthorized(new { success = false, message = "Token không hợp lệ hoặc đã hết hạn" });
+            }
+
+            switch (typeAccount)
+            {
+                case "client":
+                {
+                    var c = await _collection.Find(a => a.Id == userId).FirstOrDefaultAsync();
+                    if (c == null) return Unauthorized(new { success = false, message = "Tài khoản không tồn tại" });
+                    return Ok(new { c.Id, c.Email, c.Name, c.Point, c.Tier, c.NgayTaoTaiKhoan });
+                }
+                case "shop":
+                {
+                    var s = await mongoCollection.Find(a => a.id == userId).FirstOrDefaultAsync();
+                    if (s == null) return Unauthorized(new { success = false, message = "Tài khoản không tồn tại" });
+                    return Ok(new { s.id, s.email, s.shopId, s.NgayTaoTaiKhoan });
+                }
+                default:
+                {
+                    var ad = await collection.Find(a => a.Id == userId).FirstOrDefaultAsync();
+                    if (ad == null) return Unauthorized(new { success = false, message = "Tài khoản không tồn tại" });
+                    return Ok(new { ad.Id, ad.Email });
+                }
+            }
+        }
+
+        #endregion
     }
 }

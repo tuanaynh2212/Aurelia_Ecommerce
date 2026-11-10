@@ -11,7 +11,6 @@ export const Notification = () => {
   const { setStatePage } = useContext(DashBoardShopCOntext);
   const [activeTab, setActiveTab] = useState("Đơn Hàng");
 
-
   const tabs = [
     { name: "Đơn Hàng", icon: <Package size={16} /> },
     { name: "Lịch Hẹn", icon: <Calendar size={16} /> },
@@ -21,7 +20,6 @@ export const Notification = () => {
     activeTab === "Đơn Hàng" ? message : appointment;
   return (
     <div className="absolute top-24 right-6 w-[400px] bg-gradient-to-br from-rose-500 via-red-500 to-pink-500 text-white rounded-2xl shadow-2xl border border-white/20 overflow-hidden backdrop-blur-md">
-      {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/20">
         <h1 className="text-lg font-semibold flex items-center gap-2">
           <Bell size={20} /> Thông báo
@@ -31,7 +29,6 @@ export const Notification = () => {
         </span>
       </div>
 
-      {/* Tabs */}
       <div className="flex space-x-2 px-3 py-2 border-b border-white/20">
         {tabs.map((tab) => (
           <button
@@ -50,7 +47,6 @@ export const Notification = () => {
         ))}
       </div>
 
-      {/* Notifications List */}
       <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent px-3 py-2 space-y-2">
         {currentList.length > 0 ? (
           currentList.map((msg: any, index: number) => {
@@ -69,7 +65,7 @@ export const Notification = () => {
                 <button
                   onClick={() => handleClickCheck(msg.id)}
                   className={`absolute top-2 right-2 text-xs flex items-center gap-1 px-2 py-2 rounded-xl transition-all duration-200 ${
-                    msg.isChecked 
+                    msg.isChecked
                       ? "bg-green-500/20 text-green-300 cursor-default"
                       : "bg-white/20 hover:bg-white/30 text-white"
                   }`}
@@ -88,7 +84,6 @@ export const Notification = () => {
         )}
       </div>
 
-      {/* Footer */}
       <div className="flex justify-between px-4 py-3 border-t border-white/20 bg-white/5">
         <button
           onClick={() =>

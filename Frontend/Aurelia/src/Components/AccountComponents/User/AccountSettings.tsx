@@ -75,7 +75,6 @@ export default function AccountSettings() {
 
   return (
     <div className="space-y-6">
-      {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-rule/60 gap-3">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-tag bg-kraft/15 border border-kraft-dark/20 flex items-center justify-center text-ink">
@@ -109,9 +108,7 @@ export default function AccountSettings() {
         )}
       </div>
 
-      {/* Main Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left: Avatar & Status Tag */}
         <div className="bg-paper border border-rule/80 rounded-tag p-6 flex flex-col items-center justify-between text-center shadow-tag relative">
           <div className="absolute top-3 left-3 flex items-center gap-1.5 opacity-60">
             <div className="w-2 h-2 rounded-hole bg-kraft border border-ink/20" />
@@ -168,7 +165,6 @@ export default function AccountSettings() {
           </div>
         </div>
 
-        {/* Right: Info Form */}
         <div className="md:col-span-2 bg-paper border border-rule/80 rounded-tag p-6 shadow-tag">
           {!isEditing ? (
             <div className="space-y-4">

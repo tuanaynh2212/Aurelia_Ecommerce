@@ -11,21 +11,10 @@ export interface AccordionItem {
 
 interface AccordionProps {
   items: AccordionItem[];
-  /** Allow multiple panels open simultaneously */
   multiple?: boolean;
   className?: string;
 }
 
-/**
- * Aurelia Accordion — animated expand/collapse panels.
- * Keyboard accessible: Space/Enter toggles, Arrow keys navigate.
- *
- * @example
- * <Accordion items={[
- *   { id: "details", title: "Details", content: <p>...</p> },
- *   { id: "care",    title: "Care",    content: <p>...</p> },
- * ]} />
- */
 export function Accordion({ items, multiple = false, className }: AccordionProps) {
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
   const reduced = useReducedMotion();

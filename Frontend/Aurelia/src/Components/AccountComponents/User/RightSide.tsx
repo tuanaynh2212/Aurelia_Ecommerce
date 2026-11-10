@@ -61,7 +61,6 @@ export const RightSide: React.FC<RightProps> = ({
       case "stats":
         return (
           <div className="space-y-8 animate-fade-in">
-            {/* Atelier Greeting Header */}
             <header className="pb-6 border-b border-rule/60 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-2">
@@ -84,10 +83,8 @@ export const RightSide: React.FC<RightProps> = ({
               </div>
             </header>
 
-            {/* Loyalty Tier Progress */}
             <BarprocessTier userRole={userRole ?? ""} />
 
-            {/* Quick Metrics & Recent Activity */}
             <div className="space-y-6">
               <div>
                 <div className="flex items-center gap-2 mb-3">

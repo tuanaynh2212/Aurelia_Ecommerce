@@ -25,12 +25,6 @@ export interface CardProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof cardVariants> {}
 
-/**
- * Aurelia Card — warm white rounded surface.
- *
- * @example
- * <Card hover padding="sm">...</Card>
- */
 const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ className, hover, padding, ...props }, ref) => (
     <div
@@ -42,7 +36,6 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
 );
 Card.displayName = "Card";
 
-/** Sub-components */
 const CardHeader = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div ref={ref} className={cn("mb-4", className)} {...props} />

@@ -162,7 +162,6 @@ export default function BookingForm() {
       <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 py-16 md:py-20">
         <div className="max-w-6xl mx-auto px-4 md:px-6 space-y-10">
-          {/* Header */}
           <div className="text-center">
             <h1 className="text-3xl md:text-5xl font-extrabold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
               Đặt lịch hẹn
@@ -173,7 +172,6 @@ export default function BookingForm() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
-            {/* Left */}
             <div className="space-y-8">
               <div className="p-6 bg-white rounded-2xl shadow-md border border-gray-100">
                 <h2 className="text-2xl font-bold mb-4 text-gray-800">
@@ -190,7 +188,6 @@ export default function BookingForm() {
                 </p>
               </div>
 
-              {/* Product */}
               <div className="p-6 bg-white rounded-2xl shadow-md border border-gray-100">
                 <h2 className="text-2xl font-bold mb-4 text-gray-800">
                   Sản phẩm
@@ -295,7 +292,6 @@ export default function BookingForm() {
               )}
             </div>
 
-            {/* Right - Customer Info */}
             <div className="p-6 md:p-8 bg-white rounded-2xl shadow-lg border border-gray-100 space-y-6">
               <h2 className="text-2xl font-bold text-gray-800">
                 Thông tin của bạn

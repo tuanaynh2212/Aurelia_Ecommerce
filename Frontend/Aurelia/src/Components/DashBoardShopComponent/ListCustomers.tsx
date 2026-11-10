@@ -25,7 +25,6 @@ export default function ListCustomer() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-indigo-50 to-purple-50 p-8">
-      {/* ===== Header ===== */}
       <header className="flex flex-col md:flex-row md:items-center md:justify-between mb-10">
         <div className="flex items-center gap-4">
           <div>
@@ -39,7 +38,6 @@ export default function ListCustomer() {
         </div>
       </header>
 
-      {/* ===== Stats Section ===== */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         {[
           {
@@ -77,7 +75,6 @@ export default function ListCustomer() {
         ))}
       </section>
 
-      {/* ===== Search Bar ===== */}
       <div className="relative max-w-2xl mb-12">
         <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
         <input
@@ -89,7 +86,6 @@ export default function ListCustomer() {
         />
       </div>
 
- 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {filtered ? (
           filtered.map((c) => (
@@ -97,13 +93,11 @@ export default function ListCustomer() {
               key={c.id}
               className="group relative bg-white  p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
             >
-              {/* Badge */}
               <div className="absolute top-4 right-4 px-3 py-1.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-semibold rounded-full flex items-center gap-1">
                 <Star size={12} fill="white" />
                 {c.tier}
               </div>
 
-              {/* Avatar & Info */}
               <div className="flex items-center gap-4 mb-5">
                 <img
                   src={c.avatar}
@@ -118,7 +112,6 @@ export default function ListCustomer() {
                 </div>
               </div>
 
-              {/* Contact */}
               <div className="space-y-3 mb-5">
                 <div className="flex items-center gap-3 text-gray-600">
                   <div className="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center">
@@ -136,7 +129,6 @@ export default function ListCustomer() {
                 </div>
               </div>
 
-              {/* Stats */}
               <div className="border-t border-gray-100 pt-4">
                 <div className="flex justify-between items-center mb-4">
                   <div>

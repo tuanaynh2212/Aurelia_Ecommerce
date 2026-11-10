@@ -24,7 +24,6 @@ export const HistoryOrder: React.FC<{
 
   return (
     <div className="space-y-6">
-      {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-rule/60 gap-3">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-tag bg-kraft/15 border border-kraft-dark/20 flex items-center justify-center text-ink">
@@ -45,7 +44,6 @@ export const HistoryOrder: React.FC<{
         </div>
       </div>
 
-      {/* List */}
       <div className="space-y-4">
         {safeAppointments.map((item, idx) => {
           const statusInfo = STATUS_MAP[item.status] || {
@@ -69,7 +67,6 @@ export const HistoryOrder: React.FC<{
                 relative
               "
             >
-              {/* Grommet punch */}
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
@@ -101,7 +98,6 @@ export const HistoryOrder: React.FC<{
                   </div>
                 </div>
 
-                {/* Right badge */}
                 <div className="flex flex-col items-end gap-3">
                   <span
                     className={`
@@ -130,7 +126,6 @@ export const HistoryOrder: React.FC<{
           );
         })}
 
-        {/* Empty state */}
         {safeAppointments.length === 0 && (
           <div className="bg-paper border border-dashed border-rule rounded-tag p-12 text-center">
             <div className="w-12 h-12 mx-auto rounded-tag bg-kraft/15 flex items-center justify-center text-ink-muted mb-3">

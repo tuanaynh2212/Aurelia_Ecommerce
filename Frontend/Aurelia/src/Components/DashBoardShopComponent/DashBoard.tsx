@@ -94,7 +94,6 @@ export function DashBoardShop({
 
   return (
   <main className="flex-1 bg-gray-50 p-4 md:p-8 overflow-y-auto">
-      {/* Header */}
       <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="serif text-4xl text-gray-900">Dashboard</h1>
@@ -127,7 +126,6 @@ export function DashBoardShop({
         </div>
       </header>
 
-      {/* Stats Grid */}
       <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
         {stats.map((stat, index) => (
           <div
@@ -152,9 +150,7 @@ export function DashBoardShop({
         ))}
       </section>
 
-      {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Orders */}
         <section className="bg-white  p-6 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg  text-gray-900">
@@ -208,7 +204,6 @@ export function DashBoardShop({
           )}
         </section>
 
-        {/* Upcoming Appointments */}
         <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg  text-gray-900">

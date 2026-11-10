@@ -20,9 +20,6 @@ const NAV_LINKS = [
   { label: "About",       path: "/about" },
 ] as const;
 
-/* ============================================================
-   Announcement Strip — 1px top bar, monospace feel
-   ============================================================ */
 function AnnouncementBar() {
   const [visible, setVisible] = useState(true);
   if (!visible) return null;
@@ -43,9 +40,6 @@ function AnnouncementBar() {
   );
 }
 
-/* ============================================================
-   Mobile Navigation Drawer
-   ============================================================ */
 interface MobileNavProps {
   open: boolean;
   onClose: () => void;
@@ -81,7 +75,6 @@ function MobileNav({ open, onClose, cartCount }: MobileNavProps) {
     <AnimatePresence>
       {open && (
         <>
-          {/* Backdrop */}
           <motion.div
             key="backdrop"
             initial={{ opacity: 0 }}
@@ -93,7 +86,6 @@ function MobileNav({ open, onClose, cartCount }: MobileNavProps) {
             aria-hidden="true"
           />
 
-          {/* Drawer panel */}
           <motion.div
             key="drawer"
             role="dialog"
@@ -105,7 +97,6 @@ function MobileNav({ open, onClose, cartCount }: MobileNavProps) {
             transition={{ type: "spring", damping: 30, stiffness: 350 }}
             className="fixed top-0 right-0 h-full w-[min(340px,88vw)] z-[1100] bg-[var(--color-bg)] flex flex-col border-l border-[var(--color-rule)]"
           >
-            {/* Drawer header */}
             <div className="flex items-center justify-between px-5 h-14 border-b border-[var(--color-rule)]">
               <span className="font-heading font-bold text-sm tracking-tight">MENU</span>
               <button
@@ -117,7 +108,6 @@ function MobileNav({ open, onClose, cartCount }: MobileNavProps) {
               </button>
             </div>
 
-            {/* Search */}
             <form onSubmit={handleSearch} className="px-5 pt-4">
               <label htmlFor="mobile-search" className="sr-only">Search products</label>
               <div className="relative">
@@ -137,7 +127,6 @@ function MobileNav({ open, onClose, cartCount }: MobileNavProps) {
               </div>
             </form>
 
-            {/* Nav links */}
             <nav aria-label="Mobile navigation" className="flex-1 px-5 pt-5 overflow-y-auto">
               <ul className="flex flex-col">
                 {NAV_LINKS.map((link) => {
@@ -192,10 +181,6 @@ function MobileNav({ open, onClose, cartCount }: MobileNavProps) {
   );
 }
 
-/* ============================================================
-   Main Header — Trade Ledger Style
-   Minimal, text-driven, 1px hairline, no rounded pills
-   ============================================================ */
 export function Header() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -231,7 +216,6 @@ export function Header() {
 
   return (
     <>
-      {/* Skip to main content — accessibility */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only fixed top-4 left-4 z-[2000] px-3 py-1.5 bg-[var(--color-accent)] text-white text-xs font-semibold"
@@ -251,7 +235,6 @@ export function Header() {
         <div className="container-page">
           <div className="h-14 flex items-center justify-between gap-4">
 
-            {/* Logo */}
             <button
               onClick={() => navigate("/")}
               aria-label="Aurelia — Home"
@@ -260,7 +243,6 @@ export function Header() {
               <img src={logo} alt="Aurelia" className="h-8 w-auto" />
             </button>
 
-            {/* Desktop Nav — text links, no pill backgrounds */}
             <nav aria-label="Main navigation" className="hidden md:flex items-center gap-0">
               {NAV_LINKS.map((link) => {
                 const isActive = location.pathname === link.path ||
@@ -286,9 +268,7 @@ export function Header() {
               })}
             </nav>
 
-            {/* Right Actions */}
             <div className="flex items-center gap-0.5">
-              {/* Search */}
               <AnimatePresence mode="wait">
                 {searchOpen ? (
                   <motion.form
@@ -324,7 +304,6 @@ export function Header() {
                 {searchOpen ? <X size={18} /> : <Search size={18} />}
               </button>
 
-              {/* Account — desktop only */}
               <button
                 aria-label="My account"
                 onClick={() => navigate("/account")}
@@ -333,7 +312,6 @@ export function Header() {
                 <User size={18} aria-hidden="true" />
               </button>
 
-              {/* Cart */}
               <button
                 aria-label={`Cart, ${cartCount} item${cartCount !== 1 ? "s" : ""}`}
                 onClick={() => navigate("/cart")}
@@ -350,7 +328,6 @@ export function Header() {
                 )}
               </button>
 
-              {/* Mobile hamburger */}
               <button
                 aria-label="Open menu"
                 aria-expanded={mobileOpen}
@@ -365,7 +342,6 @@ export function Header() {
         </div>
       </header>
 
-      {/* Mobile drawer */}
       <div id="mobile-nav">
         <MobileNav
           open={mobileOpen}

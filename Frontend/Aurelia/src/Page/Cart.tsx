@@ -27,7 +27,6 @@ export const Cart = () => {
 
         <main id="main-content" className="flex-1 py-8 md:py-12">
           <Container>
-            {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[var(--color-rule)] pb-4 mb-8">
               <div>
                 <div className="font-mono text-[11px] uppercase tracking-wider text-[var(--color-ink-muted)] mb-1">
@@ -52,20 +51,17 @@ export const Cart = () => {
 
             {count > 0 ? (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                {/* Left: Product List */}
                 <div className="lg:col-span-7 space-y-3">
                   {CartDataAdd.map((item) => (
                     <CartItemRow key={item.itemid} item={item} />
                   ))}
                 </div>
 
-                {/* Right: Summary */}
                 <div className="lg:col-span-5 sticky top-24">
                   <CartSummary tax={0} />
                 </div>
               </div>
             ) : (
-              /* Empty Cart State */
               <div className="py-20 text-center max-w-lg mx-auto bg-[var(--color-surface)] rounded-none border border-[var(--color-rule)] p-8">
                 <div className="font-mono text-xs uppercase tracking-wider text-[var(--color-ink-muted)] mb-2">
                   LEDGER EMPTY · NO ITEMS

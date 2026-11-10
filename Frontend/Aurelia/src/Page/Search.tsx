@@ -35,7 +35,6 @@ export const Search = () => {
 
         <main id="main-content" className="flex-1 py-8 md:py-12">
           <Container>
-            {/* Header & Search Bar */}
             <div className="max-w-2xl mx-auto text-center space-y-3 mb-10">
               <div className="font-mono text-[11px] uppercase tracking-wider text-[var(--color-ink-muted)]">
                 INDEX QUERY · LIVE SEARCH
@@ -47,7 +46,6 @@ export const Search = () => {
                 Tra cứu theo tên mã, danh mục, kết cấu chất liệu hoặc gam màu
               </p>
 
-              {/* Input */}
               <div className="relative mt-4">
                 <input
                   type="search"
@@ -72,7 +70,6 @@ export const Search = () => {
                 )}
               </div>
 
-              {/* Quick Keywords */}
               <div className="flex items-center justify-center gap-1.5 flex-wrap pt-2">
                 <span className="text-[11px] font-mono uppercase tracking-wider text-[var(--color-ink-muted)] mr-1">
                   GỢI Ý:
@@ -89,7 +86,6 @@ export const Search = () => {
               </div>
             </div>
 
-            {/* Results Counter */}
             <div className="flex items-center justify-between mb-6 pb-3 border-b border-[var(--color-rule)] text-xs font-mono text-[var(--color-ink-muted)] uppercase tracking-wider">
               <span>
                 {key ? `KẾT QUẢ CHO "${key}":` : "TOÀN BỘ DANH MỤC:"}{" "}
@@ -97,13 +93,11 @@ export const Search = () => {
               </span>
             </div>
 
-            {/* Product Grid */}
             <ProductGrid
               products={dataFilter?.slice(0, displayCount) || []}
               columns={4}
             />
 
-            {/* Load more */}
             {dataFilter && displayCount < dataFilter.length && (
               <div className="flex justify-center mt-12">
                 <button

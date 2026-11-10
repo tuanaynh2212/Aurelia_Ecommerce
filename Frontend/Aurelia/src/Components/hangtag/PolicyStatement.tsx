@@ -1,9 +1,3 @@
-/**
- * HANG TAG — Section 3: Text-only moment
- * One large serif statement about Aurellia's sizing/returns policy.
- * Set on kraft background. No cards. Pure typographic composition.
- * Rule: only real policy copy; never invented.
- */
 
 export function PolicyStatement() {
   return (
@@ -13,7 +7,6 @@ export function PolicyStatement() {
       style={{ background: "var(--color-kraft)" }}
     >
       <div className="container-page py-16 md:py-24">
-        {/* The statement — one large serif block */}
         <div className="max-w-4xl mx-auto">
           <p
             className="font-mono text-[10px] tracking-[0.22em] uppercase text-ink-muted mb-6"
@@ -31,7 +24,6 @@ export function PolicyStatement() {
             Không cần hóa đơn. Trong vòng 14 ngày kể từ ngày nhận hàng."
           </blockquote>
 
-          {/* Policy details — monospace, factual */}
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-0 border-t border-[rgba(42,33,27,0.2)]">
             {[
               {

@@ -68,17 +68,15 @@ export const CouponCard = ({
         .map((coupon) => (
           <div
             key={coupon.id}
-            className="relative bg-white/60 backdrop-blur-xl rounded-2xl border border-slate-400/40 p-4 md:p-6 
+            className="relative bg-white/60 backdrop-blur-xl rounded-2xl border border-slate-400/40 p-4 md:p-6
               shadow-lg hover:shadow-xl transition-all hover:scale-[1.01]"
           >
-            {/* BADGE */}
             <div className="absolute -top-3 -right-3 bg-gradient-to-r from-gray-200 to-gray-400 text-slate-800 text-xs font-bold px-3 py-1 rounded-full shadow-md">
               {coupon.reuse === "Nhiều lần" ? "REUSE" : "HOT"}
             </div>
 
             <div className="flex flex-col md:flex-row items-start md:items-center gap-5">
 
-              {/* ICON + VALUE */}
               <div className="bg-gradient-to-br from-gray-300 to-gray-500 text-white p-5 rounded-2xl shadow-xl min-w-[110px] flex flex-col items-center">
                 {getIcon(coupon.typeCoupon ?? "")}
                 <div className="text-3xl font-black mt-1">
@@ -89,9 +87,7 @@ export const CouponCard = ({
                 </div>
               </div>
 
-              {/* CONTENT */}
               <div className="flex-1 space-y-3">
-                {/* CODE */}
                 <div className="flex items-center gap-3">
                   <div className="bg-white/80 border border-slate-300 px-4 py-2 rounded-xl">
                     <code className="font-bold text-slate-800">{coupon.code}</code>
@@ -109,7 +105,6 @@ export const CouponCard = ({
                   </button>
                 </div>
 
-                {/* DESCRIPTION */}
                 <p className="text-slate-700">{coupon.dieuKienApDung}</p>
 
                 <div className="flex flex-wrap gap-2">
@@ -129,12 +124,11 @@ export const CouponCard = ({
                 </div>
               </div>
 
-              {/* ACTIONS */}
               <div className="flex flex-col items-center gap-4 min-w-[140px]">
                 <button
                   onClick={() => applyCoupon(coupon)}
                   disabled={!dataVoucher.find((v) => v.code === coupon.code)}
-                  className={`px-6 py-3 rounded-xl font-bold w-full shadow-lg transition 
+                  className={`px-6 py-3 rounded-xl font-bold w-full shadow-lg transition
                     ${
                       dataVoucher.find((v) => v.code === coupon.code)
                         ? "bg-gradient-to-r from-gray-400 to-gray-600 text-white hover:scale-105"

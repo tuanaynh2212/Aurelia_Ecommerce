@@ -29,7 +29,6 @@ export function Footer() {
   return (
     <footer className="border-t border-[var(--color-rule)] mt-16 bg-[var(--color-bg)]">
 
-      {/* Value props strip */}
       <div className="border-b border-[var(--color-rule)] py-6">
         <div className="container-page">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center md:text-left">
@@ -50,12 +49,10 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Main footer grid */}
       <div className="py-12">
         <div className="container-page">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
 
-            {/* Brand + Newsletter (2 cols) */}
             <div className="lg:col-span-2 space-y-4">
               <Link to="/" className="inline-block">
                 <img src={logo} alt="Aurelia" className="h-8 w-auto" />
@@ -64,7 +61,6 @@ export function Footer() {
                 Thời trang hiện đại, thanh lịch cho phong cách sống năng động mỗi ngày.
               </p>
 
-              {/* Newsletter */}
               <div className="pt-1">
                 <h5 className="font-heading font-semibold text-xs uppercase tracking-wider text-[var(--color-ink)] mb-2">
                   Nhận tin & ưu đãi
@@ -94,7 +90,6 @@ export function Footer() {
                 )}
               </div>
 
-              {/* Social — minimal text links */}
               <div className="flex items-center gap-4 pt-1">
                 {[
                   { icon: Facebook,  label: "Facebook",  href: "https://facebook.com" },
@@ -115,7 +110,6 @@ export function Footer() {
               </div>
             </div>
 
-            {/* Col: Products */}
             <div>
               <h4 className="font-heading font-semibold text-xs uppercase tracking-wider text-[var(--color-ink)] mb-4 pb-2 border-b border-[var(--color-rule)]">
                 Sản phẩm
@@ -128,7 +122,6 @@ export function Footer() {
               </ul>
             </div>
 
-            {/* Col: About */}
             <div>
               <h4 className="font-heading font-semibold text-xs uppercase tracking-wider text-[var(--color-ink)] mb-4 pb-2 border-b border-[var(--color-rule)]">
                 Về Aurelia
@@ -141,7 +134,6 @@ export function Footer() {
               </ul>
             </div>
 
-            {/* Col: Contact */}
             <div>
               <h4 className="font-heading font-semibold text-xs uppercase tracking-wider text-[var(--color-ink)] mb-4 pb-2 border-b border-[var(--color-rule)]">
                 Liên hệ
@@ -165,7 +157,6 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Copyright bar */}
       <div className="border-t border-[var(--color-rule)] py-5 text-xs text-[var(--color-ink-muted)]">
         <div className="container-page">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">

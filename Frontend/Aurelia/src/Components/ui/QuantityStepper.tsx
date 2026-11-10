@@ -10,13 +10,6 @@ interface QuantityStepperProps {
   disabled?: boolean;
 }
 
-/**
- * Quantity stepper — accessible minus/plus stepper.
- * Minimum touch target 44×44 px on each button.
- *
- * @example
- * <QuantityStepper value={qty} min={1} max={stock} onChange={setQty} />
- */
 export function QuantityStepper({
   value,
   min = 1,

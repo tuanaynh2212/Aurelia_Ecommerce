@@ -15,22 +15,6 @@ interface TabsProps<T extends string = string> {
   className?: string;
 }
 
-/**
- * Aurelia Tabs — pill-style tab switcher.
- * Fully keyboard accessible: Arrow keys navigate, Enter/Space selects.
- *
- * @example
- * const [tab, setTab] = useState("hot");
- * <Tabs
- *   items={[
- *     { value: "hot",  label: "Bán Chạy" },
- *     { value: "new",  label: "Mới Nhất" },
- *     { value: "sale", label: "Giảm Giá" },
- *   ]}
- *   value={tab}
- *   onChange={setTab}
- * />
- */
 export function Tabs<T extends string>({
   items,
   value,

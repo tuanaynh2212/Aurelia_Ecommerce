@@ -88,7 +88,6 @@ export const ToasterObject = {
   },
 };
 
-// Callable helper with attached methods so both Toaster("msg", "success") and Toaster.success("msg") work seamlessly
 type ToasterFn = ((msg: string, type?: "success" | "error" | "info") => void) & typeof ToasterObject;
 
 const toasterCallable = ((msg: string, type: "success" | "error" | "info" = "info") => {

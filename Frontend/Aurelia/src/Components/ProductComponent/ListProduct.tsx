@@ -21,21 +21,18 @@ export const ListProduct = () => {
   return (
     <section className="py-8">
       <Container>
-        {/* Item count summary */}
         <div className="flex items-center justify-between mb-6 text-xs text-[var(--color-ink-soft)]">
           <span>
             Hiển thị {visibleProducts.length} trên tổng số {filteredProducts.length} sản phẩm
           </span>
         </div>
 
-        {/* Product Grid */}
         <ProductGrid
           products={visibleProducts}
           isLoading={isLoading}
           columns={4}
         />
 
-        {/* Load more button */}
         {displayCount < filteredProducts.length && (
           <div className="flex justify-center mt-12">
             <button

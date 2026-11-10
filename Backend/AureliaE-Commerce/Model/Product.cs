@@ -10,20 +10,20 @@ namespace AureliaE_Commerce.Model
         [BsonId]
         [BsonRepresentation(BsonType.String)]
         [JsonPropertyName("id")]
-        public string id { get; set; }             // id: UUID
-        public string name { get; set; }           // name
-        public string type { get; set; }           // type (jewelry, fashion,...)
-        public string subcategory { get; set; }    // subcategory (earrings,...)
-        public string brand { get; set; }          // brand (Hermès,...)
-        public string origin { get; set; }         // origin (Japan,...)    // sizes ["6","7","8"]
-        public double price { get; set; }          // price
-        public string description { get; set; }    // description
-        public float rating { get; set; }            // rating (1-5)
-        public int stock { get; set; }             // stock
-        public DateTime createdAt { get; set; }    // createdAt
-        public DateTime updatedAt { get; set; }    // updatedAt
-        public string thumbnail { get; set; }      // thumbnail URL
-        public List<string> images { get; set; }   // images list
+        public string id { get; set; }
+        public string name { get; set; }
+        public string type { get; set; }
+        public string subcategory { get; set; }
+        public string brand { get; set; }
+        public string origin { get; set; }
+        public double price { get; set; }
+        public string description { get; set; }
+        public float rating { get; set; }
+        public int stock { get; set; }
+        public DateTime createdAt { get; set; }
+        public DateTime updatedAt { get; set; }
+        public string thumbnail { get; set; }
+        public List<string> images { get; set; }
         public string material { get; set; }
         public List<variant>? variants { get; set; }
         public int sold { get; set; }

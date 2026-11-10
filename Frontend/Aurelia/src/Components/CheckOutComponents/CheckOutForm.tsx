@@ -46,7 +46,6 @@ export const CheckOutForm = ({
 
   return (
     <div className="space-y-10">
-      {/* Saved Addresses */}
       {saveAddress.length > 0 && (
         <section>
           <div className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-ink-muted)] mb-1">
@@ -86,7 +85,6 @@ export const CheckOutForm = ({
         </section>
       )}
 
-      {/* Contact Information */}
       <section>
         <div className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-ink-muted)] mb-1">
           STEP 01 · IDENTITY
@@ -126,7 +124,6 @@ export const CheckOutForm = ({
         </div>
       </section>
 
-      {/* Shipping Address */}
       <section>
         <div className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-ink-muted)] mb-1">
           STEP 02 · DESTINATION
@@ -198,7 +195,6 @@ export const CheckOutForm = ({
         </div>
       </section>
 
-      {/* Shipping Method */}
       <section>
         <div className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-ink-muted)] mb-1">
           STEP 03 · LOGISTICS
@@ -257,7 +253,6 @@ export const CheckOutForm = ({
         </div>
       </section>
 
-      {/* Payment Information Notice */}
       <section>
         <div className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-ink-muted)] mb-1">
           STEP 04 · SETTLEMENT

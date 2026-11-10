@@ -12,8 +12,6 @@ import {
 import { useContext, useState } from "react";
 import { AdminContext } from "../../../contexts/AdminContext";
 
-
-
 export const Stores = () => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("Tất cả");
@@ -36,7 +34,6 @@ export const Stores = () => {
 
   return (
     <div className="h-[110vh] bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-3 md:p-8 overflow-y-auto w-[300px] md:w-full">
-      {/* HEADER */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

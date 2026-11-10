@@ -23,7 +23,6 @@ export const DiaChiProvider = ({ children }: { children: React.ReactNode }) => {
   const { userData } = useContext(AuthContext);
   const [savedAddress, setSaveAddress] = useState<DiaChi[]>([]);
 
-  // --- Fetch danh sách địa chỉ ---
   const fetchDiaChi = async () => {
     if (!userData) return;
     try {
@@ -53,7 +52,7 @@ export const DiaChiProvider = ({ children }: { children: React.ReactNode }) => {
         "Content-Type": "application/json",
       });
 
-      fetchDiaChi(); 
+      fetchDiaChi();
       Toaster.success("Đã lưu địa chỉ thành công!");
     } catch (error) {
       Toaster.error("Không thể lưu địa chỉ. Vui lòng thử lại.");
@@ -61,7 +60,6 @@ export const DiaChiProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // --- Xóa địa chỉ ---
   const XoaDiaChi = async (data: DiaChi) => {
     if (!userData) return;
     try {

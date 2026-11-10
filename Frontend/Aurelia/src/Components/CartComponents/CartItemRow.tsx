@@ -27,7 +27,6 @@ export const CartItemRow: React.FC<CartItemRowProps> = ({ item }) => {
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 p-4 bg-[var(--color-bg)] rounded-none border border-[var(--color-rule)] hover:border-[var(--color-ink)] transition-colors">
-      {/* Thumbnail */}
       <div className="w-full sm:w-24 aspect-[3/4] sm:aspect-square rounded-none overflow-hidden bg-[var(--color-surface)] border border-[var(--color-rule)] flex-shrink-0">
         <img
           src={item.thumnail}
@@ -36,7 +35,6 @@ export const CartItemRow: React.FC<CartItemRowProps> = ({ item }) => {
         />
       </div>
 
-      {/* Info & Controls */}
       <div className="flex flex-col justify-between flex-1 gap-3">
         <div className="flex justify-between items-start gap-4">
           <div>
@@ -58,7 +56,6 @@ export const CartItemRow: React.FC<CartItemRowProps> = ({ item }) => {
         </div>
 
         <div className="flex items-center justify-between pt-3 border-t border-[var(--color-rule)]">
-          {/* Quantity Stepper */}
           <div className="flex items-center bg-[var(--color-surface)] rounded-none border border-[var(--color-rule)]">
             <button
               onClick={() => updateQty(item.itemid, item.quantity - 1)}
@@ -80,7 +77,6 @@ export const CartItemRow: React.FC<CartItemRowProps> = ({ item }) => {
             </button>
           </div>
 
-          {/* Remove button */}
           <button
             onClick={() => removeItem(item.itemid)}
             className="inline-flex items-center gap-1.5 text-xs font-mono text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] transition-colors cursor-pointer uppercase tracking-wider"

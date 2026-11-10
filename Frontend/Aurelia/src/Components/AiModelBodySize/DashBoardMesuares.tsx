@@ -55,7 +55,6 @@ export const DashBoardMeasures: React.FC<MeasuresProps> = ({
     <div className="flex justify-center w-full md:w-auto md:h-[840px] px-2 md:px-0">
       <div className="w-full max-w-xl bg-white/80 backdrop-blur-2xl rounded-3xl border border-white/60 shadow-[0_20px_60px_rgba(59,130,246,0.25)] p-6 md:space-y-6 space-y-2">
 
-        {/* Header */}
         <header className="flex flex-col items-center text-center space-y-3">
           <div
             className={`relative w-18 h-18 flex items-center justify-center rounded-2xl shadow-xl
@@ -78,7 +77,6 @@ export const DashBoardMeasures: React.FC<MeasuresProps> = ({
           </span>
         </header>
 
-        {/* Instruction Note */}
         <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-start p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-white border border-blue-100 text-sm md:text-base text-gray-700">
           <Info className="w-5 h-5 text-blue-600 mt-0.5" />
           <div>
@@ -91,12 +89,10 @@ export const DashBoardMeasures: React.FC<MeasuresProps> = ({
           </div>
         </div>
 
-        {/* Measures */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {measures.map((m, i) => <MeasureCard key={i} {...m} />)}
         </section>
 
-        {/* Actions */}
         <div className="flex flex-col md:flex-row gap-3 pt-2">
           <button
             onClick={() => setIsCameraOn(!iscameraOn)}
@@ -120,7 +116,6 @@ export const DashBoardMeasures: React.FC<MeasuresProps> = ({
           )}
         </div>
 
-        {/* Accuracy Note */}
         {hasData && (
           <p className="text-xs text-gray-500 text-center pt-3 border-t border-dashed border-gray-200">
             Sai lệch có thể ±3–5cm tùy ánh sáng, khoảng cách và tư thế đứng

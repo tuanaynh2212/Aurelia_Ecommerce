@@ -340,7 +340,6 @@ export const AddBanner = ({
                 </div>
               </div>
 
-              {/* PREVIEW LAYOUT */}
               <div>
                 <label className="block font-semibold mb-2">Chọn Layout</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">

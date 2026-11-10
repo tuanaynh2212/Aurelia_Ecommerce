@@ -204,7 +204,6 @@ export default function Collections() {
                 </div>
               </div>
 
-              {/* content */}
               <div className="p-4">
                 <span className="text-xs uppercase tracking-wide text-slate-500">
                   {collection.name}

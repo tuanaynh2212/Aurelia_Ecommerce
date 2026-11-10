@@ -13,7 +13,7 @@ export interface ProductCardProps {
   index?: number;
   className?: string;
   isSale?: boolean;
-  isGrayscale?: boolean; // kept for legacy signature compatibility
+  isGrayscale?: boolean;
   onQuickAdd?: (product: Product) => void;
 }
 
@@ -29,7 +29,6 @@ export function ProductCard({
 
   if (!product) return null;
 
-  // Extract images safely
   const primaryImage = product.thumbnail || (Array.isArray(product.images) ? product.images[0] : (product.images as string)) || "";
   const secondaryImage = Array.isArray(product.images) && product.images.length > 1 ? product.images[1] : primaryImage;
 
@@ -55,9 +54,7 @@ export function ProductCard({
         className
       )}
     >
-      {/* Image Container */}
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-[var(--color-surface)] border-b border-[var(--color-rule)]">
-        {/* Main image */}
         <img
           src={primaryImage}
           alt={product.name}
@@ -69,7 +66,6 @@ export function ProductCard({
           )}
         />
 
-        {/* Secondary image on hover */}
         {secondaryImage !== primaryImage && (
           <img
             src={secondaryImage}
@@ -83,7 +79,6 @@ export function ProductCard({
           />
         )}
 
-        {/* Badges top-left */}
         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10 pointer-events-none">
           {discount && (
             <span className="bg-[var(--color-accent)] text-white text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-none uppercase tracking-wider">
@@ -97,12 +92,10 @@ export function ProductCard({
           )}
         </div>
 
-        {/* Wishlist button top-right */}
         <div className="absolute top-2.5 right-2.5 z-10">
           <WishlistButton productId={product.id} size="sm" />
         </div>
 
-        {/* Quick action buttons floating on bottom of image */}
         <div className="absolute bottom-2.5 inset-x-2.5 z-10 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
           <button
             type="button"
@@ -131,10 +124,8 @@ export function ProductCard({
         </div>
       </div>
 
-      {/* Info Body */}
       <div className="p-3.5 flex flex-col flex-1 justify-between gap-2.5 bg-[var(--color-bg)]">
         <div>
-          {/* Brand & Type */}
           <div className="flex items-center justify-between text-[11px] text-[var(--color-ink-muted)] font-mono mb-1">
             <span className="uppercase tracking-wider font-medium truncate">
               {product.brand || "Aurelia"}
@@ -142,20 +133,17 @@ export function ProductCard({
             {product.type && <span className="uppercase tracking-wider text-[10px]">{product.type}</span>}
           </div>
 
-          {/* Product Name */}
           <h3 className="font-heading font-semibold text-sm text-[var(--color-ink)] group-hover:text-[var(--color-accent)] transition-colors line-clamp-1">
             {product.name}
           </h3>
         </div>
 
-        {/* Color preview if available */}
         {product.colors && product.colors.length > 0 && (
           <div className="pt-0.5">
             <ColorSwatch colors={product.colors.slice(0, 4)} size="sm" />
           </div>
         )}
 
-        {/* Price Tag */}
         <div className="pt-2 border-t border-[var(--color-rule)] flex items-baseline justify-between">
           <PriceTag
             price={product.price}

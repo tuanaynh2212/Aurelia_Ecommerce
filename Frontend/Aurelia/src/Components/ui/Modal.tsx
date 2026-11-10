@@ -29,7 +29,6 @@ export function Modal({
   className,
   size = "md",
 }: ModalProps) {
-  // Lock body scroll
   React.useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -39,7 +38,6 @@ export function Modal({
     };
   }, [open]);
 
-  // Handle escape key
   React.useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {

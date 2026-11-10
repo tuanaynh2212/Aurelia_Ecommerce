@@ -71,7 +71,6 @@ const ProductList = () => {
       )}
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-zinc-50">
         <div className=" mx-auto p-8">
-          {/* Header */}
           <div className="mb-10">
             <div className="flex items-center justify-between mb-8">
               <div>
@@ -94,7 +93,6 @@ const ProductList = () => {
               </div>
             </div>
 
-            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="bg-white  shadow-sm p-6 border border-gray-100 hover:shadow-md transition-all">
                 <div className="flex items-center justify-between mb-4">
@@ -142,7 +140,6 @@ const ProductList = () => {
             </div>
           </div>
 
-          {/* Filters & Search */}
           <div className="bg-white  shadow-sm p-6 mb-6 border border-gray-100">
             <div className="flex flex-col md:flex-row gap-4 items-center">
               <div className="flex-1 relative w-full">
@@ -201,7 +198,6 @@ const ProductList = () => {
             </div>
           </div>
 
-          {/* Products Grid */}
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredProducts?.map((product: any) => (

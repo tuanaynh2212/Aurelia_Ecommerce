@@ -24,7 +24,6 @@ export function SceneFallback({
         />
       ) : (
         <div className="relative flex flex-col items-center justify-center p-8 text-center">
-          {/* Animated floating soft rings */}
           <motion.div
             animate={{ scale: [1, 1.08, 1], rotate: [0, 90, 180, 270, 360] }}
             transition={{ repeat: Infinity, duration: 16, ease: "linear" }}

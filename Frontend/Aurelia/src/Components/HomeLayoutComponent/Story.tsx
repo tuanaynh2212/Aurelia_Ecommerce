@@ -73,7 +73,6 @@ export const StoryB = ({ data }: { data: any }) => {
   return (
     <section className="max-w-7xl mx-auto rounded-[var(--radius-2xl)] overflow-hidden bg-white border border-[var(--color-cream-300)] shadow-[var(--shadow-card)] my-8">
       <div className="flex flex-col md:flex-row items-stretch">
-        {/* Left Text Col */}
         <div className="w-full md:w-1/2 p-8 sm:p-12 lg:p-16 flex flex-col justify-center bg-[var(--color-cream-50)]">
           <span className="text-xs font-semibold uppercase tracking-widest text-[var(--color-accent)] mb-3">
             {data.mainTitle}
@@ -95,7 +94,6 @@ export const StoryB = ({ data }: { data: any }) => {
           </div>
         </div>
 
-        {/* Right Image Col */}
         <div className="w-full md:w-1/2 min-h-[360px] md:min-h-full relative overflow-hidden bg-[var(--color-cream-200)]">
           <img
             src={data.linkUrl}

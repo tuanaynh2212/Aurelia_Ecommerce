@@ -86,7 +86,7 @@ export const BannerSetting = () => {
       )}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <h1 className="text-5xl serif   text-gray-800">
-          Quản lý Banner 
+          Quản lý Banner
         </h1>
 
         <div className="flex flex-wrap gap-2">
@@ -120,7 +120,6 @@ export const BannerSetting = () => {
           </button>
         </div>
       </div>
-
 
       <div className="w-full flex flex-col md:flex-row gap-6 md:gap-8">
 
@@ -255,7 +254,6 @@ export const BannerSetting = () => {
             </div>
           )}
 
-          {/* Paragraph */}
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-gray-600">
               <Edit2 size={16} /> Slogan / Thông điệp
@@ -268,7 +266,6 @@ export const BannerSetting = () => {
             />
           </div>
 
-          {/* Color pickers */}
           <div className="flex flex-row gap-5 items-center justify-around">
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-600">

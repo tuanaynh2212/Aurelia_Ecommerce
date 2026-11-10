@@ -39,7 +39,6 @@ export const MeasureDashBoard: React.FC<{ DataMeasure: any }> = ({ DataMeasure }
 
   return (
     <div className="space-y-6">
-      {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-rule/60 gap-3">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-tag bg-kraft/15 border border-kraft-dark/20 flex items-center justify-center text-ink">
@@ -64,7 +63,6 @@ export const MeasureDashBoard: React.FC<{ DataMeasure: any }> = ({ DataMeasure }
         </button>
       </div>
 
-      {/* Grid of Measurements */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {bodyMeasurements.map((item, index) => {
           const Icon = item.icon;
@@ -88,7 +86,6 @@ export const MeasureDashBoard: React.FC<{ DataMeasure: any }> = ({ DataMeasure }
                 relative
               "
             >
-              {/* Grommet punch corner */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-hole bg-kraft/70 border border-ink/20" />
@@ -119,7 +116,6 @@ export const MeasureDashBoard: React.FC<{ DataMeasure: any }> = ({ DataMeasure }
         })}
       </div>
 
-      {/* Note box */}
       <div className="bg-kraft/15 border border-kraft-dark/30 rounded-tag p-4 flex items-start gap-3">
         <Sparkles size={16} className="text-cobalt shrink-0 mt-0.5" />
         <div className="font-mono text-xs text-ink-muted leading-relaxed">

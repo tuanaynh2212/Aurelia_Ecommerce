@@ -2,8 +2,6 @@ import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import type { Product } from "../types/type";
 
-/* ── Helpers ──────────────────────────────────────────────── */
-
 export function formatPrice(n: number): string {
   return new Intl.NumberFormat("vi-VN", {
     style: "currency",
@@ -68,9 +66,6 @@ export function getSku(product: Product): string {
   return `${(product.type || "AUR").slice(0, 3).toUpperCase()}-${(product.id || "000000").slice(-6).toUpperCase()}`;
 }
 
-/* ── Hook ────────────────────────────────────────────────────
-   Tách toàn bộ state + handlers dùng chung cho ProductTag & FeaturedTag
-   ──────────────────────────────────────────────────────────── */
 export function useProductTag(product: Product, onAddToCart?: (p: Product, size: string) => void) {
   const navigate = useNavigate();
   const [isFlipped, setIsFlipped] = React.useState(false);
@@ -84,7 +79,6 @@ export function useProductTag(product: Product, onAddToCart?: (p: Product, size:
     window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );
 
-  // Derived values
   const sizes = getAvailableSizes(product);
   const colors = getColors(product);
   const salePrice = getSalePrice(product);
@@ -95,7 +89,6 @@ export function useProductTag(product: Product, onAddToCart?: (p: Product, size:
   const thumbnail =
     product.thumbnail || (Array.isArray(product.images) ? product.images[0] : "") || "";
 
-  // Focus mặt sau khi flip
   React.useEffect(() => {
     if (isFlipped && backFirstFocusRef.current) {
       setTimeout(
@@ -125,14 +118,10 @@ export function useProductTag(product: Product, onAddToCart?: (p: Product, size:
   const goToProduct = () => navigate(`/Fashion/Products/${product.id}`);
 
   return {
-    // state
     isFlipped, selectedSize, setSelectedSize, isSwinging,
-    // refs
     detailsBtnRef, backFirstFocusRef,
-    // derived
     sizes, colors, salePrice, sku, care, isSoldOut, stockLow, thumbnail,
     prefersReduced,
-    // handlers
     handleFlip, handleMouseEnter, handleAddToCart, goToProduct,
   };
 }

@@ -1,52 +1,38 @@
-/* ============================================================
-   Aurellia — HANG TAG Design System
-   Concept: garment hang tag as product-information carrier
-   Budget rule: skeuomorphism ONLY on tags. Everything else flat.
-   ============================================================ */
 
 @import "tailwindcss";
 
-/* ── 1. Fonts ─────────────────────────────────────────────── */
-/* Loaded from Google Fonts in index.html (Fraunces, IBM Plex Mono, Inter) */
-/* @fontsource inter kept for reliability */
 @import "@fontsource/inter/400.css";
 @import "@fontsource/inter/500.css";
 @import "@fontsource/inter/600.css";
 
-/* ── 2. HANG TAG Design Tokens ────────────────────────────── */
 @theme {
-  /* Palette */
-  --color-kraft:         #CDB79A;  /* backdrop surfaces: rails, section fills */
-  --color-kraft-dark:    #B8A080;
-  --color-paper:         #FBF8F2;  /* tags, cards — highest contrast base */
-  --color-ink:           #2A211B;  /* body text on both kraft and paper */
-  --color-ink-muted:     #6B5E54;  /* secondary text */
-  --color-ink-faint:     #9E9086;  /* tertiary, disabled */
-  --color-cobalt:        #2447D6;  /* sale price, CTA, focus — PAPER ONLY */
-  --color-cobalt-hover:  #1A35B0;
-  --color-rule:          #D9CFBE;  /* hairline borders */
 
-  /* Legacy aliases — other pages inherit and don't break */
+  --color-kraft:         #CDB79A;
+  --color-kraft-dark:    #B8A080;
+  --color-paper:         #FBF8F2;
+  --color-ink:           #2A211B;
+  --color-ink-muted:     #6B5E54;
+  --color-ink-faint:     #9E9086;
+  --color-cobalt:        #2447D6;
+  --color-cobalt-hover:  #1A35B0;
+  --color-rule:          #D9CFBE;
+
   --color-bg:            #FBF8F2;
   --color-surface:       #CDB79A;
   --color-accent:        #2447D6;
   --color-accent-hover:  #1A35B0;
   --color-ink-soft:      #6B5E54;
 
-  /* Typography */
   --font-heading: "Fraunces", "Georgia", serif;
   --font-body:    "Inter", system-ui, sans-serif;
   --font-mono:    "IBM Plex Mono", "Courier New", monospace;
 
-  /* Radii — MAX 2 values used site-wide */
   --radius-none: 0px;
-  --radius-tag:  2px;    /* die-cut corner — tags only */
-  --radius-hole: 9999px; /* punched hole — tags only */
+  --radius-tag:  2px;
+  --radius-hole: 9999px;
 
-  /* Shadows — ONE style, tags only */
   --shadow-tag: 0 6px 24px -4px rgba(42,33,27,0.18), 0 2px 8px -2px rgba(42,33,27,0.10);
 
-  /* Motion */
   --ease-out:  cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in:   cubic-bezier(0.4, 0, 1, 1);
   --dur-fast:  120ms;
@@ -55,45 +41,37 @@
   --dur-slow:  400ms;
 }
 
-/* ── 3. Legacy shims ──────────────────────────────────────── */
 :root {
   color-scheme: light;
 
-  /* Old cream palette → kraft/paper */
   --color-cream-50:  var(--color-paper);
   --color-cream-100: var(--color-kraft);
   --color-cream-200: var(--color-rule);
   --color-cream-300: var(--color-rule);
 
-  /* Old peach (used in selection) */
   --color-peach-100: #EDDDCC;
   --color-peach-200: #E0C9AE;
 
-  /* Old sage */
   --color-sage-light: var(--color-kraft);
   --color-sage-100:   var(--color-kraft);
 
-  /* Radius aliases */
   --radius-xs:   2px;
   --radius-sm:   2px;
-  --radius-md:   2px;   /* collapsed to tag radius */
+  --radius-md:   2px;
   --radius-lg:   2px;
   --radius-xl:   2px;
   --radius-2xl:  2px;
   --radius-pill: 9999px;
 
-  /* Shadow aliases */
   --shadow-soft:  none;
   --shadow-card:  var(--shadow-tag);
   --shadow-lift:  var(--shadow-tag);
 
-  /* Duration aliases */
   --duration-fast: var(--dur-fast);
   --duration-base: var(--dur-base);
   --duration-slow: var(--dur-slow);
 }
 
-/* ── 4. Base ──────────────────────────────────────────────── */
 * {
   border-color: var(--color-rule);
   box-sizing: border-box;
@@ -119,12 +97,10 @@ body {
   line-height: 1.6;
 }
 
-/* Tabular numerals global toggle */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
-/* ── 5. Layout Utilities ──────────────────────────────────── */
 .container-page {
   width: 100%;
   max-width: 1280px;
@@ -148,16 +124,14 @@ body {
   .section-padding { padding-top: 4rem; padding-bottom: 4rem; }
 }
 
-/* ── 6. Tag Silhouette ────────────────────────────────────── */
-/* Die-cut: clipped top-left + top-right corners at the hole notch */
 .tag-silhouette {
   clip-path: polygon(
-    12px 0%,      /* top-left notch start */
+    12px 0%,
     calc(50% - 14px) 0%,
     calc(50% - 14px) 0%,
     calc(50% + 14px) 0%,
     calc(50% + 14px) 0%,
-    calc(100% - 12px) 0%,  /* top-right */
+    calc(100% - 12px) 0%,
     100% 12px,
     100% 100%,
     0% 100%,
@@ -165,7 +139,6 @@ body {
   );
 }
 
-/* ── 7. Tag Paper Grain (ONE subtle texture, tags only) ────── */
 .tag-grain {
   position: relative;
 }
@@ -181,7 +154,6 @@ body {
   border-radius: inherit;
 }
 
-/* Punched hole */
 .tag-hole {
   width: 20px;
   height: 20px;
@@ -196,7 +168,6 @@ body {
   box-shadow: inset 0 1px 2px rgba(42,33,27,0.12);
 }
 
-/* String/thread */
 .tag-string {
   position: absolute;
   top: 0;
@@ -214,10 +185,8 @@ body {
   transform: translateX(-50%);
 }
 
-/* ── 8. Tag Swing Animation ───────────────────────────────── */
-/* Swing around the hole — only on hover of the outer tag-wrapper */
 .tag-wrapper {
-  transform-origin: center top; /* pivot at hole */
+  transform-origin: center top;
 }
 
 @media (hover: hover) {
@@ -233,7 +202,6 @@ body {
   100%   { transform: rotate(0deg); }
 }
 
-/* ── 9. 3D Flip (Tag front ↔ back) ───────────────────────── */
 .tag-flip-scene {
   perspective: 1000px;
 }
@@ -261,7 +229,6 @@ body {
   transform: rotateY(180deg);
 }
 
-/* Reduced motion: no flip rotation, instant crossfade instead */
 @media (prefers-reduced-motion: reduce) {
   .tag-flip-card {
     transition: none;
@@ -284,20 +251,17 @@ body {
   }
 }
 
-/* ── 10. Glass warm (sticky header) ──────────────────────── */
 .glass-warm {
   background-color: rgba(251, 248, 242, 0.88);
   backdrop-filter: blur(12px) saturate(1.1);
   -webkit-backdrop-filter: blur(12px) saturate(1.1);
 }
 
-/* ── 11. Hairline Rules ───────────────────────────────────── */
 .ledger-border-b { border-bottom: 1px solid var(--color-rule); }
 .ledger-border-t { border-top: 1px solid var(--color-rule); }
 .ledger-border-r { border-right: 1px solid var(--color-rule); }
 .ledger-border-l { border-left: 1px solid var(--color-rule); }
 
-/* Kraft section divider */
 .kraft-rule {
   width: 100%;
   height: 1px;
@@ -305,7 +269,6 @@ body {
   opacity: 0.3;
 }
 
-/* ── 12. Form Controls ────────────────────────────────────── */
 .input {
   display: block;
   width: 100%;
@@ -322,7 +285,6 @@ body {
 .input::placeholder { color: var(--color-ink-faint); }
 .input:focus { border-color: var(--color-cobalt); }
 
-/* ── 13. Buttons ──────────────────────────────────────────── */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -333,7 +295,7 @@ body {
   font-weight: 600;
   font-family: var(--font-body);
   line-height: 1.25rem;
-  min-height: 44px; /* WCAG 2.2 AA tap target */
+  min-height: 44px;
   transition: background-color var(--dur-fast) ease,
               border-color var(--dur-fast) ease,
               color var(--dur-fast) ease;
@@ -374,7 +336,6 @@ body {
   min-height: 36px;
 }
 
-/* ── 14. Chip (filter pills) ──────────────────────────────── */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -401,7 +362,6 @@ body {
   border-color: var(--color-ink);
 }
 
-/* ── 15. Skeleton loader ─────────────────────────────────── */
 .skeleton {
   background: linear-gradient(
     90deg,
@@ -420,7 +380,6 @@ body {
   .skeleton { animation: none; background: var(--color-rule); }
 }
 
-/* ── 16. Price (tag data) ────────────────────────────────── */
 .price-tag {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -430,7 +389,6 @@ body {
 .price-tag--original { text-decoration: line-through; color: var(--color-ink-faint); }
 .price-tag--sale { color: var(--color-cobalt); }
 
-/* ── 17. Size Row ────────────────────────────────────────── */
 .size-row {
   display: flex;
   flex-wrap: wrap;
@@ -472,13 +430,11 @@ body {
   cursor: not-allowed;
 }
 
-/* ── 18. Accessibility ───────────────────────────────────── */
 *:focus-visible {
   outline: 2px solid var(--color-cobalt);
   outline-offset: 2px;
 }
 
-/* ── 19. Horizontal snap scroller ───────────────────────── */
 .snap-x-scroller {
   display: flex;
   overflow-x: auto;
@@ -492,19 +448,16 @@ body {
   scroll-snap-align: start;
 }
 
-/* ── 20. Custom Scrollbar ────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--color-paper); }
 ::-webkit-scrollbar-thumb { background: var(--color-rule); }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-ink-muted); }
 
-/* ── 21. Selection ───────────────────────────────────────── */
 ::selection {
   background-color: var(--color-peach-100, #EDDDCC);
   color: var(--color-ink);
 }
 
-/* ── 22. Reduced Motion ──────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;
@@ -514,7 +467,6 @@ body {
   }
 }
 
-/* ── 23. Badge ───────────────────────────────────────────── */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -527,7 +479,6 @@ body {
   white-space: nowrap;
 }
 
-/* ── 24. Hotspot (Look of the Week shoppable dots) ─────── */
 .hotspot-btn {
   position: absolute;
   width: 28px;

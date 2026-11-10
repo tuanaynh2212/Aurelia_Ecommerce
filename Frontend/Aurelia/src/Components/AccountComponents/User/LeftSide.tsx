@@ -64,9 +64,7 @@ export const LeftSide: React.FC<LeftSides> = ({
 
   return (
     <aside className="w-full bg-paper border border-rule/80 rounded-tag shadow-tag p-6 flex flex-col justify-between">
-      {/* ── Hang Tag Header / Client Profile ── */}
       <div>
-        {/* Atelier Grommet eyelet */}
         <div className="flex items-center justify-between pb-4 border-b border-rule/60">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-hole bg-kraft/80 border border-ink/20 shadow-inner ring-2 ring-white" />
@@ -79,7 +77,6 @@ export const LeftSide: React.FC<LeftSides> = ({
           </span>
         </div>
 
-        {/* Member profile snippet */}
         <div className="pt-6 pb-6 border-b border-rule/60">
           <div className="flex items-center gap-4">
             <div className="relative">
@@ -116,7 +113,6 @@ export const LeftSide: React.FC<LeftSides> = ({
           </div>
         </div>
 
-        {/* ── Navigation List ── */}
         <nav className="mt-6 flex flex-col space-y-1">
           {navItems.map((item) => {
             const isActive = activeItem === item.value;
@@ -166,7 +162,6 @@ export const LeftSide: React.FC<LeftSides> = ({
         </nav>
       </div>
 
-      {/* ── Footer: Logout ── */}
       <div className="mt-10 pt-4 border-t border-rule/60">
         <button
           onClick={handleLogOut}

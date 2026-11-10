@@ -26,7 +26,6 @@ export default function OrderListElegant() {
     setFilteredOrders(dataDonHang || []);
   }, [dataDonHang]);
 
-
   useEffect(() => {
     if (!dataDonHang) return;
 
@@ -45,7 +44,6 @@ export default function OrderListElegant() {
     setFilteredOrders(filtered);
   }, [searchTerm, filter, dataDonHang]);
 
-
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "Chờ xác nhận":
@@ -62,7 +60,6 @@ export default function OrderListElegant() {
         return <Clock className="w-4 h-4 text-gray-400" />;
     }
   };
-
 
   const getNextStatus = (status: string) => {
     switch (status) {
@@ -101,7 +98,6 @@ export default function OrderListElegant() {
 
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 p-4 sm:p-6 lg:p-8">
         <div className="max-w-6xl mx-auto">
-          {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-4xl serif text-black   ">
@@ -113,7 +109,6 @@ export default function OrderListElegant() {
             </p>
           </div>
 
-          {/* Search */}
           <div className="mb-6">
             <div className="relative group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -127,7 +122,6 @@ export default function OrderListElegant() {
             </div>
           </div>
 
-          {/* Filter */}
           <div className="flex flex-wrap gap-2 mb-8">
             {buttons.map((btn) => (
               <button
@@ -155,7 +149,6 @@ export default function OrderListElegant() {
             ))}
           </div>
 
-          {/* Orders */}
           <div className="space-y-4">
             {dataDonHang?.length === 0 ? (
               <EmptyState
@@ -176,7 +169,6 @@ export default function OrderListElegant() {
                   className="group bg-white/70 backdrop-blur-sm border border-gray-200 rounded-2xl p-6 hover:shadow-xl hover:shadow-indigo-100/50 hover:border-indigo-200 transition-all duration-300 hover:-translate-y-1"
                 >
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                    {/* Thông tin */}
                     <div className="flex-1 space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -209,7 +201,6 @@ export default function OrderListElegant() {
                       </div>
                     </div>
 
-                    {/* Hành động */}
                     <div className="flex lg:flex-col gap-3 lg:items-end">
                       <div
                         className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold border shadow-sm ${getStatusColor(
@@ -251,7 +242,6 @@ export default function OrderListElegant() {
     </>
   );
 }
-
 
 function InfoCard({
   icon,

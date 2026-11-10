@@ -59,7 +59,6 @@ export const Collection = () => {
         {isLoading && <LoadingOverlay isLoading={true} message="Đang tải dữ liệu bộ sưu tập..." />}
 
         <main id="main-content" className="flex-1">
-          {/* Hero Banner */}
           <section className="relative min-h-[380px] md:min-h-[460px] flex items-center justify-center text-center overflow-hidden bg-[var(--color-surface)] border-b border-[var(--color-rule)]">
             <div className="absolute inset-0">
               <img
@@ -93,7 +92,6 @@ export const Collection = () => {
             </Container>
           </section>
 
-          {/* Product Listing */}
           <section className="py-10 md:py-16">
             <Container>
               <div className="flex items-center justify-between mb-8 pb-4 border-b border-[var(--color-rule)]">

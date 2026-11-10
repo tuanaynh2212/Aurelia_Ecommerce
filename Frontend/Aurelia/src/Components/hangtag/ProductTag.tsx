@@ -28,7 +28,6 @@ export {
   getSku,
 };
 
-/* ── String component ─────────────────────────────────────── */
 function TagString({ length = 78 }: { length?: number }) {
   return (
     <div
@@ -44,7 +43,6 @@ function TagString({ length = 78 }: { length?: number }) {
   );
 }
 
-/* ── Punched hole ─────────────────────────────────────────── */
 function TagHole() {
   return (
     <div
@@ -57,14 +55,9 @@ function TagHole() {
   );
 }
 
-/* ── Die-cut SVG clip ──────────────────────────────────────── */
-// Applied as inline style via clipPath CSS. The notch accommodates the hole.
 const TAG_CLIP =
   "polygon(25% 0, 75% 0, 100% 14%, 100% 100%, 0 100%, 0 14%)";
 
-/* ============================================================
-   ProductTag — grid variant
-   ============================================================ */
 export interface ProductTagProps {
   product: Product;
   index?: number;
@@ -104,10 +97,9 @@ export function ProductTag({
     goToProduct,
   } = useProductTag(product, onAddToCart);
 
-  // Animation delay based on index for staggered entrance
   const delay = Math.min(index * 0.05, 0.3);
 
-  const cardHeight = 480; // px — reserved to prevent layout shift
+  const cardHeight = 480;
 
   return (
     <motion.div
@@ -118,10 +110,8 @@ export function ProductTag({
       className={cn("relative flex flex-col items-center", className)}
       style={{ paddingTop: `${stringLength + 14}px`, minHeight: `${cardHeight + stringLength + 14}px` }}
     >
-      {/* String */}
       <TagString length={stringLength} />
 
-      {/* Tag wrapper — swing pivot at hole */}
       <div
         className={cn(
           "relative w-full transition-transform duration-[220ms] ease-out",
@@ -130,10 +120,8 @@ export function ProductTag({
         style={{ transformOrigin: "50% 0" }}
         onMouseEnter={handleMouseEnter}
       >
-        {/* Hole */}
         <TagHole />
 
-        {/* 3D flip scene */}
         <div
           className="w-full tag-flip-scene"
           style={{ height: `${cardHeight}px` }}
@@ -142,7 +130,6 @@ export function ProductTag({
             className={cn("tag-flip-card w-full h-full", isFlipped && "is-flipped")}
             aria-live="polite"
           >
-            {/* ── FRONT ──────────────────────────────────── */}
             <div className="absolute inset-0 tag-face tag-face--front">
               <div
                 className={cn(
@@ -151,7 +138,6 @@ export function ProductTag({
                 )}
                 style={{ clipPath: TAG_CLIP }}
               >
-                {/* Product image — 4:5 ratio, reserved height */}
                 <button
                   onClick={goToProduct}
                   className="relative flex-shrink-0 block w-full overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-cobalt"
@@ -174,7 +160,6 @@ export function ProductTag({
                     </div>
                   )}
 
-                  {/* Sold-out overlay */}
                   {isSoldOut && (
                     <div className="absolute inset-0 flex items-center justify-center bg-paper/70">
                       <span className="font-mono text-[0.6875rem] font-semibold tracking-widest uppercase text-ink-muted border border-ink-muted px-2 py-0.5">
@@ -183,7 +168,6 @@ export function ProductTag({
                     </div>
                   )}
 
-                  {/* Sale stamp — cobalt on paper */}
                   {salePrice && !isSoldOut && (
                     <span className="absolute top-2 left-2 bg-cobalt text-white font-mono text-[10px] font-semibold px-1.5 py-0.5 uppercase tracking-wider">
                       {product.discountValue}%
@@ -191,19 +175,15 @@ export function ProductTag({
                   )}
                 </button>
 
-                {/* Tag info block */}
                 <div className="flex flex-col gap-1 px-3 pt-2.5 pb-3 flex-1">
-                  {/* SKU row */}
                   <span className="font-mono text-[10px] tracking-[0.12em] text-ink-faint uppercase">
                     {sku}
                   </span>
 
-                  {/* Product name */}
                   <p className="text-sm font-medium leading-snug font-body text-ink line-clamp-2">
                     {product.name}
                   </p>
 
-                  {/* Price */}
                   <div className="flex items-baseline gap-2 mt-0.5">
                     {salePrice ? (
                       <>
@@ -221,7 +201,6 @@ export function ProductTag({
                     )}
                   </div>
 
-                  {/* Color swatches */}
                   {colors.length > 0 && (
                     <div className="flex items-center gap-1.5 mt-1" aria-label="Màu sắc">
                       {colors.slice(0, 5).map((c) => (
@@ -238,7 +217,6 @@ export function ProductTag({
                     </div>
                   )}
 
-                  {/* Size row */}
                   {sizes.length > 0 && (
                     <div className="mt-1 size-row" aria-label="Size có sẵn">
                       {sizes.map(({ size, qty }) => (
@@ -253,14 +231,12 @@ export function ProductTag({
                     </div>
                   )}
 
-                  {/* Stock warning */}
                   {stockLow && (
                     <p className="font-mono text-[10px] text-cobalt mt-1 tracking-wide">
                       ! Chỉ còn {product.stock} sản phẩm
                     </p>
                   )}
 
-                  {/* Flip trigger */}
                   <button
                     ref={detailsBtnRef}
                     onClick={handleFlip}
@@ -275,20 +251,17 @@ export function ProductTag({
               </div>
             </div>
 
-            {/* ── BACK ───────────────────────────────────── */}
             <div className="absolute inset-0 tag-face tag-face--back" aria-hidden={!isFlipped}>
               <div
                 className={cn("tag-grain w-full h-full bg-paper border border-[var(--color-rule)] shadow-tag flex flex-col")}
                 style={{ clipPath: TAG_CLIP }}
               >
                 <div className="px-3.5 pt-8 pb-3 flex flex-col gap-3 flex-1 overflow-y-auto">
-                  {/* SKU back header */}
                   <div className="flex items-center justify-between border-b border-[var(--color-rule)] pb-2">
                     <span className="font-mono text-[10px] tracking-[0.12em] text-ink-faint uppercase">{sku}</span>
                     <span className="font-mono text-[10px] text-ink-faint">THÔNG TIN SẢN PHẨM</span>
                   </div>
 
-                  {/* Material */}
                   <div>
                     <p className="font-mono text-[10px] tracking-wider uppercase text-ink-faint mb-1">THÀNH PHẦN</p>
                     <p className="text-sm leading-snug font-body text-ink">
@@ -296,7 +269,6 @@ export function ProductTag({
                     </p>
                   </div>
 
-                  {/* Fit */}
                   <div>
                     <p className="font-mono text-[10px] tracking-wider uppercase text-ink-faint mb-1">KIỂU DÁNG</p>
                     <p className="text-sm leading-snug font-body text-ink">
@@ -306,7 +278,6 @@ export function ProductTag({
                     </p>
                   </div>
 
-                  {/* Care */}
                   <div>
                     <p className="font-mono text-[10px] tracking-wider uppercase text-ink-faint mb-1.5">HƯỚNG DẪN GIẶT</p>
                     <div className="flex flex-wrap gap-2">
@@ -326,7 +297,6 @@ export function ProductTag({
                     </div>
                   </div>
 
-                  {/* Delivery */}
                   <div className="border-t border-[var(--color-rule)] pt-2 flex flex-col gap-1">
                     <div className="flex items-center gap-2">
                       <Truck size={11} className="flex-shrink-0 text-ink-muted" aria-hidden />
@@ -338,7 +308,6 @@ export function ProductTag({
                     </div>
                   </div>
 
-                  {/* Size selector on back */}
                   {sizes.length > 0 && !isSoldOut && (
                     <div>
                       <p className="font-mono text-[10px] tracking-wider uppercase text-ink-faint mb-1.5">CHỌN SIZE</p>
@@ -364,7 +333,6 @@ export function ProductTag({
                     </div>
                   )}
 
-                  {/* Add to cart */}
                   <button
                     ref={backFirstFocusRef}
                     onClick={handleAddToCart}
@@ -382,7 +350,6 @@ export function ProductTag({
                     </span>
                   </button>
 
-                  {/* Back flip trigger */}
                   <button
                     onClick={handleFlip}
                     aria-label="Quay lại mặt trước"
@@ -401,11 +368,8 @@ export function ProductTag({
   );
 }
 
-/* ============================================================
-   FeaturedTag — large hero variant
-   ============================================================ */
 export interface FeaturedTagProps extends ProductTagProps {
-  angle?: number; // slight rotation angle for the hero
+  angle?: number;
 }
 
 export function FeaturedTag({
@@ -449,7 +413,6 @@ export function FeaturedTag({
     >
       <TagString length={100} />
 
-      {/* Hover swing wrapper */}
       <div
         className="relative w-full group"
         style={{ transformOrigin: "50% 0" }}
@@ -473,13 +436,11 @@ export function FeaturedTag({
                 className={cn("tag-flip-card w-full h-full", isFlipped && "is-flipped")}
                 aria-live="polite"
               >
-                {/* FRONT */}
                 <div className="absolute inset-0 tag-face tag-face--front">
                   <div
                     className="tag-grain w-full h-full bg-paper border border-[var(--color-rule)] shadow-tag flex flex-col"
                     style={{ clipPath: TAG_CLIP }}
                   >
-                    {/* Image — 4:5 */}
                     <button
                       onClick={goToProduct}
                       className="relative flex-shrink-0 block w-full overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-cobalt"
@@ -515,7 +476,6 @@ export function FeaturedTag({
                       )}
                     </button>
 
-                    {/* Info block */}
                     <div className="flex flex-col flex-1 gap-2 px-4 pt-3 pb-4">
                       <span className="font-mono text-[10px] tracking-[0.14em] text-ink-faint uppercase">{sku}</span>
 
@@ -579,7 +539,6 @@ export function FeaturedTag({
                   </div>
                 </div>
 
-                {/* BACK */}
                 <div className="absolute inset-0 tag-face tag-face--back" aria-hidden={!isFlipped}>
                   <div
                     className="tag-grain w-full h-full bg-paper border border-[var(--color-rule)] shadow-tag flex flex-col"
@@ -671,9 +630,6 @@ export function FeaturedTag({
   );
 }
 
-/* ============================================================
-   TagSkeleton — loading state
-   ============================================================ */
 export function TagSkeleton({ stringLength = 40 }: { stringLength?: number }) {
   return (
     <div
@@ -706,9 +662,6 @@ export function TagSkeleton({ stringLength = 40 }: { stringLength?: number }) {
   );
 }
 
-/* ============================================================
-   MiniTag — header cart count + cart line item
-   ============================================================ */
 export interface MiniTagProps {
   count: number;
   onClick: () => void;
@@ -727,7 +680,6 @@ export function MiniTag({ count, onClick, className }: MiniTagProps) {
       )}
       style={{ paddingTop: 12 }}
     >
-      {/* Mini string */}
       <div
         className="absolute -translate-x-1/2 pointer-events-none left-1/2"
         style={{
@@ -739,7 +691,6 @@ export function MiniTag({ count, onClick, className }: MiniTagProps) {
         aria-hidden="true"
       />
 
-      {/* Mini hole */}
       <div
         className="absolute -translate-x-1/2 left-1/2"
         style={{ top: 4 }}
@@ -748,7 +699,6 @@ export function MiniTag({ count, onClick, className }: MiniTagProps) {
         <div className="w-3 h-3 rounded-full border border-[var(--color-rule)] bg-paper" />
       </div>
 
-      {/* Mini tag body */}
       <div
         className="relative flex items-center justify-center px-2 bg-paper border border-[var(--color-rule)] shadow-tag group-hover:border-ink transition-colors"
         style={{

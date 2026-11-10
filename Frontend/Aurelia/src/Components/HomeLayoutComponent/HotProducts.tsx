@@ -53,7 +53,6 @@ export const HotProducts = () => {
         </button>
       }
     >
-      {/* Filter Tabs */}
       <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2 scrollbar-none">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -76,7 +75,6 @@ export const HotProducts = () => {
         })}
       </div>
 
-      {/* Grid */}
       <ProductGrid
         products={filteredItems}
         isLoading={isLoading}

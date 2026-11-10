@@ -71,7 +71,6 @@ export const Stats: React.FC<StatsProps> = ({
               shadow-sm
             "
           >
-            {/* Tag hole punch imitation */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-hole bg-kraft/70 border border-ink/20" />

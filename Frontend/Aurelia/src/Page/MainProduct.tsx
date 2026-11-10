@@ -194,7 +194,6 @@ export const MainProduct = () => {
       <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-ink)] flex flex-col">
         <Navbar />
 
-        {/* Store Finder Modal */}
         <Modal
           open={findStore}
           onClose={() => setFindStore(false)}
@@ -206,7 +205,6 @@ export const MainProduct = () => {
 
         <main id="main-content" className="flex-1 py-6 md:py-10">
           <Container>
-            {/* Breadcrumbs */}
             <nav className="flex items-center gap-2 text-xs font-mono text-[var(--color-ink-muted)] uppercase tracking-wider mb-6 pb-3 border-b border-[var(--color-rule)]">
               <button onClick={() => navigate("/")} className="hover:text-[var(--color-ink)] transition-colors cursor-pointer">
                 INDEX
@@ -224,11 +222,8 @@ export const MainProduct = () => {
               </span>
             </nav>
 
-            {/* Product Layout Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-              {/* Left Column: Image Gallery (7 cols) */}
               <div className="lg:col-span-7 flex flex-col-reverse md:flex-row gap-4">
-                {/* Thumbnails */}
                 {images.length > 1 && (
                   <div className="flex md:flex-col gap-2.5 overflow-x-auto md:overflow-y-auto max-h-[640px] pb-2 md:pb-0 scrollbar-none flex-shrink-0">
                     {images.map((src, idx) => (
@@ -253,7 +248,6 @@ export const MainProduct = () => {
                   </div>
                 )}
 
-                {/* Main Hero Image / 3D Canvas */}
                 <div className="relative flex-1 aspect-[3/4] rounded-none overflow-hidden bg-[var(--color-surface)] border border-[var(--color-rule)]">
                   {is3DMode ? (
                     <ProductViewer
@@ -277,7 +271,6 @@ export const MainProduct = () => {
                     </AnimatePresence>
                   )}
 
-                  {/* 3D Mode Toggle Button */}
                   <div className="absolute top-3 right-3 z-20">
                     <button
                       type="button"
@@ -298,7 +291,6 @@ export const MainProduct = () => {
                     </button>
                   </div>
 
-                  {/* Badges on Image */}
                   <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 pointer-events-none">
                     {product.discountValue > 0 && (
                       <span className="bg-[var(--color-accent)] text-white text-[11px] font-mono font-bold px-2 py-0.5 rounded-none uppercase tracking-wider">
@@ -312,7 +304,6 @@ export const MainProduct = () => {
                     )}
                   </div>
 
-                  {/* Navigation Arrows */}
                   {images.length > 1 && (
                     <>
                       <button
@@ -342,9 +333,7 @@ export const MainProduct = () => {
                 </div>
               </div>
 
-              {/* Right Column: Details & Actions (5 cols) */}
               <div className="lg:col-span-5 flex flex-col gap-5">
-                {/* Brand & Reference */}
                 <div className="flex items-center justify-between text-xs font-mono text-[var(--color-ink-muted)] uppercase tracking-wider">
                   <span className="font-bold text-[var(--color-ink)]">
                     {product.brand || "AURELIA"}
@@ -352,7 +341,6 @@ export const MainProduct = () => {
                   <span>SKU: {product.id}</span>
                 </div>
 
-                {/* Title & Material */}
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-heading font-bold text-[var(--color-ink)] tracking-tight">
                     {product.name}
@@ -364,7 +352,6 @@ export const MainProduct = () => {
                   )}
                 </div>
 
-                {/* Rating & Sold info */}
                 <div className="flex items-center gap-3 py-2 border-y border-[var(--color-rule)] font-mono text-xs text-[var(--color-ink-muted)]">
                   <Rating value={product.rating || 4.8} size="sm" showValue />
                   <span className="text-[var(--color-rule)]">|</span>
@@ -373,7 +360,6 @@ export const MainProduct = () => {
                   </span>
                 </div>
 
-                {/* Price Display */}
                 <div className="p-3.5 rounded-none bg-[var(--color-surface)] border border-[var(--color-rule)]">
                   <PriceTag
                     price={
@@ -387,7 +373,6 @@ export const MainProduct = () => {
                   />
                 </div>
 
-                {/* Color Selection */}
                 {product.variants && product.variants.length > 0 && (
                   <div>
                     <label className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--color-ink)] mb-2 block">
@@ -419,7 +404,6 @@ export const MainProduct = () => {
                   </div>
                 )}
 
-                {/* Size Selection + AI Suggestion */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--color-ink)]">
@@ -461,7 +445,6 @@ export const MainProduct = () => {
                   )}
                 </div>
 
-                {/* Main Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
                   <button
                     type="button"
@@ -487,7 +470,6 @@ export const MainProduct = () => {
                   </button>
                 </div>
 
-                {/* Store Locator Link */}
                 <button
                   type="button"
                   onClick={() => setFindStore(true)}
@@ -497,7 +479,6 @@ export const MainProduct = () => {
                   <span>Tra cứu tồn kho tại cửa hàng vật lý</span>
                 </button>
 
-                {/* Value props mini bar */}
                 <div className="grid grid-cols-3 border border-[var(--color-rule)] divide-x divide-[var(--color-rule)] bg-[var(--color-surface)]/40 text-center text-[11px] font-mono text-[var(--color-ink-muted)] py-2.5">
                   <div className="flex flex-col items-center gap-1 px-1">
                     <Truck size={14} className="text-[var(--color-accent)]" />
@@ -513,7 +494,6 @@ export const MainProduct = () => {
                   </div>
                 </div>
 
-                {/* Details Accordion / Tabs */}
                 <div className="pt-2">
                   <div className="flex border-b border-[var(--color-rule)] gap-5 mb-3">
                     {(["Description", "Size&Fit", "Policies"] as const).map((tab) => (
@@ -559,7 +539,6 @@ export const MainProduct = () => {
               </div>
             </div>
 
-            {/* Recommendations */}
             <div className="mt-16 pt-10 border-t border-[var(--color-rule)]">
               <ProductRecommend />
             </div>

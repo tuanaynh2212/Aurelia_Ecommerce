@@ -21,7 +21,7 @@ export const OrderSummaryGrid = ({ data }: { data: order | undefined }) => {
         </div>
       </div>
       {
-        data?.payment==="paypal" ? (  
+        data?.payment==="paypal" ? (
       <div className="flex flex-col gap-4">
         <h4 className="font-serif text-xl font-bold text-[#111318]  pb-2 border-b border-[#dbdfe6] dark:border-gray-700">
           Payment Method
@@ -31,7 +31,7 @@ export const OrderSummaryGrid = ({ data }: { data: order | undefined }) => {
             {data?.payment==="paypal" ? <CreditCardIcon className="w-8 h-8 text-gray-500"/> : data?.payment==="cod" ? <HomeIcon className="w-8 h-8 text-gray-500"/> : <CreditCardIcon className="w-8 h-8 text-gray-500"/>}
             <div>
               <p className="text-sm font-bold">
-                {data?.payment.toUpperCase()} ending in {}
+                {data?.payment.toUpperCase()} ending in
               </p>
               <p className="text-xs text-[#616f89] dark:text-gray-400">
                 Exp 12 / 26
@@ -52,7 +52,7 @@ export const OrderSummaryGrid = ({ data }: { data: order | undefined }) => {
                 {data?.payment.toUpperCase()} ending in {""}
               </p>
               <p className="text-xs text-[#616f89] dark:text-gray-400">
-                Exp 12 / 26 
+                Exp 12 / 26
               </p>
             </div>
             </div>
@@ -65,7 +65,7 @@ export const OrderSummaryGrid = ({ data }: { data: order | undefined }) => {
             </h4>
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-3 text-[#111318] dark:text-white">
-                <HomeIcon className="w-8 h-8 text-gray-500"/>   
+                <HomeIcon className="w-8 h-8 text-gray-500"/>
                 <div>
                   <p className="text-sm font-bold">
                     {data?.payment.toUpperCase()}

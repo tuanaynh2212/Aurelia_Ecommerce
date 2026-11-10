@@ -31,7 +31,6 @@ const LeftSite: React.FC<LeftSites> = ({ data, onOpenMap }) => {
               className="bg-white rounded-2xl shadow-md p-5 border border-slate-200"
             >
               <div className="flex flex-col sm:flex-row gap-5">
-                {/* Image */}
                 <div className="relative w-full sm:w-36 h-36 rounded-xl overflow-hidden bg-slate-100">
                   <img
                     src={item.thumnail}
@@ -43,7 +42,6 @@ const LeftSite: React.FC<LeftSites> = ({ data, onOpenMap }) => {
                   </span>
                 </div>
 
-                {/* Info */}
                 <div className="flex-1 space-y-3">
                   <h3 className="text-base font-semibold text-slate-800">
                     {item.name}
@@ -103,7 +101,6 @@ const LeftSite: React.FC<LeftSites> = ({ data, onOpenMap }) => {
             <p className="text-sm opacity-90">{data?.data?.address}</p>
           </div>
         </div>
-
 
         <button
           onClick={onOpenMap}

@@ -39,7 +39,6 @@ export function SceneCanvas({
     typeof window !== "undefined" &&
     window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-  // If WebGL is unavailable or user requested reduced motion, show high-fidelity 2D fallback
   if (!canRender || prefersReduced) {
     return (
       <SceneFallback

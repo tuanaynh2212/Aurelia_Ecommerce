@@ -170,19 +170,19 @@ export const Revenue = () => {
     scales: {
       x: {
         grid: { display: false },
-        ticks: { 
-          color: "#64748b", 
-          font: { size: 12, weight: "600" } 
+        ticks: {
+          color: "#64748b",
+          font: { size: 12, weight: "600" }
         },
       },
       y: {
-        grid: { 
+        grid: {
           color: "rgba(148, 163, 184, 0.15)",
           drawBorder: false,
         },
-        ticks: { 
-          color: "#64748b", 
-          font: { size: 12 } 
+        ticks: {
+          color: "#64748b",
+          font: { size: 12 }
         },
       },
     },
@@ -267,7 +267,7 @@ export const Revenue = () => {
       icon: ShoppingCart,
       title: "Tổng đơn hàng",
       value: totalOrders.toString(),
-      change: revenueData.length >= 2 
+      change: revenueData.length >= 2
         ? `${dataRevenue?.growthRateOrders ? '+' : ''}${dataRevenue?.growthRateOrders}%`
         : "+0.0%",
       gradient: "bg-black/90",
@@ -294,7 +294,6 @@ export const Revenue = () => {
   return (
     <div className="max-h-screen overflow-y-scroll bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/40 md:p-8 p-3">
       <div className="max-w-[1600px] mx-auto space-y-8">
-        {/* Header */}
         <div className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-violet-600/10 via-purple-600/10 to-pink-600/10 rounded-3xl blur-3xl"></div>
           <div className="relative bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/60 p-8">
@@ -313,7 +312,6 @@ export const Revenue = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, idx) => (
             <div
@@ -344,7 +342,6 @@ export const Revenue = () => {
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          {/* Bar Chart */}
           <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-8 hover:shadow-2xl transition-all duration-300">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-3 bg-black  shadow-md">
@@ -360,7 +357,6 @@ export const Revenue = () => {
             </div>
           </div>
 
-          {/* Line Chart */}
           <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-8 hover:shadow-2xl transition-all duration-300">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-3 bg-black  shadow-md">
@@ -377,9 +373,7 @@ export const Revenue = () => {
           </div>
         </div>
 
-        {/* Bottom Charts Row */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          {/* Doughnut Chart */}
           <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-8 hover:shadow-2xl transition-all duration-300">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-3 bg-black  shadow-md">
@@ -395,7 +389,6 @@ export const Revenue = () => {
             </div>
           </div>
 
-          {/* Radar Chart */}
           <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 p-8 hover:shadow-2xl transition-all duration-300">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-3 bg-black  shadow-md">

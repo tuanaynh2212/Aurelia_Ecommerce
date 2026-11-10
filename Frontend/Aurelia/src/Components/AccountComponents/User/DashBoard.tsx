@@ -34,9 +34,7 @@ export const DashBoard = () => {
     <div className="min-h-screen bg-[var(--color-bg,#FBF8F2)] text-[var(--color-ink,#2A211B)] flex flex-col">
       <Navbar />
 
-      {/* Main atelier workspace */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 pb-16">
-        {/* Atelier Dossier Bar */}
         <div className="flex items-center justify-between pb-6 mb-8 border-b border-rule/70">
           <div className="flex items-center gap-2 text-xs font-mono text-ink-muted">
             <span className="text-cobalt font-bold">AURELIA</span>
@@ -54,9 +52,7 @@ export const DashBoard = () => {
           </div>
         </div>
 
-        {/* 2-Column Atelier Layout */}
         <div className="flex flex-col lg:flex-row gap-8 items-start">
-          {/* Left: Atelier Dossier Spine / Menu */}
           <div className="w-full lg:w-72 xl:w-80 shrink-0 lg:sticky lg:top-24">
             <LeftSide
               userString={userData}
@@ -68,7 +64,6 @@ export const DashBoard = () => {
             />
           </div>
 
-          {/* Right: Atelier Working Surface */}
           <div className="w-full flex-1 min-w-0">
             <RightSide
               setActiveItem={setActiveItem}

@@ -124,7 +124,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     []
   );
 
-  // Memoize LayPhiVanCHuyen
   const LayPhiVanCHuyen = useCallback(
     async (DuLieuDauRa: boolean) => {
       try {

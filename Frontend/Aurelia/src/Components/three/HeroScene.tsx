@@ -41,7 +41,6 @@ export function HeroScene({
         ) : null
       )}
 
-      {/* Floating 3D / Photo toggle switch badge */}
       {fallbackImage && (
         <div className="absolute top-4 right-4 z-20 flex items-center bg-white/90 backdrop-blur-md rounded-[var(--radius-pill)] p-1 shadow-xs border border-[var(--color-cream-300)]">
           <button
@@ -71,7 +70,6 @@ export function HeroScene({
         </div>
       )}
 
-      {/* Interactive Drag hint badge at bottom */}
       {mode === "3d" && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[var(--radius-pill)] bg-white/80 backdrop-blur-xs text-[11px] font-semibold text-[var(--color-ink)] shadow-xs">

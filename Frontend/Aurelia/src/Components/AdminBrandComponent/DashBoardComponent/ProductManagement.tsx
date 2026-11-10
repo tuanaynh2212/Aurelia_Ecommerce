@@ -1,4 +1,3 @@
-/** REFACTORED RESPONSIVE VERSION **/
 
 import { useContext, useState, useMemo } from "react";
 import {

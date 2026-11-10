@@ -1,8 +1,3 @@
-/**
- * HANG TAG — Section 5: "Hàng mới về" horizontal scroller
- * Snap-scroll row of ProductTags (new arrivals).
- * Keyboard navigable (arrow keys), scroll snap, no overflow clipping text.
- */
 
 import { useContext, useMemo, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -14,7 +9,6 @@ export function NewInScroller() {
   const { dataProduct, isLoading } = useContext(FilterProductContext);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Newest products
   const newProducts = useMemo<Product[]>(() => {
     if (!dataProduct || dataProduct.length === 0) return [];
     return [...dataProduct]
@@ -48,7 +42,6 @@ export function NewInScroller() {
     >
       <div className="container-page py-12 md:py-16">
 
-        {/* Section header */}
         <div className="flex items-end justify-between mb-6 border-b border-[var(--color-rule)] pb-5">
           <div>
             <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-faint mb-1">
@@ -59,7 +52,6 @@ export function NewInScroller() {
             </h2>
           </div>
 
-          {/* Scroll controls — keyboard + click */}
           <div className="flex gap-2" role="group" aria-label="Điều hướng hàng mới">
             <button
               onClick={() => scroll("left")}
@@ -78,14 +70,12 @@ export function NewInScroller() {
           </div>
         </div>
 
-        {/* Thin rule — tags hang from this line conceptually */}
         <div
           className="w-full h-px"
           style={{ background: "var(--color-rule)" }}
           aria-hidden="true"
         />
 
-        {/* Horizontal scroll container */}
         <div
           ref={scrollRef}
           role="list"

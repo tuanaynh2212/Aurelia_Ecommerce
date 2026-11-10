@@ -15,7 +15,6 @@ export const PopUpDetail = ({
   const orderData = data?.filter((order) => order.orderId === orderId);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      {/* Card Container */}
       <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-3xl p-6 md:p-8 animate-fade-in-up overflow-y-auto max-h-[90vh]">
         <button
           onClick={onClose}
@@ -33,7 +32,6 @@ export const PopUpDetail = ({
             key={order.orderId}
             className="border border-gray-100 rounded-2xl p-5 mb-6 shadow-sm hover:shadow-md transition"
           >
-            {/* Header */}
             <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
               <div className="flex items-center gap-2">
                 <Package className="w-5 h-5 text-indigo-600" />
@@ -49,7 +47,6 @@ export const PopUpDetail = ({
               </div>
             </div>
 
-            {/* Customer Info */}
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
@@ -102,7 +99,6 @@ export const PopUpDetail = ({
                 </div>
               </div>
 
-              {/* Product Info */}
               <div className="bg-gray-50 rounded-xl p-4 space-y-3">
                 <h3 className="text-sm font-semibold text-gray-700 mb-2">
                   Danh sách sản phẩm

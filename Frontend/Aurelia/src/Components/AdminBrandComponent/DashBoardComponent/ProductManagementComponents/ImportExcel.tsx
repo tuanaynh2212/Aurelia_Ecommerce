@@ -13,8 +13,6 @@ import { api_Config, UseApiUrl } from "../../../../services/api";
 import { Toaster } from "../../../Toaster";
 import { LoadingOverlay } from "../../../LoadingOverlay";
 
-
-
 const ImportExcel = ({setOpenImportModal}:{setOpenImportModal:React.Dispatch<React.SetStateAction<boolean>>}) => {
   const [selectedFile,] = useState<File | null>(null);
   const [previewData, setPreviewData] = useState<any[]>([]);
@@ -55,7 +53,7 @@ const ImportExcel = ({setOpenImportModal}:{setOpenImportModal:React.Dispatch<Rea
             discountType: element.discountType,
             season: element.season
         }]);
-             
+
       });
     }
   };
@@ -92,7 +90,6 @@ const ImportExcel = ({setOpenImportModal}:{setOpenImportModal:React.Dispatch<Rea
         Nhập sản phẩm từ Excel
       </h2>
 
-      {/* --- Hướng dẫn --- */}
       <div className="p-4 mb-6 rounded-xl bg-white/60 border border-blue-200 shadow-inner">
         <div className="flex items-center gap-2 mb-2 text-blue-700 font-semibold">
           <Info className="w-5 h-5" />
@@ -105,14 +102,13 @@ const ImportExcel = ({setOpenImportModal}:{setOpenImportModal:React.Dispatch<Rea
 {`id | name | type | subcategory | brand | origin | price | description | rating | stock | createdAt | updatedAt | thumbnail | images | material | variants | sold | discountValue | discountType`}
         </pre>
         <p className="text-sm text-gray-600 mt-2">
-          📦 <b>Lưu ý:</b> 
-          - <code>images</code> có thể nhập nhiều URL, ngăn cách bởi dấu phẩy (,).  
-          - <code>variants</code> có thể để trống hoặc chứa JSON string.  
+          📦 <b>Lưu ý:</b>
+          - <code>images</code> có thể nhập nhiều URL, ngăn cách bởi dấu phẩy (,).
+          - <code>variants</code> có thể để trống hoặc chứa JSON string.
           - <code>price</code>, <code>stock</code>, <code>sold</code>, <code>rating</code>, <code>discountValue</code> là số.
         </p>
       </div>
 
-      {/* --- Upload --- */}
       <div
         className={`w-full p-6 border-2 border-dashed rounded-xl text-center transition-all ${
           selectedFile
@@ -138,7 +134,6 @@ const ImportExcel = ({setOpenImportModal}:{setOpenImportModal:React.Dispatch<Rea
         />
       </div>
 
-      {/* --- Preview --- */}
       {previewData.length > 0 && (
         <div className="mt-6 bg-white/60 border border-gray-200 rounded-lg overflow-hidden">
           <table className="w-full text-sm">
@@ -169,7 +164,6 @@ const ImportExcel = ({setOpenImportModal}:{setOpenImportModal:React.Dispatch<Rea
         </div>
       )}
 
-      {/* --- Button --- */}
       <div className="flex justify-center mt-6">
         <button
           onClick={handleFileUpload}

@@ -1,6 +1,3 @@
-/** @type {import('tailwindcss').Config} */
-// HANG TAG Design System — Aurellia 2026
-// Palette contract: Cobalt ONLY on paper surfaces, never on kraft.
 export default {
   content: [
     "./index.html",
@@ -9,12 +6,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        // ── HANG TAG palette ─────────────────────────────────────────
         kraft:   { DEFAULT: "#CDB79A", dark: "#B8A080" },  // backdrop rails, section fills
         paper:   { DEFAULT: "#FBF8F2" },                   // tags, cards — highest contrast base
         ink:     { DEFAULT: "#2A211B", muted: "#6B5E54", faint: "#9E9086" }, // all text on kraft/paper
         cobalt:  { DEFAULT: "#2447D6", hover: "#1A35B0" }, // sale price, CTA, focus ring — paper only
-        // ── Legacy aliases so other pages don't break ──────────────
         bg:      "#FBF8F2",           // paper
         surface: "#CDB79A",           // kraft
         rule:    "#D9CFBE",
@@ -25,11 +20,8 @@ export default {
         },
       },
       fontFamily: {
-        // Display: serif with character — used for h1/h2 only
         heading: ["'Fraunces'", "'Georgia'", "serif"],
-        // UI/body: neutral sans, 16-18px
         body:    ["'Inter'", "system-ui", "sans-serif"],
-        // Tag data: monospace tabular numerals — SKU, price, size, stock
         mono:    ["'IBM Plex Mono'", "'Courier New'", "monospace"],
       },
       fontSize: {
@@ -38,17 +30,14 @@ export default {
         "tag-size":  ["0.6875rem", { lineHeight: "1",    letterSpacing: "0.06em" }],
       },
       borderRadius: {
-        // MAX 2 radii — layout is always 0, tags get radius-tag only
         none:  "0px",
         tag:   "2px",   // die-cut corner radius — tags only
         hole:  "9999px", // punched hole only
       },
       boxShadow: {
-        // One shadow style — tags only. Soft contact shadow.
         tag: "0 6px 24px -4px rgba(42,33,27,0.18), 0 2px 8px -2px rgba(42,33,27,0.10)",
         none: "none",
       },
-      // Legacy shadow tokens so other pages render correctly
       dropShadow: {
         soft: "0 1px 2px rgba(42,33,27,0.06)",
         card: "0 2px 6px rgba(42,33,27,0.08)",
@@ -87,7 +76,6 @@ export default {
         "tag-flip-out": "tag-flip-out 220ms ease-in forwards",
         "fade-in":      "fade-in 400ms ease-out forwards",
       },
-      // Image ratios used in the system
       aspectRatio: {
         "product":  "4 / 5",   // product photo — tag front
         "editorial": "3 / 2",  // editorial photo — Look of the Week

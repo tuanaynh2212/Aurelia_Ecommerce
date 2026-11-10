@@ -56,7 +56,6 @@ export const CreditCardPayment = ({ onClose }: { onClose: () => void }) => {
               />
             </div>
 
-            {/* Expiry + CVV */}
             <div className="flex gap-4">
               <div className="flex items-center border rounded-xl px-3 py-3 w-1/2 shadow-sm focus-within:ring-2 focus-within:ring-emerald-500">
                 <Calendar className="h-5 w-5 text-emerald-500 mr-2" />

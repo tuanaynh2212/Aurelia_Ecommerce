@@ -43,7 +43,6 @@ export const RecentOrder: React.FC<{ donHangChiTiet: order[] }> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-rule/60 gap-3">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-tag bg-kraft/15 border border-kraft-dark/20 flex items-center justify-center text-ink">
@@ -64,7 +63,6 @@ export const RecentOrder: React.FC<{ donHangChiTiet: order[] }> = ({
         </div>
       </div>
 
-      {/* Filter Tabs */}
       <div className="flex gap-2 border-b border-rule/60 pb-3 overflow-x-auto scrollbar-none">
         {STATUS_CONFIG.map(({ label, value, icon: Icon }) => {
           const isActive = openStatus === value;
@@ -96,7 +94,6 @@ export const RecentOrder: React.FC<{ donHangChiTiet: order[] }> = ({
         })}
       </div>
 
-      {/* Orders List */}
       <div className="space-y-4">
         {filteredOrders.length === 0 ? (
           <div className="bg-paper border border-dashed border-rule rounded-tag p-12 text-center">

@@ -48,7 +48,6 @@ export const OrderCard: React.FC<OrderCardProps> = ({
 
   return (
     <div className="bg-paper border border-rule/80 rounded-tag shadow-tag p-5 md:p-6 transition-all hover:border-ink/25 relative">
-      {/* Top Tag Header */}
       <div className="flex flex-wrap items-center justify-between pb-3.5 border-b border-rule/60 gap-2">
         <div className="flex items-center gap-2.5">
           <div className="w-2.5 h-2.5 rounded-hole bg-kraft border border-ink/20 shadow-inner" />
@@ -76,7 +75,6 @@ export const OrderCard: React.FC<OrderCardProps> = ({
         </div>
       </div>
 
-      {/* Body: Product details & price */}
       <div className="pt-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-tag bg-kraft/15 border border-rule overflow-hidden shrink-0">
@@ -109,7 +107,6 @@ export const OrderCard: React.FC<OrderCardProps> = ({
           </div>
         </div>
 
-        {/* Price & Actions */}
         <div className="flex items-end md:items-center justify-between md:justify-end gap-6 pt-2 md:pt-0 border-t md:border-t-0 border-rule/40">
           <div className="text-left md:text-right">
             <span className="block font-mono text-[10px] uppercase tracking-widest text-ink-muted">

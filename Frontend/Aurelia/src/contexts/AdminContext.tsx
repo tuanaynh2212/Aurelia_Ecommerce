@@ -156,9 +156,7 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
       }
     });
     {
-      //-- End DashBoard Data ---  }
       {
-        //Coupon Management Data ---
 
         const [coupons, setCoupons] = useState<Coupon[]>([]);
         const fetchCoupons = async () => {

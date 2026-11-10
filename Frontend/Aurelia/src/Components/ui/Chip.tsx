@@ -34,13 +34,6 @@ export interface ChipProps
   icon?: React.ReactNode;
 }
 
-/**
- * Chip / Pill label — used for category tags, trust badges, eyebrow text.
- *
- * @example
- * <Chip color="peach" icon={<Sparkles size={12} />}>New season</Chip>
- * <Chip color="sage" interactive onClick={...}>Handmade</Chip>
- */
 export function Chip({
   className,
   color,
@@ -61,7 +54,6 @@ export function Chip({
   );
 }
 
-/* ---- Badge (compact version, uppercase label) ---- */
 const badgeVariants = cva("badge", {
   variants: {
     color: {
@@ -80,13 +72,6 @@ export interface BadgeProps
   extends React.HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof badgeVariants> {}
 
-/**
- * Badge — compact label for product status.
- *
- * @example
- * <Badge color="sale">-20%</Badge>
- * <Badge color="new">New</Badge>
- */
 export function Badge({ className, color, ...props }: BadgeProps) {
   return (
     <span className={cn(badgeVariants({ color }), className)} {...props} />

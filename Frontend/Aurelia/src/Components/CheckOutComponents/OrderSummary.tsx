@@ -70,7 +70,6 @@ export const OrderSummary = ({
         + ÁP DỤNG MÃ GIẢM GIÁ / COUPON
       </button>
 
-      {/* Totals */}
       <div className="flex flex-col gap-2.5 border-t border-[var(--color-rule)] pt-5 text-xs font-mono">
         <div className="flex justify-between text-[var(--color-ink-muted)]">
           <span className="uppercase tracking-wider">TẠM TÍNH</span>
@@ -90,7 +89,6 @@ export const OrderSummary = ({
         </div>
       </div>
 
-      {/* Grand Total */}
       <div className="mt-5 flex items-baseline justify-between border-t border-[var(--color-rule)] pt-5">
         <span className="text-sm font-mono font-bold uppercase tracking-wider text-[var(--color-ink)]">
           TỔNG CỘNG

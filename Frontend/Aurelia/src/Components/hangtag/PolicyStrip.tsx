@@ -1,8 +1,3 @@
-/**
- * HANG TAG — Section 6: Size & Returns strip
- * Single flat monospace band. Real policy info only.
- * No icon-card rows. No decorative elements.
- */
 
 export function PolicyStrip() {
   const items = [

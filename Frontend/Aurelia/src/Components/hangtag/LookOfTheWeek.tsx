@@ -7,10 +7,6 @@ import { formatVND } from "../../utils/formatters";
 import type { Product } from "../../types/type";
 import { AnimatePresence, motion } from "framer-motion";
 
-/* Hotspot position config matching the editorial lookbook image
-   Male Linen Suit: (39%, 35%)
-   Female Silk Gown: (58%, 44%)
-   Male Tailored Trousers & Shoes: (42%, 72%) */
 const HOTSPOT_CONFIG = [
   { slot: 0, x: 39, y: 35, label: "Áo Blazer Linen Bespoke" },
   { slot: 1, x: 58, y: 44, label: "Đầm Lụa Dáng Rũ Thượng Hạng" },
@@ -43,7 +39,6 @@ function HotspotTag({ product, x, y, index, isActive, onSelect, label }: Hotspot
       className="absolute z-20"
       style={{ left: `${x}%`, top: `${y}%`, transform: "translate(-50%, -50%)" }}
     >
-      {/* Interactive hotspot button */}
       <button
         type="button"
         onClick={() => onSelect(isActive ? null : index)}
@@ -55,7 +50,6 @@ function HotspotTag({ product, x, y, index, isActive, onSelect, label }: Hotspot
           isActive ? "scale-110" : "hover:scale-105"
         )}
       >
-        {/* Glowing ripple aura */}
         <span
           className={cn(
             "absolute -inset-2 rounded-full border transition-all duration-500",
@@ -65,7 +59,6 @@ function HotspotTag({ product, x, y, index, isActive, onSelect, label }: Hotspot
           )}
         />
 
-        {/* Outer circle */}
         <span
           className={cn(
             "relative w-8 h-8 rounded-full flex items-center justify-center shadow-lg backdrop-blur-md transition-colors duration-300 border",
@@ -79,7 +72,6 @@ function HotspotTag({ product, x, y, index, isActive, onSelect, label }: Hotspot
           </span>
         </span>
 
-        {/* Quick hover label tooltip */}
         {!isActive && label && (
           <span className="hidden md:block absolute left-10 top-1/2 -translate-y-1/2 whitespace-nowrap bg-neutral-900/85 backdrop-blur-md border border-white/20 text-white font-mono text-[11px] px-2.5 py-1 rounded shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             {label}
@@ -87,7 +79,6 @@ function HotspotTag({ product, x, y, index, isActive, onSelect, label }: Hotspot
         )}
       </button>
 
-      {/* Floating Product Popover Card */}
       <AnimatePresence>
         {isActive && (
           <motion.div
@@ -103,7 +94,6 @@ function HotspotTag({ product, x, y, index, isActive, onSelect, label }: Hotspot
               anchorLeft ? "left-12 -top-16" : "right-12 -top-16"
             )}
           >
-            {/* Thumbnail */}
             {(product.thumbnail || product.images?.[0]) && (
               <div className="relative w-full h-32 overflow-hidden bg-neutral-900">
                 <img
@@ -172,7 +162,6 @@ export function LookOfTheWeek() {
   const { dataProduct } = useContext(FilterProductContext);
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
 
-  // Pick 3 top products for the editorial look
   const lookProducts = useMemo<Product[]>(() => {
     if (!dataProduct || dataProduct.length === 0) return [];
     return [...dataProduct]
@@ -189,7 +178,6 @@ export function LookOfTheWeek() {
       style={{ background: "var(--color-paper)" }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header Title Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between pb-8 mb-8 border-b border-[var(--color-rule)] gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -210,19 +198,15 @@ export function LookOfTheWeek() {
           </p>
         </div>
 
-        {/* Editorial Photo with Interactive Hotspots */}
         <div className="relative w-full aspect-[3/2] max-h-[640px] rounded-2xl overflow-hidden shadow-2xl border border-[var(--color-rule)] bg-neutral-900 group">
-          {/* Real Editorial Image */}
           <img
             src="/images/lookbook-editorial.jpg"
             alt="Look của tuần - Aurelia Atelier Bespoke Collection"
             className="w-full h-full object-cover object-center transform transition-transform duration-700 group-hover:scale-[1.01]"
           />
 
-          {/* Gentle cinematic gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none" />
 
-          {/* Editorial Watermark Badge (top-left) */}
           <div className="absolute top-4 left-4 md:top-6 md:left-6 flex items-center gap-2 bg-neutral-950/70 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15 text-white shadow-lg pointer-events-none">
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
             <span className="font-mono text-[10px] md:text-xs uppercase tracking-wider text-neutral-200">
@@ -230,12 +214,10 @@ export function LookOfTheWeek() {
             </span>
           </div>
 
-          {/* Click hint (bottom-left) */}
           <div className="hidden sm:flex absolute bottom-4 left-4 md:bottom-6 md:left-6 items-center gap-2 bg-neutral-950/65 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/15 text-white/90 text-xs font-mono">
             <span>Chạm số để xem thông số & giá niêm yết</span>
           </div>
 
-          {/* Shoppable Hotspots */}
           {lookProducts.map((product, i) => (
             <HotspotTag
               key={product.id}
@@ -250,7 +232,6 @@ export function LookOfTheWeek() {
           ))}
         </div>
 
-        {/* 3 Product Legend Cards Below Photo */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
           {lookProducts.map((product, i) => {
             const isHighlighted = activeSlot === i;
@@ -274,7 +255,6 @@ export function LookOfTheWeek() {
                     : "border-[var(--color-rule)] hover:border-ink/40 hover:shadow-md"
                 )}
               >
-                {/* Number Badge */}
                 <div
                   className={cn(
                     "w-9 h-9 rounded-full flex items-center justify-center font-mono font-bold text-xs flex-shrink-0 transition-colors",
@@ -286,7 +266,6 @@ export function LookOfTheWeek() {
                   0{i + 1}
                 </div>
 
-                {/* Product Thumbnail */}
                 {(product.thumbnail || product.images?.[0]) && (
                   <div className="w-16 h-20 rounded-lg overflow-hidden bg-neutral-100 flex-shrink-0 border border-neutral-200">
                     <img
@@ -298,7 +277,6 @@ export function LookOfTheWeek() {
                   </div>
                 )}
 
-                {/* Product Info */}
                 <div className="flex-1 min-w-0">
                   <p className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
                     {HOTSPOT_CONFIG[i]?.label || "Trang phục phối"}
@@ -324,7 +302,6 @@ export function LookOfTheWeek() {
                   </div>
                 </div>
 
-                {/* Arrow */}
                 <div className="text-ink-muted group-hover:text-ink transition-transform group-hover:translate-x-1">
                   <ArrowRight size={16} />
                 </div>

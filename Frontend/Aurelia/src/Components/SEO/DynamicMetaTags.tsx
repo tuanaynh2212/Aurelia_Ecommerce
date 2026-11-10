@@ -37,13 +37,11 @@ export const DynamicMetaTags = ({
     updateMetaTag("og:url", url, "property");
     updateMetaTag("og:type", type, "property");
 
-    // Twitter Tags
     updateMetaTag("twitter:title", title, "property");
     updateMetaTag("twitter:description", description, "property");
     updateMetaTag("twitter:image", image, "property");
     updateMetaTag("twitter:card", "summary_large_image", "property");
 
-    // Canonical URL
     let canonical = document.querySelector("link[rel='canonical']") as HTMLLinkElement;
     if (!canonical) {
       canonical = document.createElement("link");
@@ -53,6 +51,6 @@ export const DynamicMetaTags = ({
     canonical.setAttribute("href", url);
   }, [title, description, keywords, image, url, type]);
 
-  return null; 
+  return null;
 };
 

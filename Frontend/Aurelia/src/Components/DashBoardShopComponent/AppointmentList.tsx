@@ -60,7 +60,6 @@ export default function AppointmentList({
             key={a.id}
             className="flex flex-col md:flex-row justify-between gap-5 bg-white p-5 rounded-2xl shadow-sm hover:shadow-lg transition-all border border-gray-100"
           >
-            {/* left */}
             <div className="flex gap-4 flex-1">
               <img
                 src={a.itemImage}
@@ -80,7 +79,6 @@ export default function AppointmentList({
               </div>
             </div>
 
-            {/* right */}
             <div className="flex flex-col justify-between items-end gap-3">
               <span
                 className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium border ${statusColors[a.status]}`}

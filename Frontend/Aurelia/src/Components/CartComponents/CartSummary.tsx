@@ -82,7 +82,6 @@ export const CartSummary: React.FC<CartSummaryProps> = ({ tax }) => {
         <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
       </button>
 
-      {/* Free shipping progress notice */}
       <div className="p-3 rounded-none bg-[var(--color-bg)] border border-[var(--color-rule)] text-[11px] font-mono text-[var(--color-ink-muted)] space-y-1">
         <div className="flex items-center gap-2">
           <Truck size={14} className="text-[var(--color-accent)] flex-shrink-0" />

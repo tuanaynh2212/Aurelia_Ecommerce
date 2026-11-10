@@ -59,7 +59,6 @@ export const DanhMucSanPham = () => {
       subtitle="Tìm kiếm trang phục và phụ kiện phù hợp nhất cho phong cách hàng ngày của bạn"
     >
       <div className="grid grid-cols-1 md:grid-cols-12 gap-5 auto-rows-[240px] md:auto-rows-[280px]">
-        {/* Large featured category (Left col) */}
         <motion.div
           whileHover={{ y: -4 }}
           transition={{ duration: 0.3 }}
@@ -92,7 +91,6 @@ export const DanhMucSanPham = () => {
           </div>
         </motion.div>
 
-        {/* Category 1: Top (Right top-left) */}
         <motion.div
           whileHover={{ y: -4 }}
           transition={{ duration: 0.3 }}
@@ -117,7 +115,6 @@ export const DanhMucSanPham = () => {
           </div>
         </motion.div>
 
-        {/* Category 2: Jewelry (Right top-right) */}
         <motion.div
           whileHover={{ y: -4 }}
           transition={{ duration: 0.3 }}
@@ -142,7 +139,6 @@ export const DanhMucSanPham = () => {
           </div>
         </motion.div>
 
-        {/* Category 3: Watch (Right bottom-left) */}
         <motion.div
           whileHover={{ y: -4 }}
           transition={{ duration: 0.3 }}
@@ -167,7 +163,6 @@ export const DanhMucSanPham = () => {
           </div>
         </motion.div>
 
-        {/* Category 4: Accessory (Right bottom-right) */}
         <motion.div
           whileHover={{ y: -4 }}
           transition={{ duration: 0.3 }}

@@ -4,7 +4,6 @@ import type { Product } from "../../../types/type";
 import { v4 as uuid } from "uuid";
 import { DashBoardShopCOntext } from "../../../contexts/DashBoardShopContext";
 
-
 export const AddProduct = ({
   onClose,
   title,
@@ -52,7 +51,7 @@ export const AddProduct = ({
       throw new Error(data.error?.message || "Upload failed");
     }
 
-    return data.data.image.url; 
+    return data.data.image.url;
   } catch (err) {
     console.error("Upload error:", err);
     return "";
@@ -62,7 +61,7 @@ useEffect(()=>{
   files.forEach(element => {
     uploadImage([element]).then((url) => {
       setImageUrl(prev=>[url,...prev]);
-      
+
     });
   });
 },[files])
@@ -101,7 +100,7 @@ useEffect(()=>{
   const [giaSanPham, setGiaSanPham] = useState(dataEditProduct ? dataEditProduct.price.toString() : "");
   const [khoHang, setKhoHang] = useState(dataEditProduct ? dataEditProduct.stock.toString() : "");
   const data:Product = {
-    id: title === "Thêm Sản Phẩm Mới" ? uuid() : dataEditProduct ? dataEditProduct.id : "", 
+    id: title === "Thêm Sản Phẩm Mới" ? uuid() : dataEditProduct ? dataEditProduct.id : "",
     name: tenSanPham,
     description: moTa,
     brand: thuongHieu,
@@ -153,7 +152,6 @@ useEffect(()=>{
         </h1>
 
         <div className="bg-white/90 shadow-xl rounded-2xl flex flex-col md:flex-row overflow-hidden">
-          {/* FORM CHÍNH */}
           <form className="flex-1 p-6 border-r border-gray-200">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
@@ -233,9 +231,7 @@ useEffect(()=>{
             </div>
           </form>
 
-          {/* BÊN PHẢI: STOCK, ẢNH, SIZE & COLOR */}
           <div className="w-full md:w-1/3 p-6 bg-gray-50">
-            {/* STOCK */}
             <div className="mb-6">
               <h2 className="text-lg font-semibold text-gray-800 mb-2">
                 Kho Hàng
@@ -248,7 +244,6 @@ useEffect(()=>{
               />
             </div>
 
-            {/* ẢNH */}
             <div className="mb-6">
               <h2 className="text-lg font-semibold text-gray-800 mb-2">
                 Ảnh Sản Phẩm
@@ -288,7 +283,6 @@ useEffect(()=>{
               )}
             </div>
 
-            {/* SIZE */}
             <div className="mb-4">
               <label className="block text-sm text-gray-700 mb-1">Size</label>
               <div className="flex gap-2 mb-2">
@@ -325,7 +319,6 @@ useEffect(()=>{
               </div>
             </div>
 
-            {/* COLOR */}
             <div>
               <label className="block text-sm text-gray-700 mb-1">Màu</label>
               <div className="flex gap-2 mb-2">

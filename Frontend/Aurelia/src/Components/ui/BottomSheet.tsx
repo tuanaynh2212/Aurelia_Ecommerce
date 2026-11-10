@@ -55,7 +55,6 @@ export function BottomSheet({
               className
             )}
           >
-            {/* Grab handle */}
             <div className="pt-3 pb-1 flex justify-center">
               <div className="w-10 h-1 rounded-full bg-[var(--color-cream-300)]" />
             </div>

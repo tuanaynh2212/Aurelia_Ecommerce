@@ -34,7 +34,6 @@ export const TimKiemTaiStore: React.FC<ProductFindProps> = ({
 
   return (
     <div className="w-full h-screen z-[9999] bg-white fixed md:top-0 md:left-0  overflow-y-auto">
-      {/* Header */}
       <div className="flex justify-between items-center p-5 border-b border-gray-300">
         <h1 className="text-lg font-semibold">Tìm Kiếm Tại Store</h1>
         <X
@@ -79,7 +78,6 @@ export const TimKiemTaiStore: React.FC<ProductFindProps> = ({
             </div>
           </div>
 
-          {/* Store List */}
           <div className="w-full mt-6">
             <h1 className="text-lg font-bold mb-3 w-full text-center">Boutiques</h1>
             <div className="h-0.5 w-full bg-gray-500 mb-4"></div>

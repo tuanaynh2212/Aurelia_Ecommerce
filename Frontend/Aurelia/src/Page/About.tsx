@@ -43,7 +43,6 @@ export const About = () => {
         <Navbar />
 
         <main id="main-content" className="flex-1 pb-20">
-          {/* Hero Banner */}
           <section className="relative min-h-[380px] md:min-h-[440px] flex items-center justify-center text-center overflow-hidden bg-[var(--color-surface)] border-b border-[var(--color-rule)]">
             <div className="absolute inset-0">
               <img
@@ -67,7 +66,6 @@ export const About = () => {
             </Container>
           </section>
 
-          {/* Mission & Philosophy */}
           <section className="py-16 md:py-20 border-b border-[var(--color-rule)]">
             <Container className="max-w-3xl text-center">
               <span className="font-mono text-xs uppercase tracking-wider text-[var(--color-ink-muted)] mb-3 block">
@@ -82,7 +80,6 @@ export const About = () => {
             </Container>
           </section>
 
-          {/* Stats Grid */}
           <section className="bg-[var(--color-surface)] border-b border-[var(--color-rule)]">
             <Container>
               <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[var(--color-rule)] text-center">
@@ -100,7 +97,6 @@ export const About = () => {
             </Container>
           </section>
 
-          {/* Core Values */}
           <section className="py-16 md:py-20">
             <Container>
               <div className="text-center max-w-xl mx-auto mb-12">

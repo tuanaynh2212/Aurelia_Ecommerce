@@ -72,7 +72,7 @@ function App() {
   const location = useLocation();
   const ref = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
-  const isWinter = [11, 0, 1].includes(new Date().getMonth()); // Dec, Jan, Feb only
+  const isWinter = [11, 0, 1].includes(new Date().getMonth());
 
   useEffect(() => {
     const timer = setTimeout(() => {

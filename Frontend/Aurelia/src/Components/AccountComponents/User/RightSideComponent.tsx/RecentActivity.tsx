@@ -72,7 +72,6 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({ orders, setActiv
                 key={order.orderId}
                 className="group flex flex-col sm:flex-row sm:items-center justify-between py-3.5 hover:bg-black/[0.015] px-2 -mx-2 rounded-tag transition-colors gap-2"
               >
-                {/* Left: Code, copy, date */}
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-tag bg-kraft/15 border border-kraft-dark/20 flex items-center justify-center text-ink-muted shrink-0 mt-0.5">
                     <Package size={15} />
@@ -108,7 +107,6 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({ orders, setActiv
                   </div>
                 </div>
 
-                {/* Right: Status and Amount */}
                 <div className="flex items-center justify-between sm:justify-end gap-4 text-right pl-11 sm:pl-0">
                   <span
                     className={`inline-block font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-tag border ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
@@ -127,4 +125,4 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({ orders, setActiv
       </div>
     </div>
   );
-};
+};

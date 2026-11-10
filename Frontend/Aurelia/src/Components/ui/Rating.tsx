@@ -3,11 +3,11 @@ import { Star } from "lucide-react";
 import { cn } from "../../utils/cn";
 
 export interface RatingProps {
-  value: number; // 0–5
+  value: number;
   max?: number;
-  count?: number; // review count
+  count?: number;
   size?: number | "xs" | "sm" | "md" | "lg";
-  showValue?: boolean; // display numeric rating e.g. 4.8
+  showValue?: boolean;
   className?: string;
 }
 
@@ -18,10 +18,6 @@ const sizeMap: Record<string, number> = {
   lg: 20,
 };
 
-/**
- * Star rating display (read-only) for Trade Ledger design system.
- * Accessible: uses aria-label describing rating out of max.
- */
 export function Rating({
   value = 5,
   max = 5,

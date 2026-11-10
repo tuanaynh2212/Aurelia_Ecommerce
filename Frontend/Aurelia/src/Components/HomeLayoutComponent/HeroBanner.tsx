@@ -44,7 +44,6 @@ export const HeroBanner = () => {
         </motion.div>
       </AnimatePresence>
 
-      {/* Prev / Next — minimal arrows */}
       {banners.length > 1 && (
         <>
           <button
@@ -64,7 +63,6 @@ export const HeroBanner = () => {
             <ChevronRight size={16} />
           </button>
 
-          {/* Index indicator — tabular */}
           <div className="absolute bottom-4 right-5 z-20 font-body text-xs text-[var(--color-ink-muted)] tabular-nums">
             <span className="font-semibold text-[var(--color-ink)]">{String(index + 1).padStart(2, "0")}</span>
             <span className="mx-1">/</span>
@@ -76,9 +74,6 @@ export const HeroBanner = () => {
   );
 };
 
-/* ============================================================
-   Layout A — Split: Text | Image (Trade Ledger: full-bleed halves)
-   ============================================================ */
 export const HeroA = ({ data }: { data: any }) => {
   const navigate = useNavigate();
 
@@ -86,7 +81,6 @@ export const HeroA = ({ data }: { data: any }) => {
     <section className="relative w-full min-h-[520px] md:min-h-[600px]">
       <div className="container-page h-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[520px] md:min-h-[600px]">
-          {/* Left — Text column */}
           <div className="flex flex-col justify-center py-12 lg:py-16 lg:pr-12">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[var(--color-accent)] mb-4 block">
               {data.h1 || "New Collection 2026"}
@@ -118,7 +112,6 @@ export const HeroA = ({ data }: { data: any }) => {
             </div>
           </div>
 
-          {/* Right — Image, flush, no rounding */}
           <div className="relative lg:border-l border-[var(--color-rule)]">
             <img
               src={data.linkUrl}
@@ -133,9 +126,6 @@ export const HeroA = ({ data }: { data: any }) => {
   );
 };
 
-/* ============================================================
-   Layout B — Full-bleed image with overlay text
-   ============================================================ */
 export const HeroB = ({ data }: { data: any }) => {
   const navigate = useNavigate();
 
@@ -176,9 +166,6 @@ export const HeroB = ({ data }: { data: any }) => {
   );
 };
 
-/* ============================================================
-   Layout C — Boxed card split
-   ============================================================ */
 export const HeroC = ({ data }: { data: any }) => {
   const navigate = useNavigate();
 
@@ -186,7 +173,6 @@ export const HeroC = ({ data }: { data: any }) => {
     <section className="relative w-full min-h-[520px] md:min-h-[600px] flex items-center py-12">
       <div className="container-page">
         <div className="border border-[var(--color-rule)] grid grid-cols-1 md:grid-cols-2">
-          {/* Text side */}
           <div className="p-8 sm:p-12 flex flex-col justify-center">
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[var(--color-accent)] mb-3 block">
               {data.subtitle || "Tuyển chọn"}
@@ -206,7 +192,6 @@ export const HeroC = ({ data }: { data: any }) => {
             </button>
           </div>
 
-          {/* Image side */}
           <div className="relative aspect-[4/3] md:aspect-auto border-t md:border-t-0 md:border-l border-[var(--color-rule)] overflow-hidden">
             <img
               src={data.linkUrl}
@@ -221,9 +206,6 @@ export const HeroC = ({ data }: { data: any }) => {
   );
 };
 
-/* ============================================================
-   Layout D — Wide text, narrow image
-   ============================================================ */
 export const HeroD = ({ data }: { data: any }) => {
   const navigate = useNavigate();
 

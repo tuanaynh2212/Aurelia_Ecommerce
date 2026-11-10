@@ -4,7 +4,7 @@ import axios from "axios";
 import { api_Config, UseApiUrl } from "../services/api";
 import { useLocation } from "react-router-dom";
 import { Toaster } from "../Components/Toaster";
-import { AuthContext } from "./Author"; 
+import { AuthContext } from "./Author";
 
 type FilterProductContextType = {
   key: string;
@@ -39,7 +39,6 @@ export const FilterProductContext = createContext<FilterProductContextType>({
   huyDonHang: async () => {},
 });
 
-
 export const FilterProvider = ({ children }: { children: ReactNode }) => {
   const {  isSignned } = useContext(AuthContext);
   const [handleToggleFavourite, setHandleToggleFavourite] = useState(false);
@@ -55,7 +54,6 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [huyDonHangs, setHuyDonHangs] = useState(false);
 
-  // Hủy đơn hàng
   const huyDonHang = async (orderId: string) => {
     if (!isSignned) return;
     try {

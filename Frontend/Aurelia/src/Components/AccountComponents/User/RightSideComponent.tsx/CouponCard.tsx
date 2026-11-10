@@ -40,7 +40,6 @@ export const CouponCard: React.FC<{
         overflow-hidden
       "
     >
-      {/* Top eyelet and coupon tag identifier */}
       <div className="flex items-center justify-between pb-3 border-b border-rule/60">
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-hole bg-kraft border border-ink/20 shadow-inner" />
@@ -51,7 +50,6 @@ export const CouponCard: React.FC<{
         <Ticket size={14} className="text-cobalt" />
       </div>
 
-      {/* Code with Copy */}
       <div className="mt-4 flex items-center justify-between bg-kraft/15 border border-rule/60 rounded-tag p-2.5">
         <div className="min-w-0">
           <span className="block font-mono text-[9px] uppercase tracking-widest text-ink-muted">
@@ -81,7 +79,6 @@ export const CouponCard: React.FC<{
         </button>
       </div>
 
-      {/* Value & description */}
       <div className="mt-4 space-y-1">
         <p className="font-heading text-lg font-semibold text-ink">
           {discountDisplay}
@@ -93,7 +90,6 @@ export const CouponCard: React.FC<{
         )}
       </div>
 
-      {/* Footer */}
       <div className="mt-5 flex items-center justify-between border-t border-rule/50 pt-3">
         <span className="font-mono text-[10px] text-ink-muted">
           HSD · {formattedEnd}
