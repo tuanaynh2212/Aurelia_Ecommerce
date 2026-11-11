@@ -29,8 +29,8 @@ export const RecentOrder: React.FC<{ donHangChiTiet: order[] }> = ({
   const { huyDonHang } = useContext(FilterProductContext);
   const [openStatus, setOpenStatus] = useState<string | null>(null);
 
-  const calcOrderTotal = (order: order) =>
-    order.product?.reduce(
+  const calcOrderTotal = (orderItem: order) =>
+    orderItem.product?.reduce(
       (sum, p) => sum + (Number(p.price) || 0) * (Number(p.quantity) || 1),
       0
     ) || 0;
@@ -43,27 +43,31 @@ export const RecentOrder: React.FC<{ donHangChiTiet: order[] }> = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-rule/60 gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-tag bg-kraft/15 border border-kraft-dark/20 flex items-center justify-center text-ink">
-            <ShoppingBag size={16} />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b-2 border-[var(--color-ink)] gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-[var(--color-volt)] border-2 border-[var(--color-ink)] flex items-center justify-center text-[var(--color-ink)] shadow-[var(--shadow-hard-sm)]">
+            <ShoppingBag size={18} />
           </div>
           <div>
-            <h1 className="font-heading text-lg font-semibold text-ink">
+            <h1 className="font-display-safe text-lg font-extrabold uppercase text-[var(--color-ink)]">
               Đơn Hàng Của Bạn
             </h1>
-            <p className="font-mono text-xs text-ink-muted">
+            <p className="mono-label text-[var(--color-ink-muted)]">
               Hồ sơ quản lý và theo dõi tiến độ may đo & vận chuyển
             </p>
           </div>
         </div>
 
-        <div className="font-mono text-xs text-ink-muted">
-          Tổng cộng: <strong className="text-ink">{safeOrders.length}</strong> đơn hàng
+        <div className="mono-label text-[var(--color-ink-muted)]">
+          Tổng cộng:{" "}
+          <strong className="bg-[var(--color-volt)] text-[var(--color-ink)] px-1.5 py-0.5 font-extrabold">
+            {safeOrders.length}
+          </strong>{" "}
+          đơn hàng
         </div>
       </div>
 
-      <div className="flex gap-2 border-b border-rule/60 pb-3 overflow-x-auto scrollbar-none">
+      <div className="flex gap-2 border-b-2 border-[var(--color-ink)] pb-3 overflow-x-auto">
         {STATUS_CONFIG.map(({ label, value, icon: Icon }) => {
           const isActive = openStatus === value;
           const count = value
@@ -74,17 +78,19 @@ export const RecentOrder: React.FC<{ donHangChiTiet: order[] }> = ({
             <button
               key={label}
               onClick={() => setOpenStatus(value)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-tag font-mono text-[11px] uppercase tracking-wider whitespace-nowrap transition-all ${
+              className={`min-h-[44px] flex items-center gap-1.5 px-3 py-2 border-2 border-[var(--color-ink)] mono-label whitespace-nowrap transition-all cursor-pointer ${
                 isActive
-                  ? "bg-ink text-paper font-semibold shadow-sm"
-                  : "bg-paper text-ink-muted hover:text-ink hover:bg-kraft/15 border border-rule/60"
+                  ? "bg-[var(--color-volt)] text-[var(--color-ink)] font-extrabold shadow-[var(--shadow-hard-sm)]"
+                  : "bg-[var(--color-paper)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-bone)]"
               }`}
             >
               <Icon size={13} />
               <span>{label}</span>
               <span
-                className={`ml-1 text-[10px] px-1.5 py-0.2 rounded-tag ${
-                  isActive ? "bg-white/20 text-white" : "bg-kraft/20 text-ink"
+                className={`ml-1 text-[10px] px-1.5 py-0.5 border border-[var(--color-ink)] ${
+                  isActive
+                    ? "bg-[var(--color-ink)] text-[var(--color-paper)]"
+                    : "bg-[var(--color-bone)] text-[var(--color-ink)]"
                 }`}
               >
                 {count}
@@ -96,30 +102,30 @@ export const RecentOrder: React.FC<{ donHangChiTiet: order[] }> = ({
 
       <div className="space-y-4">
         {filteredOrders.length === 0 ? (
-          <div className="bg-paper border border-dashed border-rule rounded-tag p-12 text-center">
-            <div className="w-12 h-12 mx-auto rounded-tag bg-kraft/15 flex items-center justify-center text-ink-muted mb-3">
-              <ShoppingBag size={22} />
+          <div className="bg-[var(--color-bone)] border-2 border-dashed border-[var(--color-ink)] p-12 text-center">
+            <div className="w-12 h-12 mx-auto bg-[var(--color-paper)] border-2 border-[var(--color-ink)] flex items-center justify-center text-[var(--color-ink)] mb-3">
+              <ShoppingBag size={20} />
             </div>
-            <p className="font-mono text-sm text-ink font-medium">
+            <p className="font-display-safe font-extrabold uppercase text-sm text-[var(--color-ink)]">
               Không tìm thấy đơn hàng nào
             </p>
-            <p className="font-mono text-xs text-ink-muted mt-1">
+            <p className="font-mono text-xs text-[var(--color-ink-muted)] mt-1">
               {openStatus
                 ? `Bạn hiện không có đơn hàng nào trong trạng thái "${openStatus}".`
                 : "Bạn chưa có đơn hàng nào trong hệ thống."}
             </p>
             <button
               onClick={() => navigate("/Collection")}
-              className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-tag bg-cobalt hover:bg-cobalt-hover text-white font-mono text-xs uppercase tracking-wider transition-colors"
+              className="mt-5 min-h-[44px] inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-flash)] text-[var(--color-paper)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard-sm)] mono-label font-extrabold cursor-pointer"
             >
               Khám phá bộ sưu tập mới
             </button>
           </div>
         ) : (
-          filteredOrders.map((order) => (
+          filteredOrders.map((orderItem) => (
             <OrderCard
-              key={order.orderId}
-              order={order}
+              key={orderItem.orderId}
+              order={orderItem}
               calcOrderTotal={calcOrderTotal}
               huyDonHang={huyDonHang}
               navigate={navigate}
@@ -130,4 +136,3 @@ export const RecentOrder: React.FC<{ donHangChiTiet: order[] }> = ({
     </div>
   );
 };
-

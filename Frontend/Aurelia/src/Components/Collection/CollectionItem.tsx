@@ -24,35 +24,42 @@ const CollectionItem: React.FC<CollectionItemProps> = ({
   const navigate = useNavigate();
 
   return (
-    <div
-      className={`flex flex-col gap-3 group cursor-pointer ${className}`}
+    <article
+      className={`group flex flex-col gap-3 border-2 border-ink bg-paper p-4 shadow-hard hover:bg-bone cursor-pointer rounded-[2px] ${className}`}
       onClick={() => navigate(`/Collection/${id}`)}
     >
-      <div className={`overflow-hidden rounded-none relative ${aspectRatio} bg-[var(--color-surface)] border border-[var(--color-rule)] group-hover:border-[var(--color-ink)] transition-colors`}>
+      <div className="flex items-center justify-between border-b-2 border-dashed border-ink pb-2 mono-label text-[10px] font-bold text-ink-muted">
+        <span>[ARCHIVE SLAB]</span>
+        <span>ADMIT ONE</span>
+      </div>
+
+      <div
+        className={`relative overflow-hidden border-2 border-ink bg-bone ${aspectRatio}`}
+      >
         <div
-          className="w-full h-full bg-cover bg-center transition-transform duration-500 ease-out group-hover:scale-102"
+          className="h-full w-full bg-cover bg-center transition-transform duration-500 ease-out group-hover:scale-105"
           style={{ backgroundImage: `url('${image}')` }}
         />
       </div>
 
-      <div className="flex justify-between items-end pt-1 pb-1">
-        <div className="flex flex-col items-start">
-          <h3 className="text-lg sm:text-xl font-heading font-bold text-[var(--color-ink)] group-hover:text-[var(--color-accent)] transition-colors leading-tight">
+      <div className="flex items-end justify-between gap-3 pt-1">
+        <div className="min-w-0">
+          <h3 className="font-display text-lg sm:text-xl font-extrabold uppercase text-ink diacritic-safe">
             {title}
           </h3>
-          <span className="text-xs font-mono text-[var(--color-ink-muted)] mt-1 uppercase tracking-wide">
+          <span className="mono-label mt-1 block text-xs text-ink-muted">
             {subtitle}
           </span>
         </div>
 
         {showButton && (
-          <span className="btn btn-outline btn-sm rounded-none font-mono text-[11px] uppercase tracking-wider inline-flex items-center gap-1.5 flex-shrink-0">
+          <span className="press-collapse inline-flex min-h-[40px] shrink-0 items-center gap-1.5 border-2 border-ink bg-volt px-3 mono-label text-[11px] font-extrabold text-ink shadow-hard-sm">
             <span>XEM BST</span>
-            <ArrowRight size={13} />
+            <ArrowRight size={13} strokeWidth={2.5} />
           </span>
         )}
       </div>
-    </div>
+    </article>
   );
 };
 

@@ -1,5 +1,3 @@
-
-
 export const api_Config = {
   authentication: {
     login: "/api/Authentication/LogIn",
@@ -7,22 +5,25 @@ export const api_Config = {
     signUp: "/api/Authentication/Register",
     getInfoUser: "/api/Authentication/GetData",
     Logout: "/api/Authentication/LogOut",
-    LogInWithFireBase: "/api/Authentication/LogInWithFireBase"
+    LogInWithFireBase: "/api/Authentication/LogInWithFireBase",
   },
   Password: {
     ResetPassWord: "/api/Email/ResetPassWord",
-    ChangePassWord: "/api/Email/ChangePassWord"
+    ChangePassWord: "/api/Email/ChangePassWord",
   },
   Product: {
     GetProduct: "/api/Product/GetProduct",
     SearchProduct: "/api/Product/GetProductBySearch",
     PostProduct: "/api/Product/PostProduct",
+    UpdateProduct: "/api/Product/UpdateProduct",
     UpdateQuantityProduct: "/api/Product/updateQuantityProduct",
-    DeleteProduct:"/api/Product/DeleteProuct"
+    DeleteProduct: "/api/Product/DeleteProduct",
+    DeleteProductLegacy: "/api/Product/DeleteProuct",
   },
   User: {
     AddFavouriteItems: "/api/Client/AddItems",
     GetItemsFavourite: "/api/Client/GetItemFavourite",
+    RemoveFavouriteItems: "/api/Client/RemoveFavourite",
     SuccessPayAddOrder: "/api/Client/AddDonHang",
     SoLuongDonVaTongThuChi: "/api/Client/GetSoLuongDonHang",
     LayDonHang: "/api/Client/LayDonHang",
@@ -37,10 +38,9 @@ export const api_Config = {
     updateprofile: "/api/Client/UpdateProfile",
     UpdateTier: "/api/Client/UpdateTier",
     HuyDon: "/api/Client/HuyDonHang",
-        AutoAddGioHang: "/api/Client/AutoAddGioHangKhiLog",
-        XoaGioHang: "/api/Client/XoaGioHang" ,
-        PaypalPayment: "/api/Client/PaypalPayment"
-
+    AutoAddGioHang: "/api/Client/AutoAddGioHangKhiLog",
+    XoaGioHang: "/api/Client/XoaGioHang",
+    PaypalPayment: "/api/Client/PaypalPayment",
   },
   Shop: {
     GetDataShop: "/api/Shop/GetShopDataAcoountByID",
@@ -61,7 +61,6 @@ export const api_Config = {
     CheckNotifycation: "/api/Shop/CheckNotifycation",
     GetAllCustomer: "/api/Shop/GetAllCustomer",
   },
-
   AIAdvice: {
     GetAdviceMeasure: "/api/GetAIAdvice/GetAdviceSize",
   },
@@ -73,7 +72,6 @@ export const api_Config = {
     ResetSoldProduct: "/api/Admin/ResetSold",
     DanhSachSanPhamBanChay: "/api/Admin/LaySanPhamBanChay",
     GetDoanhThuCaNam: "/api/Admin/DoanhThuCaNam",
-
     GetShopInfo: "/api/Admin/InformationShop",
   },
   Banner: {
@@ -91,16 +89,18 @@ export const api_Config = {
     toggleCouponStatus: "/api/Coupon/UpdateStatusVoucher",
     suggestVoucher: "/api/Coupon/SuggestVoucher",
   },
-  Collection:{
+  Collection: {
     getallcollections: "/api/SeasonCollection/GetCollection",
     getCollectionsById: "/api/SeasonCollection/GetProductWithId",
     GetStat: "/api/SeasonCollection/GetStatCollection",
     AddCollection: "/api/SeasonCollection/AddCollection",
     UpdateCollection: "/api/SeasonCollection/UpdateCollection",
     DeleteCollection: "/api/SeasonCollection/DeleteCollection",
-  }
+  },
 };
-export const api_Url = "https://lol-tgdq.onrender.com";
+
+export const api_Url =
+  import.meta.env.VITE_API_URL || "https://lol-tgdq.onrender.com";
 
 export const UseApiUrl = (item: string) => {
   return api_Url + item;

@@ -7,6 +7,8 @@ import {
   Percent,
   Calendar,
 } from "lucide-react";
+import { Ticket } from "../../UI/primitives/Ticket";
+import type { Coupon } from "../../../types/type";
 
 export const CouponTable = ({
   coupon,
@@ -15,127 +17,133 @@ export const CouponTable = ({
   setEditing,
   handleDelete,
 }: {
-  coupon: any;
+  coupon: Coupon;
   i: number;
   handleToggleStatus: (id: string, status: boolean) => void;
-  setEditing: (coupon: any) => void;
+  setEditing: (coupon: Coupon) => void;
   handleDelete: (id: string) => void;
 }) => {
   return (
     <motion.div
       key={coupon.id}
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       transition={{ delay: i * 0.03 }}
-      className="bg-white shadow-sm hover:shadow-md transition-all duration-300 p-6"
     >
-      <div className="flex justify-between items-start mb-5">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xl font-semibold text-gray-900 tracking-wide">
-              {coupon.code}
+      <Ticket
+        stub={
+          <div className="flex flex-col items-center justify-center text-center gap-2">
+            <span className="font-mono text-[10px] font-bold uppercase text-ink-muted">
+              [ADMIT ONE]
             </span>
-            {coupon.isActive ? (
-              <CheckCircle size={18} className="text-emerald-500" />
-            ) : (
-              <XCircle size={18} className="text-gray-300" />
-            )}
+            <span className="font-display-safe text-xl font-black uppercase text-ink">
+              {coupon.loaiGiam === "Phần trăm"
+                ? `${coupon.giaTri}%`
+                : `${(coupon.giaTri ?? 0).toLocaleString()}đ`}
+            </span>
+            <span className="px-2 py-0.5 bg-volt border border-ink font-mono text-[10px] font-bold uppercase text-ink">
+              SL: {coupon.soLuong}
+            </span>
           </div>
-          <span className="text-xs text-gray-400 font-mono">
-            {coupon.id}
-          </span>
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            onClick={() =>
-              handleToggleStatus(coupon.id, !coupon.isActive)
-            }
-            className={`p-2 transition ${
-              coupon.isActive
-                ? "text-emerald-600 hover:bg-emerald-50"
-                : "text-gray-400 hover:bg-gray-100"
-            }`}
-          >
-            {coupon.isActive ? (
-              <CheckCircle size={18} />
-            ) : (
-              <XCircle size={18} />
-            )}
-          </button>
-
-          <button
-            onClick={() => setEditing(coupon)}
-            className="p-2 text-indigo-600 hover:bg-indigo-50 transition"
-          >
-            <Edit3 size={18} />
-          </button>
-
-          <button
-            onClick={() => handleDelete(coupon.id)}
-            className="p-2 text-red-500 hover:bg-red-50 transition"
-          >
-            <Trash2 size={18} />
-          </button>
-        </div>
-      </div>
-
-      <div className="bg-gray-50 p-4 mb-5">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <Percent size={22} className="text-gray-600" />
+        }
+      >
+        <div className="space-y-4">
+          <div className="flex justify-between items-start gap-2">
             <div>
-              <p className="text-sm text-gray-500">Giá trị</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {coupon.loaiGiam === "Phần trăm"
-                  ? `${coupon.giaTri}%`
-                  : `${(coupon.giaTri ?? 0).toLocaleString()}đ`}
-              </p>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-mono text-lg font-bold text-ink tracking-wider uppercase">
+                  {coupon.code}
+                </span>
+                {coupon.isActive ? (
+                  <CheckCircle size={16} className="text-success" />
+                ) : (
+                  <XCircle size={16} className="text-ink-muted" />
+                )}
+              </div>
+              <span className="font-mono text-[10px] text-ink-muted block">
+                {coupon.id}
+              </span>
+            </div>
+
+            <div className="flex gap-1.5">
+              <button
+                type="button"
+                onClick={() => handleToggleStatus(coupon.id, !coupon.isActive)}
+                className={`min-w-[44px] min-h-[44px] p-2 border-2 border-ink flex items-center justify-center transition-colors cursor-pointer ${
+                  coupon.isActive
+                    ? "bg-volt text-ink"
+                    : "bg-bone text-ink-muted hover:bg-paper"
+                }`}
+                aria-label="Toggle coupon status"
+              >
+                {coupon.isActive ? (
+                  <CheckCircle size={16} />
+                ) : (
+                  <XCircle size={16} />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setEditing(coupon)}
+                className="min-w-[44px] min-h-[44px] p-2 bg-paper border-2 border-ink text-ink hover:bg-volt flex items-center justify-center transition-colors cursor-pointer"
+                aria-label="Edit coupon"
+              >
+                <Edit3 size={16} />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleDelete(coupon.id)}
+                className="min-w-[44px] min-h-[44px] p-2 bg-paper border-2 border-ink text-danger hover:bg-danger hover:text-paper flex items-center justify-center transition-colors cursor-pointer"
+                aria-label="Delete coupon"
+              >
+                <Trash2 size={16} />
+              </button>
             </div>
           </div>
 
-          <div className="text-right">
-            <p className="text-sm text-gray-500">Số lượng</p>
-            <p className="text-xl font-semibold text-gray-900">
-              {coupon.soLuong}
-            </p>
-          </div>
-        </div>
-      </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-center gap-2 bg-bone border border-ink p-2.5">
+              <Calendar size={14} className="text-ink shrink-0" />
+              <div>
+                <p className="font-mono text-[10px] uppercase text-ink-muted">
+                  Bắt đầu
+                </p>
+                <p className="font-mono text-xs font-bold text-ink">
+                  {new Date(coupon.ngayBatDau).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-5">
-        <div className="flex items-center gap-2 bg-gray-50 p-3">
-          <Calendar size={16} className="text-gray-500" />
-          <div>
-            <p className="text-xs text-gray-400">Bắt đầu</p>
-            <p className="text-sm font-medium text-gray-800">
-              {new Date(coupon.ngayBatDau).toLocaleDateString()}
-            </p>
+            <div className="flex items-center gap-2 bg-bone border border-ink p-2.5">
+              <Calendar size={14} className="text-ink shrink-0" />
+              <div>
+                <p className="font-mono text-[10px] uppercase text-ink-muted">
+                  Kết thúc
+                </p>
+                <p className="font-mono text-xs font-bold text-ink">
+                  {new Date(coupon.ngayKetThuc).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2 bg-gray-50 p-3">
-          <Calendar size={16} className="text-gray-500" />
-          <div>
-            <p className="text-xs text-gray-400">Kết thúc</p>
-            <p className="text-sm font-medium text-gray-800">
-              {new Date(coupon.ngayKetThuc).toLocaleDateString()}
-            </p>
-          </div>
-        </div>
-      </div>
-      <div className="flex flex-wrap gap-2 text-xs font-medium text-gray-600">
-        <span>{coupon.loaiGiam}</span>
-        <span>•</span>
-        <span>{coupon.reuse}</span>
-        {coupon.phamViApDung && (
-          <>
+          <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] font-bold uppercase text-ink-muted pt-2 border-t border-dashed border-ink">
+            <Percent size={12} className="text-flash" />
+            <span>{coupon.loaiGiam}</span>
             <span>•</span>
-            <span>{coupon.phamViApDung}</span>
-          </>
-        )}
-      </div>
+            <span>{coupon.reuse}</span>
+            {coupon.phamViApDung && (
+              <>
+                <span>•</span>
+                <span>{coupon.phamViApDung}</span>
+              </>
+            )}
+          </div>
+        </div>
+      </Ticket>
     </motion.div>
   );
 };

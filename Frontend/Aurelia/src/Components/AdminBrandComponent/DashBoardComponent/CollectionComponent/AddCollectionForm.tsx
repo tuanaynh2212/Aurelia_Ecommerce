@@ -1,8 +1,35 @@
-import { X, XCircleIcon } from "lucide-react";
-import React, { useContext, useState } from "react";
+import {
+  Check,
+  ImagePlus,
+  Layers,
+  Loader2,
+  Search,
+  Sparkles,
+  Trash2,
+  X,
+} from "lucide-react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { FilterProductContext } from "../../../../contexts/FIlterProduct";
 import { CollectionContext } from "../../../../contexts/SeasonContext";
 import { v4 as uuid } from "uuid";
+import type { Product, ProductRef, Season } from "../../../../types/type";
+import { toVietnameseSlug, uploadImageToImgbb } from "../adminUpload";
+import { formatVND } from "../../../../utils/formatters";
+import { getPrimaryProductImage } from "../../../../utils/productHelpers";
+import { Toaster } from "../../../Toaster";
+
+const COLOR_SUGGESTIONS = ["Đen", "Trắng Kem", "Be", "Xanh Olive", "Đỏ Cam", "Nâu Đất"];
+const MATERIAL_SUGGESTIONS = ["Linen", "Silk", "Cotton", "Tweed", "Wool", "Denim"];
+const MOOD_SUGGESTIONS = ["Tối giản", "Sang trọng", "Phóng khoáng", "Cổ điển"];
+const TEMP_SUGGESTIONS = ["Xuân nhẹ", "Hè nắng", "Thu mát", "Đông ấm"];
+
+function extractProductIds(refs: Array<ProductRef | string> | undefined): string[] {
+  if (!Array.isArray(refs)) return [];
+  return refs
+    .map((item) => (typeof item === "string" ? item : item?.id))
+    .filter((id): id is string => Boolean(id));
+}
+
 export default function AddCollectionForm({
   setState,
   status,
@@ -10,186 +37,348 @@ export default function AddCollectionForm({
 }: {
   setState: React.Dispatch<React.SetStateAction<boolean>>;
   status: string;
-  season?: any;
+  season?: Season | null;
 }) {
+  const isEditMode = status === "edit" && Boolean(season);
   const { handleAddCollection, handleUpdateCollection } =
     useContext(CollectionContext);
   const { dataProduct } = useContext(FilterProductContext);
+
   const [text, setText] = useState("");
   const [filteredSeason, setFilteredSeason] = useState("");
-  const [selectedProducts, setSelectedProducts] = useState<any[]>([]);
+  const [slugTouched, setSlugTouched] = useState(isEditMode);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const initialProductIds = useMemo(
+    () => (isEditMode ? extractProductIds(season?.products) : []),
+    [isEditMode, season?.products]
+  );
+
+  const [selectedProducts, setSelectedProducts] = useState<Product[]>(() => {
+    if (!isEditMode || !Array.isArray(dataProduct)) return [];
+    const idSet = new Set(initialProductIds);
+    return dataProduct.filter((p) => idSet.has(p.id));
+  });
+
+  useEffect(() => {
+    if (!isEditMode || !Array.isArray(dataProduct)) return;
+    const idSet = new Set(initialProductIds);
+    setSelectedProducts((prev) =>
+      prev.length > 0 ? prev : dataProduct.filter((p) => idSet.has(p.id))
+    );
+  }, [isEditMode, dataProduct, initialProductIds]);
 
   const [form, setForm] = useState({
-    id:
-      status === "edit" && season
-        ? season.id
-        : uuid(),
-    slug: status === "edit" ? season.slug : "",
-    name: status === "edit"? season.name : "",
-    slogan: status === "edit"  ? season.slogan : "",
-    description: status === "edit"  ? season.description : "",
-    banner: status === "edit"  ? season.banner : "",
+    id: isEditMode && season ? season.id : uuid(),
+    slug: isEditMode && season ? season.slug : "",
+    name: isEditMode && season ? season.name : "",
+    slogan: isEditMode && season ? season.slogan : "",
+    description: isEditMode && season ? season.description : "",
+    banner: isEditMode && season ? season.banner : "",
     seasonalAttributes:
-      status === "edit" && season
-        ? season.seasonalAttributes
+      isEditMode && season && season.seasonalAttributes
+        ? {
+            colors: season.seasonalAttributes.colors || [],
+            materials: season.seasonalAttributes.materials || [],
+            mood: season.seasonalAttributes.mood || "",
+            temperature: season.seasonalAttributes.temperature || "",
+          }
         : {
-            colors: [],
-            materials: [],
+            colors: [] as string[],
+            materials: [] as string[],
             mood: "",
             temperature: "",
           },
-    products: status === "edit" ? season.products : selectedProducts.map((p) => p.id),
-    active: status === "edit"  ? season.active : true,
-    rate: status === "edit" ? season.rate : 0,
-    views: status === "edit"  ? season.views : 0,
+    products:
+      isEditMode && season
+        ? season.products || []
+        : ([] as Array<ProductRef | string>),
+    active: isEditMode && season ? season.active : true,
+    rate: isEditMode && season ? season.rate : 0,
+    views: isEditMode && season ? season.views : 0,
   });
 
-  const filteredList = dataProduct?.filter((product) => {
-    const matchName = product.name.toLowerCase().includes(text.toLowerCase());
-    const matchSeason = !filteredSeason || product.season === filteredSeason;
-    return matchName && matchSeason;
-  });
-  const handleSelectProduct = (product: any) => {
-    if (selectedProducts.find((p) => p.id === product.id)) {
-      setSelectedProducts((prev) => prev.filter((p) => p.id !== product.id));
-      setForm((prev) => ({
-        ...prev,
-        products: prev.products.filter((id: string) => id !== product.id),
-      }));
+  const selectedIdSet = useMemo(
+    () => new Set(selectedProducts.map((p) => p.id)),
+    [selectedProducts]
+  );
+
+  const filteredList = useMemo(
+    () =>
+      (dataProduct || []).filter((product) => {
+        const matchName =
+          product.name?.toLowerCase().includes(text.toLowerCase()) ||
+          product.brand?.toLowerCase().includes(text.toLowerCase());
+        const matchSeason = !filteredSeason || product.season === filteredSeason;
+        return matchName && matchSeason;
+      }),
+    [dataProduct, text, filteredSeason]
+  );
+
+  const syncSelectedProducts = (nextProducts: Product[]) => {
+    setSelectedProducts(nextProducts);
+    setForm((prev) => ({
+      ...prev,
+      products: nextProducts.map((p) => ({ id: p.id })),
+    }));
+  };
+
+  const handleToggleProduct = (product: Product) => {
+    if (selectedIdSet.has(product.id)) {
+      syncSelectedProducts(selectedProducts.filter((p) => p.id !== product.id));
     } else {
-      setSelectedProducts((prev) => [...prev, product]);
-      setForm((prev) => ({
-        ...prev,
-        products: [...prev.products, {id: product.id}],
-      }));
+      syncSelectedProducts([...selectedProducts, product]);
     }
   };
 
-  const handleRemoveProduct = (product: any) => {
-    setSelectedProducts((prev) => prev.filter((p) => p.id !== product.id));
+  const handleSelectAllFiltered = () => {
+    const merged = new Map<string, Product>();
+    selectedProducts.forEach((p) => merged.set(p.id, p));
+    filteredList.forEach((p) => merged.set(p.id, p));
+    syncSelectedProducts(Array.from(merged.values()));
   };
 
-  const clearAll = () => setSelectedProducts([]);
+  const clearAll = () => syncSelectedProducts([]);
 
-  const handleSubmit = () => {
-    if (status === "edit") {
-      handleUpdateCollection(form);
-      setState(false);
-      console.log(form);
-      console.log(selectedProducts)
-    } else {
-      handleAddCollection(form);
-      setState(false);
-      console.log(form);
-    }
+  const handleNameChange = (value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      name: value,
+      slug: !slugTouched ? toVietnameseSlug(value) : prev.slug,
+    }));
   };
 
-  const handleChange = (e: any) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
+    if (name === "slug") setSlugTouched(true);
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAttrChange = (field: string, value: any) => {
+  const handleAttrChange = (field: string, value: string | string[]) => {
     setForm((prev) => ({
       ...prev,
       seasonalAttributes: { ...prev.seasonalAttributes, [field]: value },
     }));
   };
 
+  const toggleChipAttr = (field: "colors" | "materials", chip: string) => {
+    const current = form.seasonalAttributes[field] || [];
+    const exists = current.includes(chip);
+    const next = exists
+      ? current.filter((item) => item !== chip)
+      : [...current, chip];
+    handleAttrChange(field, next);
+  };
+
+  const handleUploadBanner = async (file: File | null) => {
+    if (!file) return;
+    setIsUploading(true);
+    try {
+      const url = await uploadImageToImgbb(file);
+      setForm((prev) => ({ ...prev, banner: url }));
+      Toaster.success("Tải ảnh banner thành công!");
+    } catch (err) {
+      console.error(err);
+      Toaster.error("Tải ảnh thất bại, thử dán URL trực tiếp.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!form.name.trim()) {
+      Toaster.error("Vui lòng nhập tên bộ sưu tập / mùa");
+      return;
+    }
+
+    const cleanedPayload = {
+      ...form,
+      slug: form.slug.trim() || toVietnameseSlug(form.name),
+      seasonalAttributes: {
+        ...form.seasonalAttributes,
+        colors: (form.seasonalAttributes.colors || []).filter(Boolean),
+        materials: (form.seasonalAttributes.materials || []).filter(Boolean),
+      },
+      products: selectedProducts.map((p) => ({ id: p.id })),
+    };
+
+    setIsSubmitting(true);
+    try {
+      if (isEditMode) {
+        await handleUpdateCollection(cleanedPayload as unknown as Season);
+      } else {
+        await handleAddCollection(cleanedPayload as unknown as Season);
+      }
+      setState(false);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center relative  p-8 ">
-      <X
-        onClick={() => setState(false)}
-        className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
-      />
-
-      <div className="bg-white/80 backdrop-blur-lg shadow-2xl rounded-3xl p-9 w-full max-w-7xl h-screen overflow-y-auto border text-black border-white/20 transition-all duration-500 hover:shadow-purple-200/50">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-lg">
-            <span className="text-3xl">🌸</span>
+    <div className="bg-paper border-2 border-ink shadow-hard-lg w-full max-w-6xl my-6 relative overflow-hidden">
+      <div className="bg-ink text-paper px-6 py-4 flex items-center justify-between border-b-2 border-ink">
+        <div className="flex items-center gap-3">
+          <Layers className="w-5 h-5 text-volt" />
+          <div>
+            <span className="mono-label text-[10px] text-volt block">
+              [SEASONAL DOSSIER EDITOR]
+            </span>
+            <h2 className="font-display-safe text-xl font-black uppercase text-paper">
+              {isEditMode ? `Chỉnh sửa: ${season?.name}` : "Tạo Bộ Sưu Tập Mới"}
+            </h2>
           </div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            {status === "edit" ? "Chỉnh Sửa Bộ Sưu Tập" : "Thêm Bộ Sưu Tập Mới"}
-          </h2>
-          <p className="text-gray-500 mt-2 text-sm">
-            {status === "edit"
-              ? "Cập nhật thông tin bộ sưu tập của bạn bên dưới."
-              : "Điền thông tin chi tiết về bộ sưu tập mới của bạn bên dưới."}
-          </p>
         </div>
+        <button
+          type="button"
+          onClick={() => setState(false)}
+          className="min-w-[44px] min-h-[44px] bg-paper text-ink border-2 border-ink flex items-center justify-center hover:bg-flash hover:text-paper transition-colors cursor-pointer"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="p-6 md:p-7 max-h-[84vh] overflow-y-auto bg-bone">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left 6 Cols: Metadata + Banner + Attributes */}
+          <div className="lg:col-span-6 space-y-5 bg-paper border-2 border-ink p-5 shadow-hard-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-semibold text-gray-700 mb-1 block">
-                  Slug
+                <label className="font-mono text-[11px] font-bold uppercase text-ink mb-1.5 block">
+                  Tên bộ sưu tập / mùa *
+                </label>
+                <input
+                  name="name"
+                  value={form.name}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                  placeholder="VD: Xuân Hè 2026"
+                  className="w-full h-11 border-2 border-ink bg-bone px-3 font-sans text-sm text-ink focus:bg-paper outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="font-mono text-[11px] font-bold uppercase text-ink mb-1.5 block">
+                  Đường dẫn Slug (Tự tạo)
                 </label>
                 <input
                   name="slug"
                   value={form.slug}
                   onChange={handleChange}
-                  placeholder="spring-collection-2025"
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-2 focus:border-blue-500 outline-none"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-gray-700 mb-1 block">
-                  Tên mùa
-                </label>
-                <input
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder="Xuân Hè 2025"
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-2 focus:border-purple-500 outline-none"
+                  placeholder="xuan-he-2026"
+                  className="w-full h-11 border-2 border-ink bg-bone px-3 font-mono text-xs text-ink focus:bg-paper outline-none"
                 />
               </div>
             </div>
 
-            <input
-              name="slogan"
-              value={form.slogan}
-              onChange={handleChange}
-              placeholder="Nở rộ cùng sắc xuân..."
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-2 focus:border-pink-500 outline-none"
-            />
-            <textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              rows={3}
-              placeholder="Mô tả chi tiết về bộ sưu tập..."
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-2 focus:border-indigo-500 outline-none resize-none"
-            />
-
             <div>
-              <label className="text-sm font-semibold text-gray-700 mb-1 block">
-                Banner URL
+              <label className="font-mono text-[11px] font-bold uppercase text-ink mb-1.5 block">
+                Slogan nổi bật
               </label>
               <input
-                name="banner"
-                value={form.banner}
+                name="slogan"
+                value={form.slogan}
                 onChange={handleChange}
-                placeholder="https://example.com/banner.jpg"
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2 focus:border-orange-500 outline-none"
+                placeholder="VD: Thanh thoát giữa những ngày nắng..."
+                className="w-full h-11 border-2 border-ink bg-bone px-3 font-sans text-sm text-ink focus:bg-paper outline-none"
               />
+            </div>
+
+            <div>
+              <label className="font-mono text-[11px] font-bold uppercase text-ink mb-1.5 block">
+                Mô tả câu chuyện bộ sưu tập
+              </label>
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                rows={3}
+                placeholder="Mô tả cảm hứng chất liệu, phom dáng..."
+                className="w-full border-2 border-ink bg-bone p-3 font-sans text-sm text-ink focus:bg-paper outline-none resize-none"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="font-mono text-[11px] font-bold uppercase text-ink block">
+                Ảnh Banner chiến dịch
+              </label>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <label className="h-11 px-3 border-2 border-dashed border-ink bg-bone hover:bg-volt/30 cursor-pointer flex items-center justify-center gap-2 font-mono text-xs font-bold shrink-0">
+                  {isUploading ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      <span>Đang tải...</span>
+                    </>
+                  ) : (
+                    <>
+                      <ImagePlus size={14} />
+                      <span>Tải ảnh lên</span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    disabled={isUploading}
+                    onChange={(e) => {
+                      void handleUploadBanner(e.target.files?.[0] || null);
+                      e.target.value = "";
+                    }}
+                    className="hidden"
+                  />
+                </label>
+
+                <input
+                  name="banner"
+                  value={form.banner}
+                  onChange={handleChange}
+                  placeholder="Hoặc dán URL ảnh (https://...)"
+                  className="flex-1 h-11 border-2 border-ink bg-bone px-3 font-mono text-xs text-ink focus:bg-paper outline-none"
+                />
+              </div>
+
               {form.banner && (
-                <div className="mt-3 rounded-2xl overflow-hidden border">
+                <div className="mt-2 border-2 border-ink overflow-hidden bg-bone">
                   <img
                     src={form.banner}
                     alt="Preview"
-                    className="w-full h-48 object-cover"
+                    className="w-full h-40 object-cover"
                   />
                 </div>
               )}
             </div>
 
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-5 border border-purple-100">
-              <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                🎨 Thuộc tính mùa
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
+            <div className="bg-bone border-2 border-ink p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-mono text-xs font-bold uppercase text-ink flex items-center gap-1.5">
+                  <Sparkles size={13} className="text-flash" />
+                  Thuộc tính mùa (Bấm để chọn nhanh)
+                </h3>
+              </div>
+
+              {/* Colors */}
+              <div>
+                <label className="mono-label text-[10px] text-ink-muted block mb-1">
+                  Bảng màu chủ đạo
+                </label>
+                <div className="flex flex-wrap gap-1.5 mb-1.5">
+                  {COLOR_SUGGESTIONS.map((c) => {
+                    const active = form.seasonalAttributes.colors.includes(c);
+                    return (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => toggleChipAttr("colors", c)}
+                        className={`px-2 py-0.5 border border-ink font-mono text-[10px] font-bold cursor-pointer ${
+                          active ? "bg-volt text-ink" : "bg-paper text-ink hover:bg-fog"
+                        }`}
+                      >
+                        {active ? `✓ ${c}` : `+ ${c}`}
+                      </button>
+                    );
+                  })}
+                </div>
                 <input
                   value={form.seasonalAttributes.colors.join(", ")}
                   onChange={(e) =>
@@ -198,9 +387,33 @@ export default function AddCollectionForm({
                       e.target.value.split(",").map((s) => s.trim())
                     )
                   }
-                  placeholder="Màu sắc..."
-                  className="border rounded-lg px-3 py-2 text-sm w-full"
+                  placeholder="VD: Đen, Trắng Kem, Be"
+                  className="h-10 border-2 border-ink bg-paper px-3 font-mono text-xs w-full outline-none"
                 />
+              </div>
+
+              {/* Materials */}
+              <div>
+                <label className="mono-label text-[10px] text-ink-muted block mb-1">
+                  Chất liệu nổi bật
+                </label>
+                <div className="flex flex-wrap gap-1.5 mb-1.5">
+                  {MATERIAL_SUGGESTIONS.map((m) => {
+                    const active = form.seasonalAttributes.materials.includes(m);
+                    return (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => toggleChipAttr("materials", m)}
+                        className={`px-2 py-0.5 border border-ink font-mono text-[10px] font-bold cursor-pointer ${
+                          active ? "bg-volt text-ink" : "bg-paper text-ink hover:bg-fog"
+                        }`}
+                      >
+                        {active ? `✓ ${m}` : `+ ${m}`}
+                      </button>
+                    );
+                  })}
+                </div>
                 <input
                   value={form.seasonalAttributes.materials.join(", ")}
                   onChange={(e) =>
@@ -209,150 +422,270 @@ export default function AddCollectionForm({
                       e.target.value.split(",").map((s) => s.trim())
                     )
                   }
-                  placeholder="Chất liệu..."
-                  className="border rounded-lg px-3 py-2 text-sm w-full"
-                />
-                <input
-                  value={form.seasonalAttributes.mood}
-                  onChange={(e) => handleAttrChange("mood", e.target.value)}
-                  placeholder="Tâm trạng..."
-                  className="border rounded-lg px-3 py-2 text-sm w-full"
-                />
-                <input
-                  value={form.seasonalAttributes.temperature}
-                  onChange={(e) =>
-                    handleAttrChange("temperature", e.target.value)
-                  }
-                  placeholder="Nhiệt độ..."
-                  className="border rounded-lg px-3 py-2 text-sm w-full"
+                  placeholder="VD: Linen, Silk, Cotton"
+                  className="h-10 border-2 border-ink bg-paper px-3 font-mono text-xs w-full outline-none"
                 />
               </div>
+
+              {/* Mood & Temperature */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="mono-label text-[10px] text-ink-muted block mb-1">
+                    Cảm hứng / Phong cách
+                  </label>
+                  <div className="flex flex-wrap gap-1 mb-1">
+                    {MOOD_SUGGESTIONS.map((mood) => (
+                      <button
+                        key={mood}
+                        type="button"
+                        onClick={() => handleAttrChange("mood", mood)}
+                        className={`px-1.5 py-0.5 border border-ink font-mono text-[9px] font-bold cursor-pointer ${
+                          form.seasonalAttributes.mood === mood
+                            ? "bg-ink text-volt"
+                            : "bg-paper text-ink"
+                        }`}
+                      >
+                        {mood}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    value={form.seasonalAttributes.mood}
+                    onChange={(e) => handleAttrChange("mood", e.target.value)}
+                    placeholder="VD: Tối giản"
+                    className="h-10 border-2 border-ink bg-paper px-3 font-mono text-xs w-full outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="mono-label text-[10px] text-ink-muted block mb-1">
+                    Thời tiết phù hợp
+                  </label>
+                  <div className="flex flex-wrap gap-1 mb-1">
+                    {TEMP_SUGGESTIONS.map((temp) => (
+                      <button
+                        key={temp}
+                        type="button"
+                        onClick={() => handleAttrChange("temperature", temp)}
+                        className={`px-1.5 py-0.5 border border-ink font-mono text-[9px] font-bold cursor-pointer ${
+                          form.seasonalAttributes.temperature === temp
+                            ? "bg-ink text-volt"
+                            : "bg-paper text-ink"
+                        }`}
+                      >
+                        {temp}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    value={form.seasonalAttributes.temperature}
+                    onChange={(e) => handleAttrChange("temperature", e.target.value)}
+                    placeholder="VD: Hè nắng"
+                    className="h-10 border-2 border-ink bg-paper px-3 font-mono text-xs w-full outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2 border-t-2 border-dashed border-ink">
+              <span className="font-mono text-xs font-bold uppercase text-ink">
+                Hiển thị ngoài cửa hàng:
+              </span>
+              <button
+                type="button"
+                onClick={() => setForm((prev) => ({ ...prev, active: !prev.active }))}
+                className={`px-3 py-1.5 border-2 border-ink font-mono text-xs font-extrabold uppercase cursor-pointer ${
+                  form.active ? "bg-volt text-ink" : "bg-fog text-ink-muted"
+                }`}
+              >
+                {form.active ? "Đang bật" : "Tạm ẩn"}
+              </button>
             </div>
           </div>
 
-          <div className="flex flex-col h-full">
-            <h1 className="font-semibold text-lg mb-2">Chọn sản phẩm</h1>
-            <input
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Tìm kiếm sản phẩm..."
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-2 mb-3 focus:border-orange-500 outline-none"
-            />
+          {/* Right 6 Cols: Visual Product Picker */}
+          <div className="lg:col-span-6 flex flex-col justify-between bg-paper border-2 border-ink p-5 shadow-hard-sm">
+            <div>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <h3 className="font-mono text-xs font-bold uppercase text-ink">
+                  Chọn sản phẩm thuộc bộ sưu tập ({selectedProducts.length} đã chọn)
+                </h3>
+                {filteredList.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleSelectAllFiltered}
+                    className="font-mono text-[10px] font-bold uppercase underline hover:text-flash cursor-pointer"
+                  >
+                    + Chọn tất cả đang lọc ({filteredList.length})
+                  </button>
+                )}
+              </div>
 
-            <div className="flex flex-wrap gap-2 mb-4">
-              {Array.from(
-                new Set(dataProduct?.map((p) => p.season).filter(Boolean))
-              ).map((season, index) => (
+              <div className="relative mb-3">
+                <Search
+                  size={15}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted"
+                />
+                <input
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder="Tìm theo tên hoặc thương hiệu..."
+                  className="w-full h-11 border-2 border-ink bg-bone pl-9 pr-3 font-mono text-xs text-ink focus:bg-paper outline-none"
+                />
+              </div>
+
+              <div className="flex flex-wrap gap-1.5 mb-3">
                 <button
-                  key={index}
-                  onClick={() =>
-                    setFilteredSeason(season === filteredSeason ? "" : season)
-                  }
-                  className={`px-4 py-1 rounded-lg text-sm ${
-                    filteredSeason === season
-                      ? "bg-fuchsia-600 text-white"
-                      : "bg-fuchsia-100 text-fuchsia-700"
+                  type="button"
+                  onClick={() => setFilteredSeason("")}
+                  className={`min-h-[32px] px-2.5 py-1 border-2 border-ink font-mono text-[10px] font-bold uppercase cursor-pointer ${
+                    filteredSeason === ""
+                      ? "bg-ink text-paper"
+                      : "bg-bone text-ink hover:bg-volt"
                   }`}
                 >
-                  {season}
+                  Tất cả
                 </button>
-              ))}
-            </div>
-
-            <ul className="flex-1 overflow-y-auto border border-gray-300 rounded-lg p-3 bg-white/70 shadow-inner max-h-[400px]">
-              {filteredList?.map((product: any) => {
-                const isSelected = selectedProducts.find(
-                  (p) =>
-                    p.id === (status === "edit" ? form.products : product.id)
-                );
-                return (
-                  <li
-                    key={product.id}
-                    onClick={() => handleSelectProduct(product)}
-                    className={`flex justify-between items-center border-b border-gray-200 py-2 px-2 text-sm rounded cursor-pointer ${
-                      isSelected
-                        ? "bg-green-50 hover:bg-green-100"
-                        : "hover:bg-gray-50"
+                {Array.from(
+                  new Set(dataProduct?.map((p) => p.season).filter(Boolean))
+                ).map((seasonName) => (
+                  <button
+                    type="button"
+                    key={seasonName}
+                    onClick={() =>
+                      setFilteredSeason(
+                        seasonName === filteredSeason ? "" : (seasonName ?? "")
+                      )
+                    }
+                    className={`min-h-[32px] px-2.5 py-1 border-2 border-ink font-mono text-[10px] font-bold uppercase cursor-pointer ${
+                      filteredSeason === seasonName
+                        ? "bg-ink text-paper"
+                        : "bg-bone text-ink hover:bg-volt"
                     }`}
                   >
-                    <span>
-                      {product.name} - {product.price}₫{" "}
-                      <span className="text-gray-400 text-xs">
-                        ({product.season || "Không có"})
-                      </span>
-                    </span>
-                    {isSelected && (
-                      <XCircleIcon
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveProduct(product);
-                        }}
-                        className="text-red-500 w-4 h-4"
-                      />
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-
-            {selectedProducts.length > 0 && (
-              <div className="mt-4">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-medium text-gray-700">
-                    Đã chọn ({selectedProducts.length})
-                  </h3>
-                  <button
-                    onClick={clearAll}
-                    className="text-sm text-red-500 hover:underline"
-                  >
-                    Bỏ chọn tất cả
+                    {seasonName}
                   </button>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  {status === "edit"
-                    ? dataProduct
-                        .filter((p) =>
-                          selectedProducts.find((sp) => sp.id === p.id)
-                        )
-                        .map((p) => (
-                          <div
-                            key={p.id}
-                            onClick={() => handleRemoveProduct(p)}
-                            className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm cursor-pointer hover:border-red-400"
-                          >
-                            <img
-                              src={p.thumbnail}
-                              alt={p.name}
-                              className="w-10 h-10 rounded-md object-cover"
-                            />
-                            <span className="text-sm">{p.name}</span>
-                            <X className="w-4 h-4 text-red-500" />
-                          </div>
-                        ))
-                    : selectedProducts.map((p) => (
-                        <div
-                          key={p.id}
-                          onClick={() => handleRemoveProduct(p)}
-                          className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm cursor-pointer hover:border-red-400"
-                        >
-                          <img
-                            src={p.thumbnail}
-                            alt={p.name}
-                            className="w-10 h-10 rounded-md object-cover"
-                          />
-                          <span className="text-sm">{p.name}</span>
-                          <X className="w-4 h-4 text-red-500" />
-                        </div>
-                      ))}
-                </div>
+                ))}
               </div>
-            )}
 
-            <button
-              onClick={handleSubmit}
-              className="mt-6 py-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-pink-700 transition-all shadow-md"
-            >
-              {status === "edit" ? "Cập Nhật Bộ Sưu Tập" : "Thêm Bộ Sưu Tập"}
-            </button>
+              <ul className="overflow-y-auto border-2 border-ink p-2 bg-bone max-h-[320px] space-y-1.5">
+                {filteredList.length === 0 ? (
+                  <li className="py-8 text-center font-mono text-xs text-ink-muted">
+                    Không tìm thấy sản phẩm phù hợp
+                  </li>
+                ) : (
+                  filteredList.map((product) => {
+                    const isSelected = selectedIdSet.has(product.id);
+                    const img = getPrimaryProductImage(product);
+                    return (
+                      <li key={product.id}>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleProduct(product)}
+                          className={`w-full flex items-center justify-between gap-3 border-2 p-2 text-left cursor-pointer transition ${
+                            isSelected
+                              ? "border-ink bg-volt text-ink font-bold shadow-hard-sm"
+                              : "border-ink/40 bg-paper text-ink hover:border-ink"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            {img ? (
+                              <img
+                                src={img}
+                                alt={product.name}
+                                className="w-10 h-10 object-cover border border-ink shrink-0"
+                              />
+                            ) : (
+                              <div className="studio-grid-bg w-10 h-10 border border-ink shrink-0" />
+                            )}
+                            <div className="min-w-0">
+                              <p className="font-sans text-xs font-bold truncate">
+                                {product.name}
+                              </p>
+                              <p className="font-mono text-[10px] text-ink-muted">
+                                {formatVND(product.price)} · {product.brand || "Aurelia"}
+                              </p>
+                            </div>
+                          </div>
+
+                          <span
+                            className={`w-6 h-6 border-2 border-ink flex items-center justify-center shrink-0 ${
+                              isSelected ? "bg-ink text-volt" : "bg-bone text-transparent"
+                            }`}
+                          >
+                            <Check size={13} strokeWidth={3} />
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })
+                )}
+              </ul>
+
+              {selectedProducts.length > 0 && (
+                <div className="mt-4 pt-3 border-t-2 border-dashed border-ink">
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="font-mono text-xs font-bold uppercase text-ink">
+                      Đã chọn ({selectedProducts.length})
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={clearAll}
+                      className="font-mono text-[11px] font-bold text-danger uppercase hover:underline cursor-pointer flex items-center gap-1"
+                    >
+                      <Trash2 size={12} /> Bỏ chọn hết
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
+                    {selectedProducts.map((p) => (
+                      <button
+                        type="button"
+                        key={p.id}
+                        onClick={() => handleToggleProduct(p)}
+                        className="flex items-center gap-1.5 bg-bone border border-ink px-2 py-1 cursor-pointer hover:bg-danger hover:text-paper transition-colors"
+                      >
+                        {getPrimaryProductImage(p) && (
+                          <img
+                            src={getPrimaryProductImage(p)}
+                            alt={p.name}
+                            className="w-5 h-5 object-cover border border-ink"
+                          />
+                        )}
+                        <span className="font-mono text-[11px] truncate max-w-[130px]">
+                          {p.name}
+                        </span>
+                        <X className="w-3 h-3" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 pt-4 border-t-2 border-ink flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setState(false)}
+                className="min-h-[46px] px-5 bg-bone border-2 border-ink font-mono text-xs font-bold uppercase text-ink hover:bg-fog cursor-pointer"
+              >
+                Đóng
+              </button>
+              <button
+                type="button"
+                disabled={isSubmitting || isUploading}
+                onClick={handleSubmit}
+                className="min-h-[46px] px-6 bg-flash text-paper border-2 border-ink shadow-hard-sm font-mono text-xs font-bold uppercase tracking-widest hover:bg-ink transition-colors cursor-pointer disabled:opacity-60 flex items-center gap-2"
+              >
+                {isSubmitting && <Loader2 size={15} className="animate-spin" />}
+                <span>
+                  {isSubmitting
+                    ? "Đang lưu..."
+                    : isEditMode
+                      ? "Cập Nhật Bộ Sưu Tập"
+                      : "Tạo Bộ Sưu Tập"}
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

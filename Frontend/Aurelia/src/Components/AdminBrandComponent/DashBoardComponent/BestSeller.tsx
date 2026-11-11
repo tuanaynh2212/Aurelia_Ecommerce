@@ -1,57 +1,71 @@
 import React from "react";
 import Icon from "./icon";
 
-const BestSeller: React.FC<{ TOP_PRODUCTS: any[] }> = ({ TOP_PRODUCTS }) => {
-  return (
-    <div className="bg-white dark:bg-dark-surface p-8 shadow-xl h-full">
-      <div className="flex items-center gap-2 mb-8">
-        <Icon name="Star" className="" size={20} />
-        <h4 className="serif text-xl font-normal ">
-          Sản phẩm bán chạy
-        </h4>
-      </div>
+interface TopProductItem {
+  id: string | number;
+  name: string;
+  price?: string | number;
+  sales?: number;
+  type?: string;
+  sold?: number;
+}
 
-      <div className="space-y-6">
-        {TOP_PRODUCTS.map((product, i) => (
-          <div
-            key={product.id}
-            className="flex items-center gap-4 group cursor-pointer"
-          >
-            <div
-              className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg font-bold text-sm ${
-                i === 0
-                  ? "bg-gradient-to-br from-yellow-400 to-orange-500 text-white"
-                  : i === 1
-                    ? "bg-gradient-to-br from-gray-300 to-gray-400 text-white"
-                    : i === 2
-                      ? "bg-gradient-to-br from-yellow-600 to-yellow-800 text-white"
-                      : "bg-gray-200 text-gray-700"
-              }`}
-            >
-              {i + 1}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex justify-between items-start">
-                <h5 className="text-[11px] font-bold  truncate uppercase tracking-tight">
-                  {product.name}
-                </h5>
-                <span
-                  className={`text-[10px] font-bold ${product.sales > 0 ? "text-primary dark:text-white" : "text-accent"}`}
-                >
-                  {product.price}
-                </span>
-              </div>
-              <div className="flex justify-between items-center mt-1">
-                <p className="text-[9px] font-bold text-accent uppercase tracking-[0.15em]">
-                  {product.type}
-                </p>
-                <p className="text-[9px] text-accent font-medium">
-                  {product.sold} đã bán
-                </p>
-              </div>
-            </div>
+const BestSeller: React.FC<{ TOP_PRODUCTS: TopProductItem[] }> = ({
+  TOP_PRODUCTS,
+}) => {
+  return (
+    <div className="bg-paper border-2 border-ink shadow-hard p-6 h-full flex flex-col justify-between">
+      <div>
+        <div className="flex items-center justify-between pb-4 mb-5 border-b-2 border-ink">
+          <div className="flex items-center gap-2">
+            <Icon name="Star" className="text-flash" size={18} />
+            <h4 className="font-display-safe text-lg font-black uppercase tracking-tight text-ink">
+              Sản phẩm bán chạy
+            </h4>
           </div>
-        ))}
+          <span className="mono-label text-[10px] text-ink-muted">[TOP 05]</span>
+        </div>
+
+        <div className="space-y-3">
+          {TOP_PRODUCTS.map((product, i) => (
+            <div
+              key={product.id ?? i}
+              className="flex items-center gap-3 p-2.5 bg-bone border-2 border-ink hover:bg-volt/40 transition-colors cursor-pointer"
+            >
+              <div
+                className={`shrink-0 w-8 h-8 flex items-center justify-center border-2 border-ink font-mono font-bold text-xs ${
+                  i === 0
+                    ? "bg-flash text-paper"
+                    : i === 1
+                      ? "bg-volt text-ink"
+                      : i === 2
+                        ? "bg-ink text-paper"
+                        : "bg-paper text-ink"
+                }`}
+              >
+                {String(i + 1).padStart(2, "0")}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-start gap-2">
+                  <h5 className="font-mono text-xs font-bold text-ink truncate uppercase">
+                    {product.name}
+                  </h5>
+                  <span className="font-mono text-xs font-bold text-ink shrink-0">
+                    {product.price}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center mt-1">
+                  <p className="font-mono text-[10px] font-bold text-ink-muted uppercase tracking-wider">
+                    {product.type}
+                  </p>
+                  <p className="font-mono text-[10px] text-ink font-bold uppercase">
+                    {product.sold} đã bán
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -1,10 +1,12 @@
 import { useContext, useState } from "react";
-import { SlidersHorizontal, Search, Check } from "lucide-react";
+import { SlidersHorizontal, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { FilterProductContext } from "../../contexts/FIlterProduct";
 import { DanhMuc } from "../HomeLayoutComponent/DanhMucSanPham";
 import { cn } from "../../utils/cn";
-import { Drawer } from "../ui/Drawer";
+import { Drawer, AccordionItem } from "../UI/primitives/Overlays";
+import { Checkbox } from "../UI/primitives/Controls";
+import { Button } from "../UI/primitives/Button";
 
 export const FilterType = () => {
   const { key, setKey } = useContext(FilterProductContext);
@@ -22,16 +24,17 @@ export const FilterType = () => {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-1">
-        <div className="flex items-center justify-between gap-3 border-b border-[var(--color-rule)] pb-4">
-          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1">
+      <div className="container-atelier pt-5 pb-1">
+        <div className="flex items-center justify-between gap-3 border-b-2 border-ink pb-4">
+          <div className="flex items-center gap-2 overflow-x-auto py-1">
             <button
+              type="button"
               onClick={() => handleSelect("")}
               className={cn(
-                "px-3.5 py-1.5 rounded-none text-xs font-mono uppercase tracking-wider whitespace-nowrap transition-colors cursor-pointer border",
+                "press-collapse min-h-[44px] px-4 py-2 rounded-[2px] border-2 border-ink mono-label text-xs font-extrabold whitespace-nowrap cursor-pointer",
                 key === ""
-                  ? "bg-[var(--color-ink)] text-[var(--color-bg)] border-[var(--color-ink)] font-bold"
-                  : "bg-[var(--color-bg)] text-[var(--color-ink-muted)] border-[var(--color-rule)] hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
+                  ? "bg-volt text-ink shadow-hard-sm"
+                  : "bg-paper text-ink hover:bg-bone"
               )}
             >
               TẤT CẢ
@@ -42,12 +45,13 @@ export const FilterType = () => {
               return (
                 <button
                   key={item.type}
+                  type="button"
                   onClick={() => handleSelect(item.type)}
                   className={cn(
-                    "px-3.5 py-1.5 rounded-none text-xs font-mono uppercase tracking-wider whitespace-nowrap transition-colors cursor-pointer border",
+                    "press-collapse min-h-[44px] px-4 py-2 rounded-[2px] border-2 border-ink mono-label text-xs font-extrabold whitespace-nowrap cursor-pointer",
                     isSelected
-                      ? "bg-[var(--color-ink)] text-[var(--color-bg)] border-[var(--color-ink)] font-bold"
-                      : "bg-[var(--color-bg)] text-[var(--color-ink-muted)] border-[var(--color-rule)] hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
+                      ? "bg-volt text-ink shadow-hard-sm"
+                      : "bg-paper text-ink hover:bg-bone"
                   )}
                 >
                   {item.name}
@@ -56,82 +60,88 @@ export const FilterType = () => {
             })}
           </div>
 
-          <button
+          <Button
+            variant="secondary"
             onClick={() => setOpenDrawer(true)}
-            className="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-none bg-[var(--color-surface)] border border-[var(--color-rule)] text-xs font-mono uppercase tracking-wider text-[var(--color-ink)] hover:border-[var(--color-ink)] transition-colors cursor-pointer flex-shrink-0"
+            className="hidden sm:inline-flex shrink-0"
+            iconLeft={<SlidersHorizontal size={15} strokeWidth={2.5} />}
           >
-            <SlidersHorizontal size={13} className="text-[var(--color-accent)]" />
-            <span>Bộ Lọc</span>
-          </button>
+            Bộ Lọc
+          </Button>
         </div>
       </div>
 
-      <div className="sm:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
-        <button
+      {/* Mobile floating filter trigger */}
+      <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2 sm:hidden">
+        <Button
+          variant="primary"
           onClick={() => setOpenDrawer(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-none bg-[var(--color-ink)] text-[var(--color-bg)] text-xs font-mono uppercase tracking-wider border border-[var(--color-ink)] shadow-none transition-colors cursor-pointer"
+          iconLeft={<SlidersHorizontal size={15} strokeWidth={2.5} />}
         >
-          <SlidersHorizontal size={13} className="text-[var(--color-accent)]" />
-          <span>{key ? `Lọc: ${key}` : "Bộ Lọc & Phân Loại"}</span>
-        </button>
+          {key ? `Lọc: ${key}` : "Bộ Lọc & Phân Loại"}
+        </Button>
       </div>
 
       <Drawer
         open={openDrawer}
         onClose={() => setOpenDrawer(false)}
+        side="bottom"
+        code="[FILTER // SHEET]"
         title="Danh Mục & Bộ Lọc"
-      >
-        <div className="space-y-6">
-          <div>
-            <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--color-ink-muted)] mb-3">
-              PHÂN LOẠI SẢN PHẨM
-            </h4>
-            <div className="flex flex-col border border-[var(--color-rule)] divide-y divide-[var(--color-rule)]">
-              <button
-                onClick={() => handleSelect("")}
-                className={cn(
-                  "w-full text-left px-3.5 py-2.5 text-xs font-mono uppercase tracking-wider flex items-center justify-between transition-colors",
-                  key === ""
-                    ? "bg-[var(--color-surface)] text-[var(--color-ink)] font-bold border-l-2 border-[var(--color-accent)]"
-                    : "bg-[var(--color-bg)] text-[var(--color-ink)] hover:bg-[var(--color-surface)]"
-                )}
-              >
-                <span>Tất Cả Sản Phẩm</span>
-                {key === "" && <Check size={14} className="text-[var(--color-accent)]" />}
-              </button>
-
-              {DanhMuc.map((item) => {
-                const isSelected = key === item.type;
-                return (
-                  <button
-                    key={item.type}
-                    onClick={() => handleSelect(item.type)}
-                    className={cn(
-                      "w-full text-left px-3.5 py-2.5 text-xs font-mono uppercase tracking-wider flex items-center justify-between transition-colors",
-                      isSelected
-                        ? "bg-[var(--color-surface)] text-[var(--color-ink)] font-bold border-l-2 border-[var(--color-accent)]"
-                        : "bg-[var(--color-bg)] text-[var(--color-ink)] hover:bg-[var(--color-surface)]"
-                    )}
-                  >
-                    <span>{item.name}</span>
-                    {isSelected && <Check size={14} className="text-[var(--color-accent)]" />}
-                  </button>
-                );
-              })}
-            </div>
+        footer={
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              variant="secondary"
+              block
+              onClick={() => {
+                setKey("");
+                setOpenDrawer(false);
+              }}
+            >
+              Xoá
+            </Button>
+            <Button
+              variant="volt"
+              block
+              onClick={() => setOpenDrawer(false)}
+            >
+              Áp dụng
+            </Button>
           </div>
+        }
+      >
+        <div className="space-y-4">
+          <AccordionItem code="01" title="Phân Loại Sản Phẩm" defaultOpen>
+            <div className="flex flex-col gap-1">
+              <Checkbox
+                checked={key === ""}
+                onChange={() => handleSelect("")}
+                label="Tất Cả Sản Phẩm"
+              />
+              {DanhMuc.map((item) => (
+                <Checkbox
+                  key={item.type}
+                  checked={key === item.type}
+                  onChange={() => handleSelect(item.type)}
+                  label={item.name}
+                  description={item.subtitle}
+                />
+              ))}
+            </div>
+          </AccordionItem>
 
-          <div className="pt-4 border-t border-[var(--color-rule)]">
-            <button
+          <div className="pt-2">
+            <Button
+              variant="secondary"
+              block
               onClick={() => {
                 setOpenDrawer(false);
                 navigate("/search");
               }}
-              className="btn btn-outline w-full flex items-center justify-center gap-2 rounded-none text-xs font-mono uppercase tracking-wider"
+              iconLeft={<Search size={15} />}
             >
-              <Search size={14} />
-              <span>Tìm Kiếm Theo Từ Khóa</span>
-            </button>
+              Tìm Kiếm Theo Từ Khóa
+            </Button>
           </div>
         </div>
       </Drawer>

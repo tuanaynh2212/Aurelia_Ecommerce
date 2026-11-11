@@ -1,8 +1,12 @@
-import { X } from "lucide-react";
+import { X, MapPin, Phone, Clock, CalendarCheck } from "lucide-react";
 import React, { useContext, type SetStateAction, useState } from "react";
 import type { Product } from "../types/type";
 import { StoreContext } from "../contexts/Store";
 import { useNavigate } from "react-router-dom";
+import { formatVND } from "../utils/formatters";
+import { Ticket } from "./UI/primitives/Ticket";
+import { Button } from "./UI/primitives/Button";
+import { sizeTileClass } from "./UI/primitives/recipes";
 
 type ProductFindProps = {
   product: Product;
@@ -13,63 +17,79 @@ export const TimKiemTaiStore: React.FC<ProductFindProps> = ({
   product,
   setState,
 }) => {
-  const { GetStore, dataStore,setAppointmentProduct } = useContext(StoreContext);
+  const { GetStore, dataStore, setAppointmentProduct } = useContext(StoreContext);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
   const handleSelectSize = (size: string) => {
     setSelectedSize(size);
     GetStore(product.id, size.toUpperCase());
   };
-  const navigate=useNavigate()
-  const handleClickAppointment=(item:Product,shopId:string)=>{
-    navigate(`/BookingAppointment/${shopId}`)
+  const navigate = useNavigate();
+  const handleClickAppointment = (item: Product, shopId: string) => {
+    navigate(`/BookingAppointment/${shopId}`);
     setAppointmentProduct({
-      id:item.id,
-      thumbnail:item.images[1],
-      name:item.name,
-      size:selectedSize??"",
-      price:item.price
+      id: item.id,
+      thumbnail: item.images?.[1] || item.thumbnail,
+      name: item.name,
+      size: selectedSize ?? "",
+      price: item.price,
     });
-  }
+  };
 
   return (
-    <div className="w-full h-screen z-[9999] bg-white fixed md:top-0 md:left-0  overflow-y-auto">
-      <div className="flex justify-between items-center p-5 border-b border-gray-300">
-        <h1 className="text-lg font-semibold">Tìm Kiếm Tại Store</h1>
-        <X
-          className="cursor-pointer hover:text-red-500 transition"
+    <div className="space-y-6 text-ink">
+      <div className="flex items-center justify-between border-b-2 border-ink pb-3">
+        <div>
+          <span className="mono-label text-[10px] font-bold text-ink-muted">
+            [STORE LOCATOR // BOUTIQUE STOCK]
+          </span>
+          <h2 className="font-display text-lg font-extrabold uppercase text-ink diacritic-safe">
+            Tìm Kiếm Tại Store
+          </h2>
+        </div>
+        <button
+          type="button"
           onClick={() => setState(false)}
-        />
+          aria-label="Đóng"
+          className="press-collapse flex h-11 w-11 items-center justify-center border-2 border-ink bg-paper hover:bg-volt cursor-pointer rounded-[2px]"
+        >
+          <X size={18} strokeWidth={2.5} />
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
-        <div className="flex flex-col items-center gap-3">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        {/* Product summary card */}
+        <div className="flex flex-col items-center gap-3 border-2 border-ink bg-bone p-4 rounded-[2px]">
           <img
-            src={product.images[1]}
+            src={product.images?.[1] || product.thumbnail}
             alt={product.name}
-            className="w-full h-full object-contain"
+            className="aspect-[3/4] w-full border-2 border-ink bg-paper object-cover"
           />
-          <h1 className="text-xl font-semibold text-center">{product.name}</h1>
-          <h2 className="text-gray-500">{product.brand}</h2>
-          <h3 className="text-lg text-green-600 font-bold">{product.price}</h3>
+          <h3 className="text-center font-display text-base font-extrabold uppercase text-ink diacritic-safe">
+            {product.name}
+          </h3>
+          <p className="mono-label text-xs font-bold text-ink-muted">
+            {product.brand}
+          </p>
+          <p className="font-mono text-lg font-black tabular text-ink">
+            {formatVND(product.price)}
+          </p>
         </div>
 
-        <div className="md:col-span-2 flex flex-col items-center gap-6">
-          <div className="text-center">
-            <h2 className="font-medium mb-3">
+        {/* Size selector + Boutique list */}
+        <div className="flex flex-col gap-6 md:col-span-2">
+          <div className="border-2 border-ink bg-paper p-4 rounded-[2px]">
+            <h4 className="mono-label mb-3 text-xs font-extrabold text-ink">
               Hãy chọn một size để tìm kiếm cửa hàng
-            </h2>
-            <div className="flex flex-wrap gap-3 justify-center">
-              {product.variants.flatMap((variant) =>
-                variant.sizes.map((size) => (
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {product.variants?.flatMap((variant) =>
+                variant.sizes?.map((size, idx) => (
                   <button
-                    key={size.size}
+                    key={`${variant.color}-${size.size}-${idx}`}
+                    type="button"
                     onClick={() => handleSelectSize(size.size)}
-                    className={`px-4 py-2 rounded-lg border transition ${
-                      selectedSize === size.size
-                        ? "bg-black text-white border-black"
-                        : "border-gray-400 hover:bg-black hover:text-white"
-                    }`}
+                    className={sizeTileClass(selectedSize === size.size, false)}
                   >
                     {size.size}
                   </button>
@@ -78,37 +98,60 @@ export const TimKiemTaiStore: React.FC<ProductFindProps> = ({
             </div>
           </div>
 
-          <div className="w-full mt-6">
-            <h1 className="text-lg font-bold mb-3 w-full text-center">Boutiques</h1>
-            <div className="h-0.5 w-full bg-gray-500 mb-4"></div>
+          <div className="w-full">
+            <h4 className="mono-label mb-3 border-b-2 border-ink pb-2 text-xs font-extrabold text-ink">
+              [BOUTIQUES // AVAILABLE LOCATIONS]
+            </h4>
             {dataStore.length === 0 ? (
-              <p className="text-gray-500 text-center">
+              <p className="border-2 border-dashed border-ink bg-bone p-6 text-center text-sm text-ink-muted">
                 Vui lòng chọn size để tìm kiếm cửa hàng.
               </p>
             ) : (
-              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+              <div className="max-h-[380px] space-y-3 overflow-y-auto pr-1">
                 {dataStore.map((item, i) => (
-                  <div
-                    key={i}
-                    className="p-4 border rounded-xl shadow-sm hover:shadow-md transition"
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <h1 className="font-semibold">{item.shopName}</h1>
-                      <span className="text-sm text-red-500">Limited stock</span>
+                  <Ticket key={i} notchClassName="bg-paper" className="bg-bone">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <h5 className="font-display text-base font-extrabold uppercase text-ink diacritic-safe">
+                          {item.shopName}
+                        </h5>
+                        <span className="border-2 border-ink bg-volt px-2 py-0.5 mono-label text-[10px] font-bold text-ink">
+                          Limited stock
+                        </span>
+                      </div>
+                      <div className="space-y-1 text-xs text-ink-muted">
+                        <p className="flex items-center gap-1.5">
+                          <MapPin size={13} className="text-ink" />
+                          <span>
+                            {item.address} — {item.city}
+                          </span>
+                        </p>
+                        <p className="flex items-center gap-1.5">
+                          <Phone size={13} className="text-ink" />
+                          <span className="font-mono font-bold text-ink">
+                            {item.phone}
+                          </span>
+                        </p>
+                        <p>Owner: {item.owner}</p>
+                        <p className="flex items-center gap-1.5 font-semibold text-ink">
+                          <Clock size={13} />
+                          <span>Open: {item.openingHours}</span>
+                        </p>
+                      </div>
+                      <div className="pt-2">
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() =>
+                            handleClickAppointment(product, item.shopId)
+                          }
+                          iconLeft={<CalendarCheck size={14} />}
+                        >
+                          Đặt Lịch Hẹn
+                        </Button>
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-700 space-y-1">
-                      <p>{item.address}</p>
-                      <p>{item.city}</p>
-                      <p>☎ {item.phone}</p>
-                      <p>Owner: {item.owner}</p>
-                    </div>
-                    <p className="mt-2 text-black text-sm">⏰ Open: {item.openingHours}</p>
-                    <div className="mt-3">
-                      <button onClick={()=>handleClickAppointment(product,item.shopId)} className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition">
-                        Đặt Lịch Hẹn
-                      </button>
-                    </div>
-                  </div>
+                  </Ticket>
                 ))}
               </div>
             )}

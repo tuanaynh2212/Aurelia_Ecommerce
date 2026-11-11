@@ -1,5 +1,6 @@
 import { Package, User, MapPin, Calendar, X } from "lucide-react";
 import type { order } from "../../../types/type";
+import { Badge } from "../../UI";
 
 export const PopUpDetail = ({
   data,
@@ -13,33 +14,39 @@ export const PopUpDetail = ({
   const shop = localStorage.getItem("shop");
   const shopParsed = shop ? JSON.parse(shop) : null;
   const orderData = data?.filter((order) => order.orderId === orderId);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-3xl p-6 md:p-8 animate-fade-in-up overflow-y-auto max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-ink)]/70 p-4">
+      <div className="relative bg-[var(--color-paper)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard-lg)] w-full max-w-3xl p-6 md:p-8 overflow-y-auto max-h-[90vh]">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
+          className="absolute top-4 right-4 min-w-[40px] min-h-[40px] inline-flex items-center justify-center border-2 border-[var(--color-ink)] bg-[var(--color-bone)] hover:bg-[var(--color-flash)] hover:text-[var(--color-paper)] transition-colors cursor-pointer"
         >
-          <X className="w-6 h-6" />
+          <X className="w-5 h-5" />
         </button>
 
-        <h2 className="text-2xl font-bold  mb-6 bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
-          Chi tiết đơn hàng
-        </h2>
+        <div className="mb-6 pb-3 border-b-2 border-[var(--color-ink)]">
+          <span className="hud-chip bg-[var(--color-volt)] text-[var(--color-ink)]">
+            [ORDER MANIFEST]
+          </span>
+          <h2 className="display-m font-display-safe text-[var(--color-ink)] mt-2">
+            Chi tiết đơn hàng
+          </h2>
+        </div>
 
         {orderData?.map((order) => (
           <div
             key={order.orderId}
-            className="border border-gray-100 rounded-2xl p-5 mb-6 shadow-sm hover:shadow-md transition"
+            className="border-2 border-[var(--color-ink)] bg-[var(--color-bone)] p-5 mb-4 space-y-5"
           >
-            <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
+            <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b-2 border-[var(--color-ink)]">
               <div className="flex items-center gap-2">
-                <Package className="w-5 h-5 text-indigo-600" />
-                <span className="font-semibold text-gray-800">
+                <Package className="w-5 h-5 text-[var(--color-flash)]" />
+                <span className="font-mono font-extrabold text-sm text-[var(--color-ink)]">
                   Mã đơn: #{order.orderId}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-gray-500 text-sm">
+              <div className="flex items-center gap-2 mono-label text-[var(--color-ink-muted)]">
                 <Calendar className="w-4 h-4" />
                 <span>
                   {new Date(order.ngayTaoDon).toLocaleDateString("vi-VN")}
@@ -48,75 +55,75 @@ export const PopUpDetail = ({
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-3">
+              <div className="space-y-3 font-mono text-xs">
                 <div className="flex items-start gap-3">
-                  <div className="bg-indigo-50 p-2 rounded-lg">
-                    <User className="w-4 h-4 text-indigo-600" />
+                  <div className="bg-[var(--color-paper)] border-2 border-[var(--color-ink)] p-2">
+                    <User className="w-4 h-4 text-[var(--color-flash)]" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Khách hàng</p>
-                    <p className="font-medium text-gray-800">{order.name}</p>
+                    <p className="mono-label text-[10px] text-[var(--color-ink-muted)]">
+                      Khách hàng
+                    </p>
+                    <p className="font-extrabold text-[var(--color-ink)]">
+                      {order.name}
+                    </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="bg-blue-50 p-2 rounded-lg">
-                    <MapPin className="w-4 h-4 text-blue-600" />
+                  <div className="bg-[var(--color-paper)] border-2 border-[var(--color-ink)] p-2">
+                    <MapPin className="w-4 h-4 text-[var(--color-flash)]" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Địa chỉ nhận hàng</p>
-                    <p className="text-sm text-gray-700">{order.address}</p>
+                    <p className="mono-label text-[10px] text-[var(--color-ink-muted)]">
+                      Địa chỉ nhận hàng
+                    </p>
+                    <p className="text-[var(--color-ink)]">{order.address}</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="bg-emerald-50 p-2 rounded-lg">
-                    <MapPin className="w-4 h-4 text-emerald-600" />
+                  <div className="bg-[var(--color-paper)] border-2 border-[var(--color-ink)] p-2">
+                    <MapPin className="w-4 h-4 text-[var(--color-success)]" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Địa chỉ giao hàng</p>
-                    <p className="text-sm text-gray-700">
+                    <p className="mono-label text-[10px] text-[var(--color-ink-muted)]">
+                      Địa chỉ giao hàng
+                    </p>
+                    <p className="text-[var(--color-ink)]">
                       {shopParsed?.address}
                     </p>
                   </div>
                 </div>
 
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Trạng thái</p>
-                  <span
-                    className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${
-                      order.status === "Đang giao"
-                        ? "bg-blue-100 text-blue-700"
-                        : order.status === "Chờ xác nhận"
-                        ? "bg-amber-100 text-amber-700"
-                        : order.status === "Đã giao"
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-rose-100 text-rose-700"
-                    }`}
-                  >
-                    {order.status}
-                  </span>
+                <div className="pt-1">
+                  <p className="mono-label text-[10px] text-[var(--color-ink-muted)] mb-1">
+                    Trạng thái
+                  </p>
+                  <Badge status="info">{order.status}</Badge>
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-4 space-y-3">
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">
+              <div className="bg-[var(--color-paper)] border-2 border-[var(--color-ink)] p-4 space-y-3">
+                <h3 className="mono-label font-extrabold text-[var(--color-ink)] pb-2 border-b-2 border-[var(--color-ink)]">
                   Danh sách sản phẩm
                 </h3>
                 {order.product.map((item) => (
                   <div
                     key={item.itemid}
-                    className="border-b border-gray-200 pb-2 last:border-0"
+                    className="border-b-2 border-dashed border-[var(--color-ink)] pb-2 last:border-0"
                   >
-                    <p className="font-medium text-gray-800">{item.name}</p>
-                    <p className="text-xs text-gray-600">
-                      Màu: {item.color} • Size: {item.size}
+                    <p className="font-display-safe font-extrabold text-xs uppercase text-[var(--color-ink)]">
+                      {item.name}
                     </p>
-                    <div className="flex justify-between items-center mt-1">
-                      <span className="text-sm text-gray-500">
+                    <p className="mono-label text-[10px] text-[var(--color-ink-muted)]">
+                      Màu: {item.color} · Size: {item.size}
+                    </p>
+                    <div className="flex justify-between items-center mt-1 font-mono text-xs">
+                      <span className="text-[var(--color-ink-muted)]">
                         SL: {item.quantity}
                       </span>
-                      <span className="text-sm font-semibold text-indigo-600">
+                      <span className="font-extrabold text-[var(--color-flash)] tabular-nums">
                         {item.price.toLocaleString("vi-VN", {
                           style: "currency",
                           currency: "VND",

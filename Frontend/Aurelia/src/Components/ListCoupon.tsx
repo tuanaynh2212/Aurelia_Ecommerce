@@ -15,75 +15,87 @@ export const ListCoupon = ({
   dataOrder: Cart[];
   order: order | undefined;
 }) => {
-  const { coupons, suggestVoucher} =
-    useContext(AdminContext);
+  const { coupons, suggestVoucher } = useContext(AdminContext);
 
   const [validationMessage] = useState<string | null>(null);
 
   useEffect(() => {
     suggestVoucher(order ?? undefined);
-  }, [dataOrder, order]);
+  }, [dataOrder, order, suggestVoucher]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div
-        className="bg-gradient-to-br from-slate-200 to-slate-300 rounded-3xl
-      max-w-3xl w-full max-h-[90vh] overflow-hidden shadow-2xl
-      border border-slate-400/40"
-      >
-        <div className="relative bg-gradient-to-r from-gray-300 to-gray-500 p-8">
-          <button
-            onClick={() => setIsOpen(false)}
-            className="absolute top-6 right-6 text-slate-800 hover:bg-black/10 rounded-xl p-2 transition-all"
-          >
-            <X className="w-6 h-6" />
-          </button>
+    <div className="fixed inset-0 bg-[var(--color-ink)]/70 flex items-center justify-center p-4 z-50">
+      <div className="bg-[var(--color-paper)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard-lg)] max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        {/* Brutalist Header */}
+        <div className="relative bg-[var(--color-ink)] text-[var(--color-paper)] p-6 border-b-2 border-[var(--color-ink)] flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="bg-white/40 backdrop-blur-md p-4 rounded-2xl border border-gray-300">
-              <Sparkles className="w-10 h-10 text-slate-800" />
+            <div className="w-12 h-12 bg-[var(--color-volt)] text-[var(--color-ink)] border-2 border-[var(--color-paper)] flex items-center justify-center">
+              <Sparkles className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-3xl font-bold text-slate-900">Mã giảm giá</h2>
-              <p className="text-slate-700 text-lg">Tiết kiệm ngay hôm nay</p>
+              <span className="mono-label text-[var(--color-volt)]">
+                [TICKET BOOTH · VOUCHER ARCHIVE]
+              </span>
+              <h2 className="display-m font-display-safe text-[var(--color-paper)]">
+                Mã Giảm Giá
+              </h2>
+              <p className="mono-label text-[var(--color-paper)]/70">
+                Tiết kiệm ngay hôm nay
+              </p>
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setIsOpen(false)}
+            className="min-w-[44px] min-h-[44px] inline-flex items-center justify-center bg-[var(--color-paper)] text-[var(--color-ink)] hover:bg-[var(--color-flash)] hover:text-[var(--color-paper)] border-2 border-[var(--color-ink)] transition-colors cursor-pointer"
+            aria-label="Đóng"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        <div className="p-4 sm:p-8 overflow-y-auto max-h-[calc(92vh-150px)] scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
+        {/* Scrollable Body */}
+        <div className="p-6 overflow-y-auto flex-1 bg-[var(--color-bone)] space-y-6">
           {validationMessage && (
-            <div className="mb-4 px-4 py-3 rounded-xl bg-yellow-500/10 border border-yellow-400/30 text-yellow-300 text-sm sm:text-base">
+            <div className="px-4 py-3 border-2 border-[var(--color-ink)] bg-[var(--color-warning)] text-[var(--color-ink)] mono-label">
               {validationMessage}
             </div>
           )}
 
           {coupons.length === 0 ? (
-            <div className="text-center py-10 sm:py-12">
-              <Tag className="w-14 h-14 sm:w-16 sm:h-16 text-gray-500 mx-auto mb-4" />
-              <p className="text-gray-400 text-base sm:text-lg">
+            <div className="text-center py-12 bg-[var(--color-paper)] border-2 border-[var(--color-ink)] p-8">
+              <Tag className="w-12 h-12 text-[var(--color-ink-muted)] mx-auto mb-3" />
+              <p className="mono-label text-[var(--color-ink-muted)]">
                 Chưa có mã giảm giá nào
               </p>
             </div>
           ) : (
             <div className="space-y-6">
               <div>
-                <h1 className="text-lg sm:text-2xl font-bold text-white px-1 sm:px-3 pb-3">
-                  Mã Giảm Phí Ship
-                </h1>
-                <CouponCard
-                  type="ship"
-                />
+                <div className="flex items-center gap-2 mb-3 pb-1.5 border-b-2 border-[var(--color-ink)]">
+                  <span className="px-2 py-0.5 bg-[var(--color-ink)] text-[var(--color-paper)] mono-label">
+                    SHIP
+                  </span>
+                  <h3 className="font-display-safe font-extrabold text-base uppercase text-[var(--color-ink)]">
+                    Mã Giảm Phí Ship
+                  </h3>
+                </div>
+                <CouponCard type="ship" />
               </div>
 
               <div>
-                <h1 className="text-lg sm:text-2xl font-bold text-white px-1 sm:px-3 pb-3">
-                  Mã Giảm Đơn Hàng
-                </h1>
-                <CouponCard
-                  type="order"
-
-                />
+                <div className="flex items-center gap-2 mb-3 pb-1.5 border-b-2 border-[var(--color-ink)]">
+                  <span className="px-2 py-0.5 bg-[var(--color-flash)] text-[var(--color-paper)] mono-label">
+                    ORDER
+                  </span>
+                  <h3 className="font-display-safe font-extrabold text-base uppercase text-[var(--color-ink)]">
+                    Mã Giảm Đơn Hàng
+                  </h3>
+                </div>
+                <CouponCard type="order" />
               </div>
             </div>
           )}
@@ -92,3 +104,5 @@ export const ListCoupon = ({
     </div>
   );
 };
+
+export default ListCoupon;

@@ -1,3 +1,5 @@
+import { getPercentageDiscountPrice } from "./productHelpers";
+
 export function formatVND(amount: number | string | null | undefined): string {
   if (amount === null || amount === undefined || amount === "") return "0 ₫";
   const num = typeof amount === "string" ? parseFloat(amount) : amount;
@@ -11,7 +13,7 @@ export function formatVND(amount: number | string | null | undefined): string {
 
 export function formatProductPrice(price: number, discountValue: number) {
   const isSale = discountValue > 0;
-  const salePrice = isSale ? price - (price * discountValue) / 100 : price;
+  const salePrice = getPercentageDiscountPrice(price, discountValue);
   return {
     display: formatVND(salePrice),
     original: formatVND(price),
@@ -22,10 +24,11 @@ export function formatProductPrice(price: number, discountValue: number) {
 }
 
 export function formatOrderId(id: string | null | undefined): string {
-  if (!id) return "#00000000";
+  const prefix = "#";
+  if (!id) return `${prefix}00000000`;
   const clean = String(id).replace(/[^a-zA-Z0-9]/g, "");
-  if (clean.length <= 8) return `#${clean.toUpperCase()}`;
-  return `#${clean.slice(0, 8).toUpperCase()}`;
+  if (clean.length <= 8) return `${prefix}${clean.toUpperCase()}`;
+  return `${prefix}${clean.slice(0, 8).toUpperCase()}`;
 }
 
 export function formatDateTime(dateInput: string | number | Date | null | undefined): string {

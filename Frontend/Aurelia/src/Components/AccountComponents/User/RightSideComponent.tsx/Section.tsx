@@ -8,41 +8,34 @@ export const Section: React.FC<{
   coupons: Coupon[];
   type: string;
   emptyText: string;
-}> = ({
-  title,
-  icon: Icon,
-  coupons = [],
-  type,
-  emptyText,
-}) => {
+}> = ({ title, icon: Icon, coupons = [], type, emptyText }) => {
   const safeCoupons = Array.isArray(coupons) ? coupons : [];
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between border-b border-rule/60 pb-3">
+      <div className="flex items-center justify-between border-b-2 border-[var(--color-ink)] pb-2.5">
         <div className="flex items-center gap-2.5">
-          <Icon className="w-4 h-4 text-ink-muted" />
-          <h2 className="font-heading text-sm font-semibold text-ink">
+          <Icon className="w-4 h-4 text-[var(--color-flash)]" />
+          <h2 className="font-display-safe text-sm font-extrabold uppercase text-[var(--color-ink)]">
             {title}
           </h2>
         </div>
-        <span className="font-mono text-xs text-ink-muted">
-          {safeCoupons.length} phiếu
+        <span className="mono-label text-[var(--color-ink-muted)]">
+          [{safeCoupons.length} PHIẾU]
         </span>
       </div>
 
       {safeCoupons.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {safeCoupons.map((coupon) => (
             <CouponCard key={coupon.id} coupon={coupon} type={type} />
           ))}
         </div>
       ) : (
-        <div className="bg-paper border border-dashed border-rule rounded-tag p-8 text-center text-xs font-mono text-ink-muted">
+        <div className="bg-[var(--color-bone)] border-2 border-dashed border-[var(--color-ink)] p-8 text-center text-xs font-mono text-[var(--color-ink-muted)]">
           {emptyText}
         </div>
       )}
     </div>
   );
 };
-

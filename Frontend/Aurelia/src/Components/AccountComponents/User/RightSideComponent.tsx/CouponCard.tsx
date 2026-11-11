@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import type { Coupon } from "../../../../types/type";
 import { formatVND, formatDateOnly } from "../../../../utils/formatters";
-import { Copy, Check, Ticket } from "lucide-react";
+import { Copy, Check } from "lucide-react";
+import { Ticket } from "../../../UI";
 
 export const CouponCard: React.FC<{
   coupon: Coupon;
@@ -24,81 +25,45 @@ export const CouponCard: React.FC<{
   const formattedEnd = formatDateOnly(coupon.ngayKetThuc);
 
   return (
-    <div
-      className="
-        relative
-        bg-paper
-        border border-rule/80
-        rounded-tag
-        p-5
-        flex flex-col
-        justify-between
-        transition-all
-        hover:border-ink/30
-        hover:shadow-tag
-        shadow-sm
-        overflow-hidden
-      "
+    <Ticket
+      serial={coupon.code}
+      header={type === "ship" ? "VẬN CHUYỂN" : "ĐƠN HÀNG"}
+      stampText="KHẢ DỤNG"
+      stub={
+        <div className="w-full flex items-center justify-between gap-2">
+          <span className="mono-label text-[10px] text-[var(--color-ink-muted)]">
+            HSD · {formattedEnd}
+          </span>
+          <button
+            onClick={handleCopy}
+            className="min-h-[38px] px-3 py-1.5 bg-[var(--color-volt)] hover:bg-[var(--color-flash)] hover:text-[var(--color-paper)] border-2 border-[var(--color-ink)] mono-label font-extrabold text-[var(--color-ink)] flex items-center gap-1.5 transition-colors cursor-pointer"
+            title="Sao chép mã"
+          >
+            {copied ? (
+              <>
+                <Check size={12} />
+                <span>Đã chép</span>
+              </>
+            ) : (
+              <>
+                <Copy size={12} />
+                <span>Chép mã</span>
+              </>
+            )}
+          </button>
+        </div>
+      }
     >
-      <div className="flex items-center justify-between pb-3 border-b border-rule/60">
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-hole bg-kraft border border-ink/20 shadow-inner" />
-          <span className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-            {type === "ship" ? "VẬN CHUYỂN" : "ĐƠN HÀNG"}
-          </span>
-        </div>
-        <Ticket size={14} className="text-cobalt" />
-      </div>
-
-      <div className="mt-4 flex items-center justify-between bg-kraft/15 border border-rule/60 rounded-tag p-2.5">
-        <div className="min-w-0">
-          <span className="block font-mono text-[9px] uppercase tracking-widest text-ink-muted">
-            MÃ ƯU ĐÃI
-          </span>
-          <span className="font-mono text-base font-bold text-ink tracking-wider">
-            {coupon.code}
-          </span>
-        </div>
-
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-tag bg-paper hover:bg-white border border-rule font-mono text-[11px] uppercase tracking-wider text-ink transition-all shadow-sm"
-          title="Sao chép mã"
-        >
-          {copied ? (
-            <>
-              <Check size={12} className="text-emerald-600" />
-              <span className="text-emerald-700">Đã chép</span>
-            </>
-          ) : (
-            <>
-              <Copy size={12} />
-              <span>Chép mã</span>
-            </>
-          )}
-        </button>
-      </div>
-
-      <div className="mt-4 space-y-1">
-        <p className="font-heading text-lg font-semibold text-ink">
+      <div className="space-y-1.5">
+        <p className="font-display-safe text-lg font-extrabold uppercase text-[var(--color-ink)]">
           {discountDisplay}
         </p>
         {coupon.moTa && (
-          <p className="font-body text-xs text-ink-muted leading-relaxed line-clamp-2">
+          <p className="font-sans text-xs text-[var(--color-ink-muted)] line-clamp-2">
             {coupon.moTa}
           </p>
         )}
       </div>
-
-      <div className="mt-5 flex items-center justify-between border-t border-rule/50 pt-3">
-        <span className="font-mono text-[10px] text-ink-muted">
-          HSD · {formattedEnd}
-        </span>
-        <span className="font-mono text-[10px] uppercase tracking-wider text-cobalt font-medium">
-          Khả dụng
-        </span>
-      </div>
-    </div>
+    </Ticket>
   );
 };
-

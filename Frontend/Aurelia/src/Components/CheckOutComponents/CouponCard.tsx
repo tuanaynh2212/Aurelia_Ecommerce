@@ -3,6 +3,7 @@ import type { Coupon } from "../../types/type";
 import { Copy, Check, Percent, TruckIcon, Zap } from "lucide-react";
 import { AdminContext } from "../../contexts/AdminContext";
 import { Toaster } from "../Toaster";
+import { Ticket } from "../UI";
 
 export const CouponCard = ({
   type,
@@ -28,16 +29,16 @@ export const CouponCard = ({
     });
   };
 
-  const formatValue = (value: number, type: string) => {
-    if (type === "percent") return `${value}%`;
-    if (type === "money") return `${(value / 1000).toFixed(0)}K`;
+  const formatValue = (value: number, discountType: string) => {
+    if (discountType === "percent") return `${value}%`;
+    if (discountType === "money") return `${(value / 1000).toFixed(0)}K`;
     return "Free";
   };
 
-  const getIcon = (type: string) => {
-    if (type === "order") return <Percent className="w-5 h-5" />;
-    if (type === "ship") return <TruckIcon className="w-5 h-5" />;
-    return <Zap className="w-5 h-5" />;
+  const getIcon = (couponType: string) => {
+    if (couponType === "order") return <Percent className="w-4 h-4" />;
+    if (couponType === "ship") return <TruckIcon className="w-4 h-4" />;
+    return <Zap className="w-4 h-4" />;
   };
 
   const applyCoupon = (coupon: Coupon) => {
@@ -62,98 +63,112 @@ export const CouponCard = ({
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {coupons
         .filter((c: Coupon) => c.isActive && c.typeCoupon === type)
-        .map((coupon) => (
-          <div
-            key={coupon.id}
-            className="relative bg-white/60 backdrop-blur-xl rounded-2xl border border-slate-400/40 p-4 md:p-6
-              shadow-lg hover:shadow-xl transition-all hover:scale-[1.01]"
-          >
-            <div className="absolute -top-3 -right-3 bg-gradient-to-r from-gray-200 to-gray-400 text-slate-800 text-xs font-bold px-3 py-1 rounded-full shadow-md">
-              {coupon.reuse === "Nhiều lần" ? "REUSE" : "HOT"}
-            </div>
-
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-5">
-
-              <div className="bg-gradient-to-br from-gray-300 to-gray-500 text-white p-5 rounded-2xl shadow-xl min-w-[110px] flex flex-col items-center">
-                {getIcon(coupon.typeCoupon ?? "")}
-                <div className="text-3xl font-black mt-1">
-                  {formatValue(coupon.giaTri!, coupon.loaiGiam)}
-                </div>
-                <div className="text-xs opacity-80">
-                  {coupon.typeCoupon === "order" ? "OFF" : "FREE"}
-                </div>
-              </div>
-
-              <div className="flex-1 space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="bg-white/80 border border-slate-300 px-4 py-2 rounded-xl">
-                    <code className="font-bold text-slate-800">{coupon.code}</code>
-                  </div>
-
+        .map((coupon) => {
+          const isSelected = Boolean(
+            selectvoucher.find((s) => s.id === coupon.id),
+          );
+          const isEligible = Boolean(
+            dataVoucher.find((v) => v.code === coupon.code),
+          );
+          return (
+            <Ticket
+              key={coupon.id}
+              serial={coupon.code}
+              header={coupon.reuse === "Nhiều lần" ? "REUSE TICKET" : "HOT VOUCHER"}
+              stampText={isSelected ? "APPLIED" : undefined}
+              stub={
+                <div className="flex flex-col items-center gap-2 min-w-[130px]">
                   <button
-                    onClick={() => copyCode(coupon.code, coupon.id)}
-                    className="text-slate-700 hover:text-slate-900 p-2 hover:bg-gray-200 rounded-lg transition"
+                    type="button"
+                    onClick={() => applyCoupon(coupon)}
+                    disabled={!isEligible}
+                    className={`min-h-[44px] px-4 py-2 border-2 border-[var(--color-ink)] mono-label w-full transition-all cursor-pointer ${
+                      isSelected
+                        ? "bg-[var(--color-volt)] text-[var(--color-ink)] shadow-[var(--shadow-hard-sm)]"
+                        : isEligible
+                        ? "bg-[var(--color-flash)] text-[var(--color-paper)] shadow-[var(--shadow-hard-sm)]"
+                        : "bg-[var(--color-fog)] text-[var(--color-ink-muted)] cursor-not-allowed"
+                    }`}
                   >
-                    {copiedCode === coupon.id ? (
-                      <Check className="w-5 h-5 text-green-500" />
-                    ) : (
-                      <Copy className="w-5 h-5" />
-                    )}
+                    {isSelected
+                      ? "ĐÃ ÁP DỤNG"
+                      : isEligible
+                      ? "ÁP DỤNG"
+                      : "KHÔNG HỢP LỆ"}
                   </button>
-                </div>
 
-                <p className="text-slate-700">{coupon.dieuKienApDung}</p>
-
-                <div className="flex flex-wrap gap-2">
-                  <span className="bg-white/70 border border-slate-300 text-slate-700 px-3 py-1.5 rounded-lg text-sm">
-                    {coupon.moTa ?? "Không mô tả"}
-                  </span>
-
-                  <span className="bg-white/70 border border-slate-300 text-slate-700 px-3 py-1.5 rounded-lg text-sm">
-                    HSD: {formatDate(coupon.ngayKetThuc)}
-                  </span>
-
-                  {coupon.soLuong > 0 && (
-                    <span className="bg-white/70 border border-slate-300 text-yellow-700 px-3 py-1.5 rounded-lg text-sm">
-                      Còn: {coupon.soLuong}
-                    </span>
+                  {isSelected && (
+                    <button
+                      type="button"
+                      onClick={() => removeCoupon(coupon.id)}
+                      className="min-h-[40px] px-3 py-1.5 border-2 border-[var(--color-ink)] bg-[var(--color-danger)] text-[var(--color-paper)] mono-label w-full cursor-pointer"
+                    >
+                      BỎ ÁP DỤNG
+                    </button>
                   )}
                 </div>
-              </div>
+              }
+            >
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="border-2 border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)] p-3.5 min-w-[96px] flex flex-col items-center justify-center">
+                  {getIcon(coupon.typeCoupon ?? "")}
+                  <div className="text-2xl font-mono font-extrabold text-[var(--color-volt)] mt-1 tabular-nums">
+                    {formatValue(coupon.giaTri!, coupon.loaiGiam)}
+                  </div>
+                  <div className="mono-label text-[var(--color-paper)] text-[10px]">
+                    {coupon.typeCoupon === "order" ? "ORDER OFF" : "SHIP FREE"}
+                  </div>
+                </div>
 
-              <div className="flex flex-col items-center gap-4 min-w-[140px]">
-                <button
-                  onClick={() => applyCoupon(coupon)}
-                  disabled={!dataVoucher.find((v) => v.code === coupon.code)}
-                  className={`px-6 py-3 rounded-xl font-bold w-full shadow-lg transition
-                    ${
-                      dataVoucher.find((v) => v.code === coupon.code)
-                        ? "bg-gradient-to-r from-gray-400 to-gray-600 text-white hover:scale-105"
-                        : "bg-gray-300 text-gray-400 cursor-not-allowed"
-                    }`}
-                >
-                  {selectvoucher.find((s) => s.id === coupon.id)
-                    ? "Đã áp dụng"
-                    : dataVoucher.find((v) => v.code === coupon.code)
-                    ? "Áp dụng"
-                    : "Không thể áp dụng"}
-                </button>
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="border-2 border-[var(--color-ink)] bg-[var(--color-bone)] px-3 py-1">
+                      <code className="font-mono font-extrabold text-xs text-[var(--color-ink)]">
+                        {coupon.code}
+                      </code>
+                    </div>
 
-                {selectvoucher.find((s) => s.id === coupon.id) && (
-                  <button
-                    onClick={() => removeCoupon(coupon.id)}
-                    className="px-6 py-3 rounded-xl bg-red-500 text-white font-semibold w-full"
-                  >
-                    Bỏ áp dụng
-                  </button>
-                )}
+                    <button
+                      type="button"
+                      onClick={() => copyCode(coupon.code, coupon.id)}
+                      className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center border-2 border-[var(--color-ink)] bg-[var(--color-paper)] hover:bg-[var(--color-volt)] transition-colors cursor-pointer"
+                      aria-label="Sao chép mã"
+                    >
+                      {copiedCode === coupon.id ? (
+                        <Check className="w-4 h-4 text-[var(--color-success)]" />
+                      ) : (
+                        <Copy className="w-4 h-4 text-[var(--color-ink)]" />
+                      )}
+                    </button>
+                  </div>
+
+                  <p className="text-xs font-sans font-bold text-[var(--color-ink)]">
+                    {coupon.dieuKienApDung}
+                  </p>
+
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="border border-[var(--color-ink)] bg-[var(--color-bone)] px-2 py-0.5 mono-label text-[10px] text-[var(--color-ink-muted)]">
+                      {coupon.moTa ?? "Không mô tả"}
+                    </span>
+                    <span className="border border-[var(--color-ink)] bg-[var(--color-bone)] px-2 py-0.5 mono-label text-[10px] text-[var(--color-ink-muted)]">
+                      HSD: {formatDate(coupon.ngayKetThuc)}
+                    </span>
+                    {coupon.soLuong > 0 && (
+                      <span className="border border-[var(--color-ink)] bg-[var(--color-volt)] px-2 py-0.5 mono-label text-[10px] text-[var(--color-ink)]">
+                        CÒN: {coupon.soLuong}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
+            </Ticket>
+          );
+        })}
     </div>
   );
 };
+
+export default CouponCard;

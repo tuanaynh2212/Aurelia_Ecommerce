@@ -1,18 +1,7 @@
-﻿using AureliaE_Commerce.Context;
 using AureliaE_Commerce.Dto;
-using AureliaE_Commerce.Hubs;
 using AureliaE_Commerce.Model;
-using AureliaE_Commerce.Model.CouponProperty;
-using AureliaE_Commerce.Model.Shop;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
+using AureliaE_Commerce.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using MongoDB.Bson;
-using MongoDB.Driver;
-using Newtonsoft.Json.Linq;
-using PayPalCheckoutSdk.Orders;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace AureliaE_Commerce.Controller
 {
@@ -20,247 +9,182 @@ namespace AureliaE_Commerce.Controller
     [ApiController]
     public class ClientController : ControllerBase
     {
-        public readonly IMongoCollection<Client> mongoCollection;
-        public readonly IMongoCollection<Shop> mongo;
-        public readonly IMongoCollection<Product> mongos;
-        public readonly IHubContext<NotifyHub> hubContext;
-        public readonly IMongoCollection<MaGiamGia> voucher;
-        public ClientController(MongoDbContext dbContext, IHubContext<NotifyHub> hubContexts)
+        private readonly ClientService _clientService;
+        private readonly JwtTokenService _jwtTokenService;
+
+        public ClientController(ClientService clientService, JwtTokenService jwtTokenService)
         {
-            mongoCollection = dbContext.Client;
-            hubContext = hubContexts;
-            mongo = dbContext.Shop;
-            mongos = dbContext.SanPham;
-            voucher = dbContext.MaGiamGiaVoucher;
+            _clientService = clientService;
+            _jwtTokenService = jwtTokenService;
         }
-         [NonAction]
-        private string? GetUserIdFromCookie(string typeAccount = "user")
-        {
-            string cookieName = typeAccount switch
-            {
-                "user" => "access_token_client",
-                "shop" => "access_token_shop",
-                "admin" => "access_token_admin",
-                _ => "access_token_user"
-            };
 
-            if (!Request.Cookies.TryGetValue(cookieName, out var token))
-                return null;
+        private string? GetUserId() => _jwtTokenService.GetSubjectFromRequestCookie(Request, "user");
 
-            var handler = new JwtSecurityTokenHandler();
-            if (!handler.CanReadToken(token))
-                return null;
-
-            var jwtToken = handler.ReadJwtToken(token);
-            var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
-            return userId;
-        }
         [HttpPost("AddItems")]
         public async Task<IActionResult> AddItems([FromBody] Product product)
         {
-            var userId = GetUserIdFromCookie("user");
+            var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            if (product == null || string.IsNullOrWhiteSpace(product.id))
+                return BadRequest(new { message = "Dữ liệu sản phẩm không hợp lệ" });
 
-            var filter = Builders<Client>.Filter.Eq(c => c.Id, userId);
-            var update = Builders<Client>.Update.Push(c => c.SanPhamYeuThich, product);
-            var result = await mongoCollection.UpdateOneAsync(filter, update);
-            if (result.ModifiedCount > 0) return Ok(new { message = "Thêm sản phẩm thành công" });
+            var added = await _clientService.AddFavouriteAsync(userId, product);
+            return added
+                ? Ok(new { message = "Thêm sản phẩm thành công" })
+                : BadRequest(new { message = "Không tìm thấy user hoặc thêm thất bại" });
+        }
 
-            return BadRequest(new { message = "Không tìm thấy user hoặc thêm thất bại" });
+        [HttpDelete("RemoveFavourite/{productId}")]
+        public async Task<IActionResult> RemoveFavourite(string productId)
+        {
+            var userId = GetUserId();
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            if (string.IsNullOrWhiteSpace(productId))
+                return BadRequest(new { message = "Thiếu mã sản phẩm" });
+
+            var removed = await _clientService.RemoveFavouriteAsync(userId, productId);
+            return removed
+                ? Ok(new { message = "Đã xóa khỏi danh sách yêu thích" })
+                : NotFound(new { message = "Không tìm thấy user" });
         }
 
         [HttpPost("AutoAddGioHangKhiLog")]
         public async Task<IActionResult> AddDon([FromBody] List<ItemOrder> Product)
         {
-            var userId = GetUserIdFromCookie("user");
+            var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var filter = Builders<Client>.Filter.Eq(c => c.Id, userId);
-            var update = Builders<Client>.Update.PushEach(a => a.GioHangCuaBan, Product);
-            await mongoCollection.UpdateOneAsync(filter, update);
-
+            await _clientService.AddCartItemsAsync(userId, Product);
             return Ok(new { s = "Add thành công", p = Product });
         }
 
         [HttpDelete("XoaGioHang")]
         public async Task<IActionResult> XoaGioHang()
         {
-            var userId = GetUserIdFromCookie("user");
+            var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var filter = Builders<Client>.Filter.Eq(c => c.Id, userId);
-            var update = Builders<Client>.Update.Set(c => c.GioHangCuaBan, new List<ItemOrder>());
-            await mongoCollection.UpdateOneAsync(filter, update);
-
+            await _clientService.ClearCartAsync(userId);
             return Ok("Đã xóa toàn bộ giỏ hàng");
         }
 
         [HttpGet("GetItemFavourite")]
         public async Task<IActionResult> GetItemFavourite()
         {
-            var userId = GetUserIdFromCookie("user");
+            var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var filter = Builders<Client>.Filter.Eq(a => a.Id, userId);
-            var client = await mongoCollection.Find(filter).FirstOrDefaultAsync();
+            var client = await _clientService.GetByIdAsync(userId);
             if (client == null) return NotFound("Client not found");
 
-            return Ok(client.SanPhamYeuThich);
+            var items = (client.SanPhamYeuThich ?? new List<Product>())
+                .Where(p => p != null && !string.IsNullOrEmpty(p.id))
+                .GroupBy(p => p.id)
+                .Select(g => g.First())
+                .ToList();
+
+            return Ok(items);
         }
 
         [HttpPost("AddDonHang")]
         public async Task<IActionResult> AddDonHang([FromBody] OrderModel order, [FromQuery] string shopId)
         {
-            var userId = GetUserIdFromCookie("user");
+            var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var filter = Builders<Client>.Filter.Eq(a => a.Id, userId);
-            var update = Builders<Client>.Update.Push("DonHangCuaBan", order);
-            var result = await mongoCollection.UpdateOneAsync(filter, update);
-
-            string shopGroup = $"Shop_{shopId}";
-            string messages = $"Đơn hàng mới #{order.orderId} từ {order.name}";
-            var value = order.product.Sum(a => a.price * a.quantity);
-
-            var point = value switch
-            {
-                <= 100_000_000 => 100,
-                <= 500_000_000 => 500,
-                <= 1_000_000_000 => 1000,
-                _ => 2000
-            };
-
-            var productId = order.product.Select(a => a.Itemid).FirstOrDefault();
-            var updates = Builders<Client>.Update.Set(a => a.Point, point);
-            await mongoCollection.UpdateOneAsync(filter, updates);
-
-            var quantity = order.product.Where(a => a.Itemid == productId).Sum(a => a.quantity);
-
-            var filters = Builders<Shop>.Filter.And(
-                Builders<Shop>.Filter.Eq(a => a.shopId, shopId),
-                Builders<Shop>.Filter.ElemMatch(a => a.products, s => s.productId == productId)
-            );
-
-            var filterVoucher = Builders<MaGiamGia>.Filter.Eq(a => a.code, order.voucherUsed != null && order.voucherUsed.Count > 0 ? order.voucherUsed[0].code : "");
-            var updateVoucher = Builders<MaGiamGia>.Update.Inc(a => a.soLuong, -1);
-            await voucher.UpdateOneAsync(filterVoucher, updateVoucher);
-
-            var updatess = Builders<Shop>.Update.Inc("products.$.sold", quantity);
-            await mongo.UpdateOneAsync(filters, updatess);
-
-            var dataNotify = new { message = messages };
-            await hubContext.Clients.Group(shopGroup).SendAsync("NotificationOrder", dataNotify);
-
-            if (result.ModifiedCount > 0) return Ok(new { message = "Thêm sản phẩm thành công" });
-            return BadRequest(new { message = "Không tìm thấy user hoặc thêm thất bại" });
+            var added = await _clientService.AddOrderAsync(userId, order, shopId);
+            return added
+                ? Ok(new { message = "Thêm sản phẩm thành công" })
+                : BadRequest(new { message = "Không tìm thấy user hoặc thêm thất bại" });
         }
 
         [HttpGet("LayDonHang")]
         public async Task<IActionResult> LayDonHang()
         {
-            var userId = GetUserIdFromCookie("user");
+            var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var filter = Builders<Client>.Filter.Eq(a => a.Id, userId);
-            var data = await mongoCollection.Find(filter).FirstOrDefaultAsync();
-            return Ok(data.DonHangCuaBan);
+            var client = await _clientService.GetByIdAsync(userId);
+            if (client == null) return NotFound("Client not found");
+
+            return Ok(client.DonHangCuaBan);
         }
 
         [HttpGet("LayDonHangGanDay")]
         public async Task<IActionResult> LayDonHangGanDay()
         {
-            var userId = GetUserIdFromCookie("user");
+            var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var filter = Builders<Client>.Filter.Eq(a => a.Id, userId);
-            var data = await mongoCollection.Find(filter).FirstOrDefaultAsync();
+            var latestDate = await _clientService.GetLatestOrderDateAsync(userId);
+            if (latestDate == null) return NotFound("Không tìm thấy đơn hàng nào");
 
-            if (data == null || data.DonHangCuaBan == null || !data.DonHangCuaBan.Any())
-                return NotFound("Không tìm thấy đơn hàng nào");
-
-            var orderGanDay = data.DonHangCuaBan.SelectMany(a => a.product)
-                .OrderByDescending(o => o.dateBuy)
-                .FirstOrDefault();
-
-            return Ok(new { ngayMoiNhat = orderGanDay.dateBuy });
+            return Ok(new { ngayMoiNhat = latestDate });
         }
 
         [HttpGet("GetSoLuongDonHang")]
         public async Task<IActionResult> GetSoLuongDonHang()
         {
-            var userId = GetUserIdFromCookie("user");
+            var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var filter = Builders<Client>.Filter.Eq(a => a.Id, userId);
-            var data = await mongoCollection.Find(filter).FirstOrDefaultAsync();
-            if (data == null) return NotFound(new { message = "User not found" });
+            var summary = await _clientService.GetOrderSummaryAsync(userId);
+            if (summary == null) return NotFound(new { message = "User not found" });
 
-            var soLuongDon = data.DonHangCuaBan.Count(a => a.status != "Đã Hủy");
-            var tongTien = data.DonHangCuaBan
-                .Where(a => a.status != "Đã Hủy")
-                .SelectMany(dh => dh.product)
-                .Sum(p => p.quantity * p.price);
-
-            return Ok(new { SoLuongDon = soLuongDon, TongTien = tongTien });
+            return Ok(new { SoLuongDon = summary.Value.Count, TongTien = summary.Value.TotalAmount });
         }
 
         [HttpPost("UpMeasure")]
         public async Task<IActionResult> UpMeasure([FromBody] Measure measure)
         {
-            var userId = GetUserIdFromCookie("user");
+            var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var filter = Builders<Client>.Filter.Eq(a => a.Id, userId);
-            var update = Builders<Client>.Update.Set("SoDoNgDUng", measure);
-            await mongoCollection.UpdateOneAsync(filter, update);
+            await _clientService.UpdateMeasureAsync(userId, measure);
             return Ok(measure);
         }
 
         [HttpGet("GetSoDo")]
         public async Task<IActionResult> GetSoDo()
         {
-            var userId = GetUserIdFromCookie("user");
+            var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var filter = Builders<Client>.Filter.Eq(a => a.Id, userId);
-            var data = await mongoCollection.Find(filter).FirstOrDefaultAsync();
-            if (data.SoDoNgDUng == null) return BadRequest();
+            var client = await _clientService.GetByIdAsync(userId);
+            if (client?.SoDoNgDUng == null) return BadRequest();
 
-            var das = data.SoDoNgDUng;
+            var m = client.SoDoNgDUng;
             return Ok(new Measure
             {
-                vai = das.vai ?? "",
-                eo = das.eo ?? "",
-                chieuCao = das.chieuCao ?? "",
-                nguc = das.nguc ?? "",
-                hong = das.hong ?? ""
+                vai = m.vai ?? "",
+                eo = m.eo ?? "",
+                chieuCao = m.chieuCao ?? "",
+                nguc = m.nguc ?? "",
+                hong = m.hong ?? ""
             });
         }
 
         [HttpPost("AddCuocHenUser")]
         public async Task<IActionResult> AddCuocHen([FromBody] ClientAppointment clientAppointment)
         {
-            var userId = GetUserIdFromCookie("user");
+            var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var filter = Builders<Client>.Filter.Eq(a => a.Id, userId);
-            var update = Builders<Client>.Update.Push("LichSuCuocHen", clientAppointment);
-            await mongoCollection.UpdateOneAsync(filter, update);
-
+            await _clientService.AddAppointmentAsync(userId, clientAppointment);
             return Ok(new { message = "Thêm Lịch Hẹn Thành Công!" });
         }
 
         [HttpGet("LayCuocHenUser")]
         public async Task<IActionResult> LayCuocHen()
         {
-            var userId = GetUserIdFromCookie("user");
+            var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var user = await mongoCollection.Find(u => u.Id == userId).FirstOrDefaultAsync();
+            var user = await _clientService.GetByIdAsync(userId);
             if (user == null) return NotFound(new { message = "Người dùng không tồn tại" });
 
             var appointments = user.LichSuCuocHen?.ToList();
-            if (appointments == null || !appointments.Any())
+            if (appointments == null || appointments.Count == 0)
                 return Ok(new { message = "Chưa có cuộc hẹn nào" });
 
             return Ok(appointments);
@@ -269,174 +193,87 @@ namespace AureliaE_Commerce.Controller
         [HttpPost("LuuDiaChi")]
         public async Task<IActionResult> LuuAddress([FromBody] ThongTinCaNhan thongTinCaNhan)
         {
-            var userId = GetUserIdFromCookie("user");
+            var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var filter = Builders<Client>.Filter.Eq(a => a.Id, userId);
-            var update = Builders<Client>.Update.Push(a => a.ThongTinDatHang, thongTinCaNhan);
-            await mongoCollection.UpdateOneAsync(filter, update);
+            await _clientService.SaveAddressAsync(userId, thongTinCaNhan);
             return Ok(new { message = "Lưu Thành Công" });
         }
 
         [HttpGet("LayDiaChi")]
         public async Task<IActionResult> LayDiaChi()
         {
-            var userId = GetUserIdFromCookie("user");
+            var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var filter = Builders<Client>.Filter.Eq(a => a.Id, userId);
-            var data = await mongoCollection.Find(filter).FirstOrDefaultAsync();
-            return Ok(data.ThongTinDatHang);
+            var client = await _clientService.GetByIdAsync(userId);
+            if (client == null) return NotFound("Client not found");
+
+            return Ok(client.ThongTinDatHang);
         }
 
         [HttpPost("XoaDiaChi")]
         public async Task<IActionResult> XoaDiaChi([FromBody] ThongTinCaNhan thongTinCaNhan)
         {
-            var userId = GetUserIdFromCookie("user");
+            var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var filter = Builders<Client>.Filter.Eq(c => c.Id, userId);
-            var update = Builders<Client>.Update.PullFilter(
-                c => c.ThongTinDatHang,
-                td => td.hoVaTen == thongTinCaNhan.hoVaTen &&
-                      td.diaChi == thongTinCaNhan.diaChi &&
-                      td.email == thongTinCaNhan.email &&
-                      td.soDT == thongTinCaNhan.soDT
-            );
-
-            var result = await mongoCollection.UpdateOneAsync(filter, update);
-            if (result.ModifiedCount > 0) return Ok(new { message = "Xóa thành công" });
-            return NotFound(new { message = "Không tìm thấy địa chỉ" });
+            var deleted = await _clientService.DeleteAddressAsync(userId, thongTinCaNhan);
+            return deleted
+                ? Ok(new { message = "Xóa thành công" })
+                : NotFound(new { message = "Không tìm thấy địa chỉ" });
         }
+
         [HttpPost("PaypalPayment")]
         public async Task<IActionResult> PaypalPayment([FromBody] PaypalDto paypalDto)
         {
-            var client=PayPalClient.Client();
-            var request = new PayPalCheckoutSdk.Orders.OrdersGetRequest(paypalDto.orderId);
-            var response = await client.Execute(request);
-            var order = response.Result<PayPalCheckoutSdk.Orders.Order>();
-            if (order.Status == "COMPLETED")
-            {
-                var userId = GetUserIdFromCookie("user");
-                if (string.IsNullOrEmpty(userId)) return Unauthorized();
-                var totalAmount=paypalDto.order.product.Sum(a => a.price * a.quantity);
-                if (order.PurchaseUnits[0].AmountWithBreakdown.Value != totalAmount.ToString())
-                {
-                    return BadRequest(new { message = "Số tiền thanh toán không khớp" });
-                }
-                return Ok(new { message = "Thanh toán thành công", orderId = order.Id , amount = order.PurchaseUnits[0].AmountWithBreakdown.Value });
-            }
-            return BadRequest(new { message = "Thanh toán thất bại" });
+            var userId = GetUserId();
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var (success, errorMessage, orderId, amount) = await _clientService.VerifyPayPalPaymentAsync(paypalDto);
+            if (!success)
+                return BadRequest(new { message = errorMessage });
+
+            return Ok(new { message = "Thanh toán thành công", orderId, amount });
         }
+
         [HttpPost("UpdateProfile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileCustomer updateProfileCustomer)
         {
-            var userId = GetUserIdFromCookie("user");
+            var userId = GetUserId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var filter = Builders<Client>.Filter.Eq(c => c.Id, userId);
-            var data = await mongoCollection.Find(filter).FirstOrDefaultAsync();
-            if (data == null) return NotFound(new { message = "Người dùng không tồn tại" });
+            var updatedUser = await _clientService.UpdateProfileAsync(userId, updateProfileCustomer);
+            if (updatedUser == null) return NotFound(new { message = "Người dùng không tồn tại" });
 
-            var update = Builders<Client>.Update
-                .Set(s => s.Name, updateProfileCustomer.name ?? data.Name)
-                .Set(s => s.Email, updateProfileCustomer.email ?? data.Email)
-                .Set(s => s.SoDt, updateProfileCustomer.phone ?? data.SoDt)
-                .Set(s => s.DiaChi, updateProfileCustomer.address ?? data.DiaChi)
-                .Set(s => s.Avatar, updateProfileCustomer.avatar ?? data.Avatar);
-
-            await mongoCollection.UpdateOneAsync(filter, update);
-
-            data.Name = updateProfileCustomer.name ?? data.Name;
-            data.Email = updateProfileCustomer.email ?? data.Email;
-            data.SoDt = updateProfileCustomer.phone ?? data.SoDt;
-            data.DiaChi = updateProfileCustomer.address ?? data.DiaChi;
-            data.Avatar = updateProfileCustomer.avatar ?? data.Avatar;
-            return Ok(new { message = "Cập Nhật Thành Công", user = data });
+            return Ok(new { message = "Cập Nhật Thành Công", user = updatedUser });
         }
+
         [HttpPost("UpdateTier")]
-        public async Task UpdateTier()
+        public async Task<IActionResult> UpdateTier()
         {
-            var userToken = GetUserIdFromCookie("user");
-            var filter = Builders<Client>.Filter.Eq(c => c.Id, userToken);
-            var data = await mongoCollection.Find(filter).FirstOrDefaultAsync();
-            var point = data.Point;
-            var tier = point switch
-            {
-                <= 1000 => "Bronze",
-                <= 5000 => "Silver",
-                <= 10000 => "Gold",
-                <= 20000 => "Diamond",
-                _ => "Royal"
-            };
-            var update = Builders<Client>.Update.Set(s => s.Tier, tier);
-            await mongoCollection.UpdateOneAsync(filter, update);
-            var dataBenfit = new benefit
-            {
-                name = "",
-                freeShipping = true,
-                value=0
-            };
-            benefit dataBenefit = tier switch
-            {
-                "Bronze" => new benefit { name = "Ưu đãi sinh nhật 3%", freeShipping = false, value = 3 },
-                "Silver" => new benefit { name = "Miễn phí vận chuyển đơn đầu tiên + Ưu đãi sinh nhật 5%", freeShipping = true, value = 5 },
-                "Gold" => new benefit { name = "Giảm 10% cho tất cả sản phẩm + Ưu tiên hỗ trợ khách hàng", freeShipping = true, value = 10 },
-                "Diamond" => new benefit { name = "Giảm 15% + Quà tri ân mỗi quý", freeShipping = true, value = 15 },
-                "Royal" => new benefit { name = "Giảm 20% + Ưu đãi sự kiện VIP + Hỗ trợ riêng 24/7", freeShipping = true, value = 20 },
-                "Royal Plus" => new benefit { name = "Giảm 30% + Quà tặng độc quyền + Trải nghiệm cao cấp", freeShipping = true, value = 30 },
-                _ => null
-            };
+            var userId = GetUserId();
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            if (dataBenefit != null)
-            {
-                var updates = Builders<Client>.Update.Set(a => a.Benefits, dataBenefit);
-                await mongoCollection.UpdateOneAsync(filter, updates);
-            }
-
+            await _clientService.UpdateTierAsync(userId);
+            return Ok();
         }
+
         [HttpPost("HuyDonHang")]
-        public async Task<IActionResult> HuyDonHang( [FromQuery] string orderId)
+        public async Task<IActionResult> HuyDonHang([FromQuery] string orderId)
         {
+            var userId = GetUserId();
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
             try
             {
-                var userToken = GetUserIdFromCookie("user");
-                var filter = Builders<Client>.Filter.And(Builders<Client>.Filter.Eq(c => c.Id, userToken),
-                     Builders<Client>.Filter.ElemMatch(c => c.DonHangCuaBan, d => d.orderId == orderId));
-                var update = Builders<Client>.Update.Set("DonHangCuaBan.$.status", "Đã Hủy");
-                await mongoCollection.UpdateOneAsync(filter, update);
-
-                var filterShop = Builders<Shop>.Filter.ElemMatch(a => a.Orders, s => s.orderId == orderId);
-                var updateShop = Builders<Shop>.Update.Set("Orders.$.status", "Đã Hủy");
-                await mongo.UpdateOneAsync(filterShop, updateShop);
-
-                var data = await mongoCollection.Find(filter).FirstOrDefaultAsync();
-                var quantity = data.DonHangCuaBan.SelectMany(a => a.product).Select(a => a.quantity).First();
-                var size = data.DonHangCuaBan.SelectMany(a => a.product).Select(a => a.size).First();
-                var productID = data.DonHangCuaBan.SelectMany(a => a.product).Select(a => a.Itemid).First();
-                var color = data.DonHangCuaBan.SelectMany(a => a.product).Select(a => a.color).First();
-                var filterSanPham = Builders<Product>.Filter.And(
-                    Builders<Product>.Filter.Eq(a => a.id, productID),
-                    Builders<Product>.Filter.Eq("variants.color", color),
-                    Builders<Product>.Filter.Eq("variants.sizes.size", size)
-                    );
-                var updatesanpham = Builders<Product>.Update.Inc("variants.$[v].sizes.$[s].quantity", quantity);
-                var arrayFilters = new List<ArrayFilterDefinition>
-                {
-                    new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("v.color", color)),
-                    new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("s.size", size))
-                };
-                var updateOptions = new UpdateOptions { ArrayFilters = arrayFilters };
-                await mongos.UpdateOneAsync(filterSanPham, updatesanpham,updateOptions);
+                await _clientService.CancelOrderAsync(userId, orderId);
                 return Ok(new { message = "Đã Hủy Thành Công" });
             }
             catch (Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
             }
-
         }
     }
-
-
 }

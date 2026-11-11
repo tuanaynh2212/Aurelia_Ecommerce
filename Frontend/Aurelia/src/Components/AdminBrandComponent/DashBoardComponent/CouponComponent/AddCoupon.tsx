@@ -1,15 +1,35 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { X } from "lucide-react";
-import { Plus } from "lucide-react";
-import { useContext } from "react";
+import { X, Plus } from "lucide-react";
+import React, { useContext } from "react";
 import { AdminContext } from "../../../../contexts/AdminContext";
+
+interface NewCouponForm {
+  id: string;
+  code: string;
+  NgayBatDau: string;
+  NgayKetThuc: string;
+  PhamViApDung: string;
+  GiaTri: string | number;
+  DieuKienApDung: string;
+  ApDungCho?: string;
+  Apdungcho?: string;
+  TheLoaiApDung: string;
+  isActive: boolean;
+  SoLuong: string | number;
+  Reuse: string;
+}
 
 export const AddCoupon = ({
   showAddModal,
   setShowAddModal,
   newCoupon,
   setNewCoupon,
-}: any) => {
+}: {
+  showAddModal: boolean;
+  setShowAddModal: React.Dispatch<React.SetStateAction<boolean>>;
+  newCoupon: NewCouponForm;
+  setNewCoupon: React.Dispatch<React.SetStateAction<NewCouponForm>>;
+}) => {
   const { handleAddCoupon } = useContext(AdminContext);
   const handleCLick = () => {
     handleAddCoupon(newCoupon);
@@ -19,35 +39,37 @@ export const AddCoupon = ({
     <AnimatePresence>
       {showAddModal && (
         <motion.div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-ink/60 flex items-center justify-center z-50 p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={() => setShowAddModal(false)}
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
+            initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-8 relative max-h-[90vh] overflow-y-auto"
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="bg-paper border-2 border-ink shadow-hard-lg w-full max-w-2xl relative max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={() => setShowAddModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <X size={24} />
-            </button>
+            <div className="bg-ink text-paper px-6 py-4 flex items-center justify-between border-b-2 border-ink">
+              <h2 className="font-display-safe text-xl font-black uppercase flex items-center gap-2">
+                <Plus className="text-volt" size={22} />
+                Tạo Mã Giảm Giá Mới
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="min-w-[44px] min-h-[44px] bg-paper text-ink border-2 border-ink flex items-center justify-center hover:bg-flash hover:text-paper transition-colors cursor-pointer"
+              >
+                <X size={20} />
+              </button>
+            </div>
 
-            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-              <Plus className="text-indigo-600" size={28} />
-              Tạo Mã Giảm Giá Mới
-            </h2>
-
-            <div className="space-y-4">
+            <div className="p-6 space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block font-mono text-xs font-bold uppercase text-ink mb-1.5">
                     Mã giảm giá *
                   </label>
                   <input
@@ -59,11 +81,11 @@ export const AddCoupon = ({
                         code: e.target.value.toUpperCase(),
                       })
                     }
-                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none"
+                    className="w-full h-12 px-3 bg-bone border-2 border-ink font-mono text-xs text-ink focus:bg-paper outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block font-mono text-xs font-bold uppercase text-ink mb-1.5">
                     Giá trị *
                   </label>
                   <input
@@ -73,14 +95,14 @@ export const AddCoupon = ({
                     onChange={(e) =>
                       setNewCoupon({ ...newCoupon, GiaTri: e.target.value })
                     }
-                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none"
+                    className="w-full h-12 px-3 bg-bone border-2 border-ink font-mono text-xs text-ink focus:bg-paper outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block font-mono text-xs font-bold uppercase text-ink mb-1.5">
                     Thể loại áp dụng
                   </label>
                   <select
@@ -91,14 +113,14 @@ export const AddCoupon = ({
                         TheLoaiApDung: e.target.value,
                       })
                     }
-                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none"
+                    className="w-full h-12 px-3 bg-bone border-2 border-ink font-mono text-xs text-ink focus:bg-paper outline-none"
                   >
                     <option>Phần trăm</option>
                     <option>Cố định</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block font-mono text-xs font-bold uppercase text-ink mb-1.5">
                     Số lượng
                   </label>
                   <input
@@ -108,13 +130,13 @@ export const AddCoupon = ({
                     onChange={(e) =>
                       setNewCoupon({ ...newCoupon, SoLuong: e.target.value })
                     }
-                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none"
+                    className="w-full h-12 px-3 bg-bone border-2 border-ink font-mono text-xs text-ink focus:bg-paper outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block font-mono text-xs font-bold uppercase text-ink mb-1.5">
                   Phạm vi áp dụng
                 </label>
                 <input
@@ -123,12 +145,13 @@ export const AddCoupon = ({
                   onChange={(e) =>
                     setNewCoupon({ ...newCoupon, PhamViApDung: e.target.value })
                   }
-                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none"
+                  className="w-full h-12 px-3 bg-bone border-2 border-ink font-sans text-sm text-ink focus:bg-paper outline-none"
                 />
               </div>
+
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block font-mono text-xs font-bold uppercase text-ink mb-1.5">
                     Điều kiện áp dụng
                   </label>
                   <input
@@ -140,26 +163,27 @@ export const AddCoupon = ({
                         DieuKienApDung: e.target.value,
                       })
                     }
-                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none"
+                    className="w-full h-12 px-3 bg-bone border-2 border-ink font-sans text-sm text-ink focus:bg-paper outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block font-mono text-xs font-bold uppercase text-ink mb-1.5">
                     Áp dụng cho
                   </label>
                   <input
                     placeholder="VD: Tất cả khách hàng, Khách hàng mới..."
-                    value={newCoupon.Apdungcho}
+                    value={newCoupon.Apdungcho ?? ""}
                     onChange={(e) =>
                       setNewCoupon({ ...newCoupon, Apdungcho: e.target.value })
                     }
-                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none"
+                    className="w-full h-12 px-3 bg-bone border-2 border-ink font-sans text-sm text-ink focus:bg-paper outline-none"
                   />
                 </div>
               </div>
+
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block font-mono text-xs font-bold uppercase text-ink mb-1.5">
                     Ngày bắt đầu
                   </label>
                   <input
@@ -168,11 +192,11 @@ export const AddCoupon = ({
                     onChange={(e) =>
                       setNewCoupon({ ...newCoupon, NgayBatDau: e.target.value })
                     }
-                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none"
+                    className="w-full h-12 px-3 bg-bone border-2 border-ink font-mono text-xs text-ink focus:bg-paper outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block font-mono text-xs font-bold uppercase text-ink mb-1.5">
                     Ngày kết thúc
                   </label>
                   <input
@@ -184,13 +208,13 @@ export const AddCoupon = ({
                         NgayKetThuc: e.target.value,
                       })
                     }
-                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none"
+                    className="w-full h-12 px-3 bg-bone border-2 border-ink font-mono text-xs text-ink focus:bg-paper outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block font-mono text-xs font-bold uppercase text-ink mb-1.5">
                   Tái sử dụng
                 </label>
                 <select
@@ -198,14 +222,14 @@ export const AddCoupon = ({
                   onChange={(e) =>
                     setNewCoupon({ ...newCoupon, Reuse: e.target.value })
                   }
-                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none"
+                  className="w-full h-12 px-3 bg-bone border-2 border-ink font-mono text-xs text-ink focus:bg-paper outline-none"
                 >
                   <option>Một lần</option>
                   <option>Nhiều lần</option>
                 </select>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 pt-2">
                 <input
                   type="checkbox"
                   id="isActive"
@@ -213,30 +237,32 @@ export const AddCoupon = ({
                   onChange={(e) =>
                     setNewCoupon({ ...newCoupon, isActive: e.target.checked })
                   }
-                  className="w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-400"
+                  className="w-5 h-5 accent-ink border-2 border-ink"
                 />
                 <label
                   htmlFor="isActive"
-                  className="text-sm font-medium text-gray-700"
+                  className="font-mono text-xs font-bold uppercase text-ink cursor-pointer"
                 >
                   Kích hoạt ngay sau khi tạo
                 </label>
               </div>
-            </div>
 
-            <div className="mt-8 flex justify-end gap-3">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-all"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleCLick}
-                className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
-              >
-                Tạo Mã
-              </button>
+              <div className="pt-6 border-t-2 border-ink flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="min-h-[44px] px-6 py-2.5 bg-bone border-2 border-ink text-ink font-mono text-xs font-bold uppercase hover:bg-fog transition-colors cursor-pointer"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCLick}
+                  className="min-h-[44px] px-6 py-2.5 bg-flash border-2 border-ink text-paper shadow-hard-sm font-mono text-xs font-bold uppercase hover:bg-ink transition-colors cursor-pointer"
+                >
+                  Tạo Mã
+                </button>
+              </div>
             </div>
           </motion.div>
         </motion.div>

@@ -1,4 +1,3 @@
-import * as React from "react";
 import { cn } from "../../utils/cn";
 import { formatVND } from "../../utils/formatters";
 
@@ -12,24 +11,24 @@ export interface PriceTagProps {
 
 const sizeClasses = {
   sm: {
-    price: "text-xs sm:text-sm font-semibold",
-    original: "text-[11px] line-through text-[var(--color-ink-muted)]",
-    badge: "text-[9px] px-1 py-0.2",
+    price: "text-xs sm:text-sm font-extrabold",
+    original: "text-[11px] line-through text-ink-muted",
+    badge: "text-[9px] px-1 py-0.5",
   },
   md: {
-    price: "text-sm sm:text-base font-bold",
-    original: "text-xs line-through text-[var(--color-ink-muted)]",
+    price: "text-base sm:text-lg font-extrabold",
+    original: "text-xs line-through text-ink-muted",
     badge: "text-[10px] px-1.5 py-0.5",
   },
   lg: {
-    price: "text-lg sm:text-xl font-bold",
-    original: "text-xs sm:text-sm line-through text-[var(--color-ink-muted)]",
-    badge: "text-[11px] px-1.5 py-0.5",
+    price: "text-xl sm:text-2xl font-black",
+    original: "text-xs sm:text-sm line-through text-ink-muted",
+    badge: "text-[11px] px-2 py-0.5",
   },
   xl: {
-    price: "text-2xl sm:text-3xl font-extrabold",
-    original: "text-sm sm:text-base line-through text-[var(--color-ink-muted)]",
-    badge: "text-xs px-2 py-0.5",
+    price: "text-2xl sm:text-4xl font-black",
+    original: "text-sm sm:text-base line-through text-ink-muted",
+    badge: "text-xs px-2.5 py-1",
   },
 };
 
@@ -41,29 +40,36 @@ export function PriceTag({
   className,
 }: PriceTagProps) {
   const currentSize = sizeClasses[size];
-  const hasDiscount = (discountValue && discountValue > 0) || (originalPrice && originalPrice > price);
-  const strikePrice = originalPrice || (discountValue ? Math.round(price / (1 - discountValue / 100)) : undefined);
+  const hasDiscount =
+    (discountValue && discountValue > 0) ||
+    (originalPrice && originalPrice > price);
+  const strikePrice =
+    originalPrice ||
+    (discountValue ? Math.round(price / (1 - discountValue / 100)) : undefined);
 
   return (
-    <div className={cn("inline-flex items-baseline gap-2 flex-wrap tabular-nums", className)}>
-      <span className={cn(currentSize.price, "text-[var(--color-ink)] font-heading tracking-tight")}>
+    <div
+      className={cn(
+        "inline-flex items-baseline gap-2 flex-wrap font-mono tabular",
+        className
+      )}
+    >
+      <span className={cn(currentSize.price, "text-ink")}>
         {formatVND(price)}
       </span>
       {hasDiscount && strikePrice && (
-        <span className={cn(currentSize.original, "font-body")}>
-          {formatVND(strikePrice)}
-        </span>
+        <span className={cn(currentSize.original)}>{formatVND(strikePrice)}</span>
       )}
-      {discountValue && discountValue > 0 && (
+      {discountValue && discountValue > 0 ? (
         <span
           className={cn(
             currentSize.badge,
-            "bg-[var(--color-accent)] text-white font-mono font-bold rounded-none uppercase leading-none"
+            "border-2 border-ink bg-volt text-ink mono-label font-extrabold leading-none"
           )}
         >
           -{discountValue}%
         </span>
-      )}
+      ) : null}
     </div>
   );
 }

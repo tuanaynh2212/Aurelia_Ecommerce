@@ -1,41 +1,40 @@
 import React from "react";
 
-export const InputField = ({
+interface InputFieldProps {
+  icon?: React.ElementType;
+  label: string;
+  name?: string;
+  type?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export const InputField: React.FC<InputFieldProps> = ({
   icon: Icon,
   label,
   name,
   type = "text",
   value,
   onChange,
-}: any) => (
+}) => (
   <div className="space-y-1.5">
-    <label className="block text-[11px] font-mono uppercase tracking-wider text-ink-muted">
-      {label}
-    </label>
+    <label className="block mono-label text-[var(--color-ink)]">{label}</label>
     <div className="relative">
       {Icon && (
-        <Icon size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted" />
+        <Icon
+          size={16}
+          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-flash)]"
+        />
       )}
       <input
         type={type}
         name={name}
         value={value}
         onChange={onChange}
-        className={`
-          w-full
-          ${Icon ? "pl-10" : "pl-3.5"} pr-4 py-2.5
-          border border-rule/80
-          rounded-tag
-          bg-paper
-          text-ink
-          font-mono text-sm
-          focus:outline-none
-          focus:border-cobalt
-          focus:ring-1 focus:ring-cobalt
-          transition-all
-        `}
+        className={`w-full min-h-[48px] ${
+          Icon ? "pl-10" : "pl-3.5"
+        } pr-4 py-2.5 border-2 border-[var(--color-ink)] bg-[var(--color-paper)] text-[var(--color-ink)] font-mono text-xs focus:outline-none focus:bg-[var(--color-volt)]/15 focus:shadow-[var(--shadow-hard-sm)] transition-all`}
       />
     </div>
   </div>
 );
-

@@ -1,86 +1,66 @@
 import { useMemo } from "react";
+import { Check } from "lucide-react";
 import type { order } from "../../types/type";
-import { Calendar, CheckCircle, Home, Package2Icon, Truck } from "lucide-react";
+import {
+  buildOrderSteps,
+  getOrderStatusIndex,
+  ORDER_STEP_ICONS,
+} from "./orderSteps";
 
-const Timeline= ({ data }: { data: order | undefined }) => {
-     const status = data?.status;
-  const dataLable = [
-    {
-      status: "Chờ Xác Nhận",
-      date: data?.ngayTaoDon,
-      icon: <Calendar className="w-7" />,
-    },
-    {
-      status: "Xác Nhận",
-      date: data?.tracking?.updateTime,
-      icon: <CheckCircle className="w-7" />,
-    },
-    {
-      status: "Đóng Gói",
-      date: data?.tracking?.updateTime,
-      icon: <Package2Icon className="w-7" />,
-    },
-    {
-      status: "Đang giao",
-      date: data?.tracking?.updateTime,
-      icon: <Truck className="w-7" />,
-    },
-    {
-      status: "Đã Giao",
-      date: data?.tracking?.updateTime,
-      icon: <Home className="w-7" />,
-    },
-  ];
-  const statusIndex = useMemo(() => {
-    const table: Record<string, number> = {
-      "Chờ Xác Nhận": 0,
-      "Xác Nhận": 1,
-      "Đóng Gói": 2,
-      "Đang giao": 3,
-      "Đã Giao": 4,
-    };
-    return table[status ?? ""] ?? 0;
-  }, [status]);
+const Timeline = ({ data }: { data: order | undefined }) => {
+  const steps = buildOrderSteps(data);
+  const statusIndex = useMemo(
+    () => getOrderStatusIndex(data?.status),
+    [data?.status]
+  );
 
   return (
-    <div className="flex-1 overflow-y-auto no-scrollbar pr-2 mt-8">
-      <div className="relative pl-2">
-        <div className="absolute left-[7px] top-2 bottom-4 w-[1px] bg-aurelia-silver"></div>
+    <div className="flex-1 overflow-y-auto pr-2 my-6">
+      <div className="relative pl-3">
+        <div className="absolute left-[18px] top-2 bottom-4 w-[2px] bg-[var(--color-ink)]" />
 
-        {dataLable.map((step,index) => {
+        {steps.map((step, index) => {
+          const isCompleted = statusIndex > index;
+          const isCurrent = statusIndex === index;
+          const Icon = ORDER_STEP_ICONS[step.status];
 
           return (
             <div
-              
-              className={`relative flex gap-6 pb-10 ${statusIndex < index ? 'opacity-40' : ''}`}
+              key={step.status}
+              className={`relative flex gap-4 pb-7 ${
+                statusIndex < index ? "opacity-45" : ""
+              }`}
             >
               <div className="z-10 flex flex-col items-center">
-                {statusIndex > index ? (
-                  <div className="size-4 rounded-full bg-gray-900 border border-aurelia-charcoal mt-1 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-white text-[10px]">check</span>
+                {isCompleted ? (
+                  <div className="w-7 h-7 bg-[var(--color-ink)] text-[var(--color-paper)] border-2 border-[var(--color-ink)] flex items-center justify-center">
+                    <Check size={13} />
                   </div>
-                ) : statusIndex === index ? (
-                  <div className="size-4 rounded-full border-2 border-primary bg-gray-900 mt-1 shadow-[0_0_0_4px_rgba(19,91,236,0.1)]"></div>
+                ) : isCurrent ? (
+                  <div className="w-7 h-7 bg-[var(--color-volt)] text-[var(--color-ink)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard-sm)] flex items-center justify-center">
+                    <Icon className="w-4 h-4" />
+                  </div>
                 ) : (
-                  <div className="size-4 rounded-full border border-aurelia-charcoal bg-white mt-1"></div>
+                  <div className="w-7 h-7 bg-[var(--color-paper)] text-[var(--color-ink-muted)] border-2 border-[var(--color-ink)] flex items-center justify-center">
+                    <Icon className="w-4 h-4" />
+                  </div>
                 )}
               </div>
 
               <div className="flex flex-col">
-                <p className={`text-sm font-medium leading-none mb-1 ${statusIndex === index ? 'text-primary font-bold' : 'text-aurelia-charcoal'}`}>
-                  {step.status}
+                <p
+                  className={`font-mono text-xs uppercase tracking-wider mb-1 ${
+                    isCurrent
+                      ? "text-[var(--color-flash)] font-extrabold"
+                      : "text-[var(--color-ink)] font-bold"
+                  }`}
+                >
+                  0{index + 1} · {step.status}
                 </p>
                 {(data?.address || step.date) && (
-                  <p className="text-aurelia-gray text-xs">
-                    {data?.address} {data?.address && step.date ? '•' : ''} {step.date}
-                  </p>
-                )}
-                {data?.address && index!==statusIndex && (
-                    <p className="text-aurelia-gray text-xs mt-1">{step.status}</p>
-                )}
-                {data?.address && index===statusIndex && (
-                  <p className="text-aurelia-gray text-xs mt-2 leading-relaxed max-w-[280px]">
-                    {step.status}
+                  <p className="font-mono text-[11px] text-[var(--color-ink-muted)]">
+                    {data?.address} {data?.address && step.date ? "·" : ""}{" "}
+                    {step.date}
                   </p>
                 )}
               </div>

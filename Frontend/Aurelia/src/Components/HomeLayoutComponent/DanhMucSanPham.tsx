@@ -1,6 +1,6 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { FilterProductContext } from "../../contexts/FIlterProduct";
 import { Section } from "../layout/Section";
@@ -11,35 +11,35 @@ export const DanhMuc = [
     subtitle: "Thanh lịch & Nữ tính",
     type: "dress",
     img: "https://i.pinimg.com/736x/58/0b/b7/580bb7f28cfbf183f2746993a181d9f7.jpg",
-    accent: "bg-[var(--color-peach-100)]",
+    accent: "bg-bone",
   },
   {
     name: "Áo Thiết Kế",
     subtitle: "Hiện đại & Năng động",
     type: "top",
     img: "https://i.pinimg.com/1200x/9b/e4/d5/9be4d5d483ce50ddc1dd7cdedcbde159.jpg",
-    accent: "bg-[var(--color-cream-100)]",
+    accent: "bg-paper",
   },
   {
     name: "Trang Sức",
     subtitle: "Tinh tế & Sang trọng",
     type: "jewelry",
     img: "https://i.pinimg.com/736x/1a/d8/11/1ad8111c65c6f2781ccba0009c11cd36.jpg",
-    accent: "bg-[var(--color-peach-200)]",
+    accent: "bg-bone",
   },
   {
     name: "Đồng Hồ",
     subtitle: "Cổ điển & Vượt thời gian",
     type: "watch",
     img: "https://i.pinimg.com/736x/87/9b/ec/879bec5e2a5e23f2528bf1efd93c3f74.jpg",
-    accent: "bg-[var(--color-sage-light)]",
+    accent: "bg-paper",
   },
   {
     name: "Phụ Kiện",
     subtitle: "Điểm nhấn hoàn hảo",
     type: "accessory",
     img: "https://i.pinimg.com/1200x/c4/49/77/c44977b0c84eb51f1713c0778959fc8f.jpg",
-    accent: "bg-[var(--color-cream-200)]",
+    accent: "bg-bone",
   },
 ];
 
@@ -58,134 +58,41 @@ export const DanhMucSanPham = () => {
       title="Danh Mục Sản Phẩm"
       subtitle="Tìm kiếm trang phục và phụ kiện phù hợp nhất cho phong cách hàng ngày của bạn"
     >
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-5 auto-rows-[240px] md:auto-rows-[280px]">
-        <motion.div
-          whileHover={{ y: -4 }}
-          transition={{ duration: 0.3 }}
-          onClick={() => handleClick(DanhMuc[0].type)}
-          className="md:col-span-6 md:row-span-2 group relative rounded-[var(--radius-xl)] overflow-hidden cursor-pointer shadow-[var(--shadow-card)] border border-[var(--color-cream-300)]/60 bg-[var(--color-cream-100)]"
-        >
-          <img
-            src={DanhMuc[0].img}
-            alt={DanhMuc[0].name}
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-ink)]/75 via-[var(--color-ink)]/20 to-transparent" />
-
-          <div className="absolute inset-x-6 bottom-6 flex items-end justify-between text-white">
-            <div>
-              <span className="text-xs font-semibold tracking-wider uppercase text-[var(--color-peach-100)] mb-1 block">
-                Nổi bật
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-12">
+        {DanhMuc.map((item, idx) => (
+          <button
+            key={item.type}
+            type="button"
+            onClick={() => handleClick(item.type)}
+            className={`group relative flex flex-col justify-between overflow-hidden border-2 border-ink bg-paper p-4 text-left shadow-hard hover:bg-volt cursor-pointer rounded-[2px] ${
+              idx === 0 ? "md:col-span-6 md:row-span-2" : "md:col-span-3"
+            }`}
+          >
+            <div className="mb-3 flex w-full items-center justify-between mono-label text-[10px] font-bold text-ink-muted">
+              <span>[CAT-0{idx + 1}]</span>
+              <span>{item.type.toUpperCase()}</span>
+            </div>
+            <div className="aspect-[4/3] w-full overflow-hidden border-2 border-ink bg-bone">
+              <img
+                src={item.img}
+                alt={item.name}
+                loading="lazy"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            </div>
+            <div className="mt-3 flex w-full items-end justify-between gap-2">
+              <div>
+                <h3 className="font-display text-lg font-extrabold uppercase text-ink diacritic-safe">
+                  {item.name}
+                </h3>
+                <p className="text-xs text-ink-muted">{item.subtitle}</p>
+              </div>
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-ink bg-ink text-paper group-hover:bg-flash">
+                <ArrowUpRight size={18} strokeWidth={2.5} aria-hidden="true" />
               </span>
-              <h3 className="text-2xl sm:text-3xl font-heading font-bold">
-                {DanhMuc[0].name}
-              </h3>
-              <p className="text-sm text-white/80 font-body mt-1">
-                {DanhMuc[0].subtitle}
-              </p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm group-hover:bg-[var(--color-accent)] text-white flex items-center justify-center transition-all duration-300 group-hover:scale-110">
-              <ArrowUpRight size={20} />
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          whileHover={{ y: -4 }}
-          transition={{ duration: 0.3 }}
-          onClick={() => handleClick(DanhMuc[1].type)}
-          className="md:col-span-3 md:row-span-1 group relative rounded-[var(--radius-xl)] overflow-hidden cursor-pointer shadow-[var(--shadow-card)] border border-[var(--color-cream-300)]/60 bg-[var(--color-cream-100)]"
-        >
-          <img
-            src={DanhMuc[1].img}
-            alt={DanhMuc[1].name}
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-ink)]/70 via-transparent to-transparent" />
-          <div className="absolute inset-x-5 bottom-5 flex items-end justify-between text-white">
-            <div>
-              <h3 className="text-xl font-heading font-bold">{DanhMuc[1].name}</h3>
-              <p className="text-xs text-white/80 mt-0.5">{DanhMuc[1].subtitle}</p>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm group-hover:bg-[var(--color-accent)] text-white flex items-center justify-center transition-colors">
-              <ArrowUpRight size={16} />
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          whileHover={{ y: -4 }}
-          transition={{ duration: 0.3 }}
-          onClick={() => handleClick(DanhMuc[2].type)}
-          className="md:col-span-3 md:row-span-1 group relative rounded-[var(--radius-xl)] overflow-hidden cursor-pointer shadow-[var(--shadow-card)] border border-[var(--color-cream-300)]/60 bg-[var(--color-cream-100)]"
-        >
-          <img
-            src={DanhMuc[2].img}
-            alt={DanhMuc[2].name}
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-ink)]/70 via-transparent to-transparent" />
-          <div className="absolute inset-x-5 bottom-5 flex items-end justify-between text-white">
-            <div>
-              <h3 className="text-xl font-heading font-bold">{DanhMuc[2].name}</h3>
-              <p className="text-xs text-white/80 mt-0.5">{DanhMuc[2].subtitle}</p>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm group-hover:bg-[var(--color-accent)] text-white flex items-center justify-center transition-colors">
-              <ArrowUpRight size={16} />
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          whileHover={{ y: -4 }}
-          transition={{ duration: 0.3 }}
-          onClick={() => handleClick(DanhMuc[3].type)}
-          className="md:col-span-3 md:row-span-1 group relative rounded-[var(--radius-xl)] overflow-hidden cursor-pointer shadow-[var(--shadow-card)] border border-[var(--color-cream-300)]/60 bg-[var(--color-cream-100)]"
-        >
-          <img
-            src={DanhMuc[3].img}
-            alt={DanhMuc[3].name}
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-ink)]/70 via-transparent to-transparent" />
-          <div className="absolute inset-x-5 bottom-5 flex items-end justify-between text-white">
-            <div>
-              <h3 className="text-xl font-heading font-bold">{DanhMuc[3].name}</h3>
-              <p className="text-xs text-white/80 mt-0.5">{DanhMuc[3].subtitle}</p>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm group-hover:bg-[var(--color-accent)] text-white flex items-center justify-center transition-colors">
-              <ArrowUpRight size={16} />
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          whileHover={{ y: -4 }}
-          transition={{ duration: 0.3 }}
-          onClick={() => handleClick(DanhMuc[4].type)}
-          className="md:col-span-3 md:row-span-1 group relative rounded-[var(--radius-xl)] overflow-hidden cursor-pointer shadow-[var(--shadow-card)] border border-[var(--color-cream-300)]/60 bg-[var(--color-cream-100)]"
-        >
-          <img
-            src={DanhMuc[4].img}
-            alt={DanhMuc[4].name}
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-ink)]/70 via-transparent to-transparent" />
-          <div className="absolute inset-x-5 bottom-5 flex items-end justify-between text-white">
-            <div>
-              <h3 className="text-xl font-heading font-bold">{DanhMuc[4].name}</h3>
-              <p className="text-xs text-white/80 mt-0.5">{DanhMuc[4].subtitle}</p>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm group-hover:bg-[var(--color-accent)] text-white flex items-center justify-center transition-colors">
-              <ArrowUpRight size={16} />
-            </div>
-          </div>
-        </motion.div>
+          </button>
+        ))}
       </div>
     </Section>
   );

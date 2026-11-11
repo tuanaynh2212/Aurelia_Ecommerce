@@ -1,5 +1,5 @@
 import { Route, Routes, useLocation } from "react-router-dom";
-import { useEffect, useRef, lazy, Suspense, useState} from "react";
+import { useEffect, useRef, lazy, Suspense, useState, type ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
 import { LoadingScreen } from "./Components/LoadingScreen";
 import FormAuthorForShopAndAdmin from "./Components/FormAuthorForShopAndAdmin";
@@ -7,6 +7,7 @@ import { ForgotPassword } from "./Page/ForgotPassword";
 import { ChangePassWord } from "./Page/ChangePassWord";
 import Snowfall from "react-snowfall";
 import { OrderDetals } from "./Components/TrackingOrder/OrderDetals";
+import { resolveStationFromPath, spatialStore } from "./Components/UI/three/SpatialStore";
 
 const MainProduct = lazy(() =>
   import("./Page/MainProduct").then((m) => ({ default: m.MainProduct }))
@@ -68,6 +69,19 @@ const About = lazy(() =>
   import("./Page/About").then((m) => ({ default: m.About }))
 );
 
+function SpatialWorldLayout({
+  pathname,
+  children,
+}: {
+  pathname: string;
+  children: ReactNode;
+}) {
+  useEffect(() => {
+    spatialStore.setStation(resolveStationFromPath(pathname));
+  }, [pathname]);
+  return <div className="min-h-screen bg-bone text-ink">{children}</div>;
+}
+
 function App() {
   const location = useLocation();
   const ref = useRef(null);
@@ -105,39 +119,41 @@ function App() {
           }}
         />
       )}
-      <Suspense
-        fallback={
-          <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)]">
-            <div className="text-center">
-              <div className="w-8 h-8 border border-[var(--color-rule)] border-t-[var(--color-ink)] rounded-full animate-spin mx-auto mb-3"></div>
-              <p className="text-[var(--color-ink-muted)] font-medium text-xs font-body tracking-wide">Đang tải...</p>
+      <SpatialWorldLayout pathname={location.pathname}>
+        <Suspense
+          fallback={
+            <div className="studio-grid-bg min-h-screen flex items-center justify-center bg-bone">
+              <div className="border-2 border-ink bg-paper px-6 py-4 shadow-hard text-center">
+                <div className="w-8 h-8 border-2 border-ink border-t-volt animate-spin mx-auto mb-3" />
+                <p className="mono-label text-xs font-bold text-ink">Đang tải...</p>
+              </div>
             </div>
-          </div>
-        }
-      >
-        <Routes>
-          <Route path="/" element={<Home />}></Route>
-          <Route path="/Collection" element={<AllCollection />} />
-          <Route path="/Collection/:id" element={<Collection />}></Route>
-          <Route path="/Fashion/Products" element={<Product />} />
-          <Route path="/Fashion/Products/:id" element={<MainProduct />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/account" element={<Account />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/payment" element={<Checkout />} />
-          <Route path="/payment/:id" element={<MockPayMent />} />
-          <Route path="/bodyMeasurements" element={<BodySize />} />
-          <Route path="/BookingAppointment/:id" element={<FormBooking />} />
-          <Route path="/orders/:id" element={<OrderDetals />} />
-          <Route path="/tracking/:id" element={<MainPage />} />
-          <Route path="/login" element={<FormAuthorForShopAndAdmin />} />
-          <Route path="/DashBoardShop" element={<DashboardShop />} />
-          <Route path="/Admin" element={<AdminDashboard />} />
-          <Route path="/Forgot-PassWord" element={<ForgotPassword />} />
-          <Route path="/reset-passWord" element={<ChangePassWord />} />
-        </Routes>
-      </Suspense>
+          }
+        >
+          <Routes>
+            <Route path="/" element={<Home />}></Route>
+            <Route path="/Collection" element={<AllCollection />} />
+            <Route path="/Collection/:id" element={<Collection />}></Route>
+            <Route path="/Fashion/Products" element={<Product />} />
+            <Route path="/Fashion/Products/:id" element={<MainProduct />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/account" element={<Account />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/payment" element={<Checkout />} />
+            <Route path="/payment/:id" element={<MockPayMent />} />
+            <Route path="/bodyMeasurements" element={<BodySize />} />
+            <Route path="/BookingAppointment/:id" element={<FormBooking />} />
+            <Route path="/orders/:id" element={<OrderDetals />} />
+            <Route path="/tracking/:id" element={<MainPage />} />
+            <Route path="/login" element={<FormAuthorForShopAndAdmin />} />
+            <Route path="/DashBoardShop" element={<DashboardShop />} />
+            <Route path="/Admin" element={<AdminDashboard />} />
+            <Route path="/Forgot-PassWord" element={<ForgotPassword />} />
+            <Route path="/reset-passWord" element={<ChangePassWord />} />
+          </Routes>
+        </Suspense>
+      </SpatialWorldLayout>
     </div>
   );
 }

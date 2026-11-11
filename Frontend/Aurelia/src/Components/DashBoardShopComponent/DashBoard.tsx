@@ -7,11 +7,22 @@ import {
   Users,
   Clock,
   Inbox,
+  ArrowUpRight,
 } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { DashBoardShopCOntext } from "../../contexts/DashBoardShopContext";
 import { Notification } from "./Notification";
 import { NotificationContext } from "../../contexts/NotifycationContext";
+import { SplitFlap, Badge } from "../UI";
+
+interface ShopDashboardMetrics {
+  doanhThu?: number;
+  doanhSoPhanTram?: string;
+  orderHomNay?: number | string;
+  soLichHen?: number | string;
+  soUser?: number | string;
+  soLuongTang?: number | string;
+}
 
 export function DashBoardShop({
   onclick,
@@ -20,55 +31,67 @@ export function DashBoardShop({
   onclick: () => void;
   onChange: () => void;
 }) {
-  const [dataDashBoard, setDataDashBoard] = useState<any>();
+  const [dataDashBoard, setDataDashBoard] = useState<ShopDashboardMetrics>();
   const { GetDataDashBoard, dataDonHang, dataLichHen } =
     useContext(DashBoardShopCOntext);
   const [notifycationOpen, setNotificationOpen] = useState(false);
+
   useEffect(() => {
     GetDataDashBoard(setDataDashBoard);
-  }, []);
-  const { message, appointment} = useContext(NotificationContext);
+  }, [GetDataDashBoard]);
+
+  const { message, appointment } = useContext(NotificationContext);
 
   const stats = [
     {
       title: "Doanh thu hôm nay",
-      value: dataDashBoard?.doanhThu.toLocaleString("vi-VN", {
-        style: "currency",
-        currency: "VND",
-      }) ?? "0",
+      code: "KPI-REV",
+      value:
+        dataDashBoard?.doanhThu?.toLocaleString("vi-VN", {
+          style: "currency",
+          currency: "VND",
+        }) ?? "0 ₫",
       change: dataDashBoard?.doanhSoPhanTram ?? "0%",
       icon: TrendingUp,
     },
     {
       title: "Đơn hàng mới",
-      value: dataDashBoard?.orderHomNay?? "0",
-      change: dataDashBoard?.orderHomNay ?? "0",
+      code: "KPI-ORD",
+      value: String(dataDashBoard?.orderHomNay ?? "0"),
+      change: `${dataDashBoard?.orderHomNay ?? "0"} ĐƠN`,
       icon: ShoppingCart,
     },
     {
       title: "Lịch hẹn hôm nay",
-      value: dataDashBoard?.soLichHen ?? "0",
-      change: dataDashBoard?.soLichHen + " đang chờ",
+      code: "KPI-APT",
+      value: String(dataDashBoard?.soLichHen ?? "0"),
+      change: `${dataDashBoard?.soLichHen ?? 0} ĐANG CHỜ`,
       icon: Calendar,
     },
     {
       title: "Khách hàng mới",
-      value: dataDashBoard?.soUser ?? "0",
-      change: "+" + (dataDashBoard?.soLuongTang ?? "0") + " tuần này",
+      code: "KPI-USR",
+      value: String(dataDashBoard?.soUser ?? "0"),
+      change: `+${dataDashBoard?.soLuongTang ?? "0"} TUẦN NÀY`,
       icon: Users,
     },
   ];
 
-  const getStatusStyle = (status: string) => {
+  const getStatusBadge = (
+    status: string
+  ): "success" | "info" | "danger" | "warning" => {
     switch (status) {
       case "completed":
-        return "bg-emerald-100 text-emerald-700";
+      case "Đã giao":
+        return "success";
       case "processing":
-        return "bg-blue-100 text-blue-700";
+      case "Đang giao":
+        return "info";
       case "cancelled":
-        return "bg-red-100 text-red-700";
+      case "Đã hủy":
+        return "danger";
       default:
-        return "bg-gray-100 text-gray-700";
+        return "warning";
     }
   };
 
@@ -86,115 +109,126 @@ export function DashBoardShop({
   };
 
   const EmptyState = ({ text }: { text: string }) => (
-    <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-      <Inbox size={48} className="mb-4" />
-      <p>{text}</p>
+    <div className="flex flex-col items-center justify-center py-12 text-[var(--color-ink-muted)] border-2 border-dashed border-[var(--color-ink)] bg-[var(--color-bone)]">
+      <Inbox size={36} className="mb-3" />
+      <p className="mono-label">{text}</p>
     </div>
   );
 
   return (
-  <main className="flex-1 bg-gray-50 p-4 md:p-8 overflow-y-auto">
-      <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+    <main className="flex-1 bg-[var(--color-bone)] p-2 md:p-4 space-y-8">
+      <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-6 bg-[var(--color-paper)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard)] relative">
         <div>
-          <h1 className="serif text-4xl text-gray-900">Dashboard</h1>
-          <p className="text-gray-500 mt-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="hud-chip bg-[var(--color-volt)] text-[var(--color-ink)]">
+              [CONTROL ROOM // SHOP OPS]
+            </span>
+          </div>
+          <h1 className="display-l font-display-safe text-[var(--color-ink)]">
+            Dashboard
+          </h1>
+          <p className="font-mono text-xs text-[var(--color-ink-muted)] mt-1">
             Chào mừng trở lại! Đây là tổng quan hôm nay.
           </p>
         </div>
-        <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
-          <div className="relative">
+
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <div className="relative flex-1 md:flex-initial">
             <Search
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-              size={18}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-muted)]"
+              size={16}
             />
             <input
               type="text"
               placeholder="Tìm kiếm..."
-              className="pl-12 pr-4 py-3 bg-white  border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 w-full md:w-64 shadow-sm"
+              className="min-h-[44px] pl-10 pr-4 py-2 bg-[var(--color-bone)] border-2 border-[var(--color-ink)] font-mono text-xs focus:outline-none focus:bg-[var(--color-paper)] w-full md:w-64"
             />
           </div>
           <button
             onClick={() => setNotificationOpen(!notifycationOpen)}
-            className="relative p-3 bg-white  border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm"
+            className="relative min-w-[44px] min-h-[44px] inline-flex items-center justify-center bg-[var(--color-paper)] border-2 border-[var(--color-ink)] hover:bg-[var(--color-volt)] shadow-[var(--shadow-hard-sm)] transition-colors cursor-pointer"
           >
-            <Bell size={20} className="text-gray-600" />
-            {message && message?.message!==null && appointment?.message !== null && (
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
-            )}
+            <Bell size={18} className="text-[var(--color-ink)]" />
+            {message &&
+              message?.message !== null &&
+              appointment?.message !== null && (
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-[var(--color-flash)] rounded-full border border-[var(--color-ink)]" />
+              )}
           </button>
           {notifycationOpen && <Notification />}
         </div>
       </header>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => (
+      {/* Scoreboard KPI Cards with SplitFlap Counters */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+        {stats.map((stat) => (
           <div
-            key={index}
-            className="bg-white  p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100"
+            key={stat.code}
+            className="bg-[var(--color-paper)] p-5 border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard)] flex flex-col justify-between gap-4"
           >
-            <div className="flex items-start justify-between mb-4">
-              <div
-                className={`w-12 h-12  bg-gradient-to-br bg-black flex items-center justify-center shadow-lg`}
-              >
-                <stat.icon size={22} className="text-white" />
+            <div className="flex items-start justify-between border-b-2 border-dashed border-[var(--color-ink)] pb-3">
+              <div className="w-10 h-10 bg-[var(--color-ink)] text-[var(--color-paper)] flex items-center justify-center">
+                <stat.icon size={18} />
               </div>
-              <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 ">
+              <span className="px-2 py-0.5 bg-[var(--color-volt)] border border-[var(--color-ink)] mono-label font-extrabold text-[10px] text-[var(--color-ink)]">
                 {stat.change}
               </span>
             </div>
-            <h3 className="text-gray-500 text-sm font-medium mb-1">
-              {stat.title}
-            </h3>
-            <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+            <div>
+              <h3 className="mono-label text-[var(--color-ink-muted)] mb-2">
+                {stat.title}
+              </h3>
+              <SplitFlap value={stat.value} size="sm" />
+            </div>
           </div>
         ))}
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <section className="bg-white  p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg  text-gray-900">
+        <section className="bg-[var(--color-paper)] p-6 border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard)]">
+          <div className="flex items-center justify-between mb-5 pb-3 border-b-2 border-[var(--color-ink)]">
+            <h3 className="font-display-safe text-base font-extrabold uppercase text-[var(--color-ink)]">
               Đơn hàng gần đây
             </h3>
             <button
               onClick={onclick}
-              className="text-sm text-black font-medium"
+              className="min-h-[36px] px-3 border-2 border-[var(--color-ink)] bg-[var(--color-bone)] hover:bg-[var(--color-volt)] mono-label font-extrabold flex items-center gap-1 cursor-pointer"
             >
-              Xem tất cả
+              <span>Xem tất cả</span>
+              <ArrowUpRight size={13} />
             </button>
           </div>
           {dataDonHang && dataDonHang.length > 0 ? (
-            <div className="space-y-4">
-              {dataDonHang.map((order) => (
+            <div className="space-y-3">
+              {dataDonHang.slice(0, 6).map((order) => (
                 <div
                   key={order.orderId}
-                  className="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-colors border border-gray-100"
+                  className="flex items-center justify-between p-3.5 border-2 border-[var(--color-ink)] bg-[var(--color-bone)] hover:bg-[var(--color-paper)] transition-colors"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
-                      <ShoppingCart size={18} className="text-purple-600" />
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-[var(--color-paper)] border-2 border-[var(--color-ink)] flex items-center justify-center">
+                      <ShoppingCart
+                        size={16}
+                        className="text-[var(--color-flash)]"
+                      />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">
+                      <p className="font-mono font-extrabold text-xs text-[var(--color-ink)]">
                         {order.name}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="mono-label text-[10px] text-[var(--color-ink-muted)]">
                         {new Date(order.ngayTaoDon).toLocaleDateString("vi-VN")}{" "}
-                        • {order.orderId}
+                        · {order.orderId.slice(0, 8)}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-bold text-gray-900 mb-1">
+                  <div className="text-right space-y-1">
+                    <p className="font-mono text-xs font-bold text-[var(--color-ink)] truncate max-w-[160px]">
                       {order.address}
                     </p>
-                    <span
-                      className={`text-xs font-medium px-3 py-1 rounded-full ${getStatusStyle(
-                        order.status
-                      )}`}
-                    >
+                    <Badge status={getStatusBadge(order.status)}>
                       {getStatusText(order.status)}
-                    </span>
+                    </Badge>
                   </div>
                 </div>
               ))}
@@ -204,51 +238,59 @@ export function DashBoardShop({
           )}
         </section>
 
-        <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg  text-gray-900">
-              Lịch hẹn sắp tới
-            </h3>
-            <button
-              onClick={onChange}
-              className="text-sm text-black   font-medium"
-            >
-              Xem lịch
-            </button>
-          </div>
-          {dataLichHen && dataLichHen.length > 0 ? (
-            <div className="space-y-4">
-              {dataLichHen.map((appointment) => (
-                <div
-                  key={appointment.id}
-                  className="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-colors border border-gray-100"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
-                      <Calendar size={18} className="text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">
-                        {appointment.customerName}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {appointment.service}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Clock size={16} />
-                    <span className="font-semibold">
-                      {appointment.duration}
-                    </span>
-                  </div>
-                </div>
-              ))}
+        <section className="bg-[var(--color-paper)] p-6 border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard)] flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-5 pb-3 border-b-2 border-[var(--color-ink)]">
+              <h3 className="font-display-safe text-base font-extrabold uppercase text-[var(--color-ink)]">
+                Lịch hẹn sắp tới
+              </h3>
+              <button
+                onClick={onChange}
+                className="min-h-[36px] px-3 border-2 border-[var(--color-ink)] bg-[var(--color-bone)] hover:bg-[var(--color-volt)] mono-label font-extrabold flex items-center gap-1 cursor-pointer"
+              >
+                <span>Xem lịch</span>
+                <ArrowUpRight size={13} />
+              </button>
             </div>
-          ) : (
-            <EmptyState text="Không có lịch hẹn nào" />
-          )}
-          <button className="w-full mt-4 py-3  text-black border-1 font-medium  hover:shadow-lg transition-all duration-300">
+            {dataLichHen && dataLichHen.length > 0 ? (
+              <div className="space-y-3">
+                {dataLichHen.slice(0, 6).map((apt) => (
+                  <div
+                    key={apt.id}
+                    className="flex items-center justify-between p-3.5 border-2 border-[var(--color-ink)] bg-[var(--color-bone)] hover:bg-[var(--color-paper)] transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 bg-[var(--color-volt)] border-2 border-[var(--color-ink)] flex items-center justify-center">
+                        <Calendar
+                          size={16}
+                          className="text-[var(--color-ink)]"
+                        />
+                      </div>
+                      <div>
+                        <p className="font-mono font-extrabold text-xs text-[var(--color-ink)]">
+                          {apt.customerName}
+                        </p>
+                        <p className="mono-label text-[10px] text-[var(--color-ink-muted)]">
+                          {apt.service}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 border border-[var(--color-ink)] bg-[var(--color-paper)] mono-label text-[10px] text-[var(--color-ink)]">
+                      <Clock size={12} className="text-[var(--color-flash)]" />
+                      <span>{apt.duration} MIN</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState text="Không có lịch hẹn nào" />
+            )}
+          </div>
+
+          <button
+            onClick={onChange}
+            className="w-full min-h-[48px] mt-5 py-3 bg-[var(--color-ink)] hover:bg-[var(--color-flash)] text-[var(--color-paper)] border-2 border-[var(--color-ink)] mono-label font-extrabold transition-colors cursor-pointer"
+          >
             Thêm lịch hẹn mới
           </button>
         </section>

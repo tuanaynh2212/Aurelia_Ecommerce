@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { useContext, useEffect, useState } from "react";
 import { CartContext } from "../contexts/CartContext";
 import { DiaChiContext } from "../contexts/DiaChiContext";
@@ -10,9 +9,8 @@ import { v4 as uuidv4 } from "uuid";
 import type { order } from "../types/type";
 import { ListCoupon } from "../Components/ListCoupon";
 import { AdminContext } from "../contexts/AdminContext";
-
 import { CheckOutForm } from "../Components/CheckOutComponents/CheckOutForm";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, CheckSquare } from "lucide-react";
 
 export const CheckOutPanel = () => {
   const { CartDataAdd, setDataOrder, LayToaDo, LayPhiVanCHuyen } =
@@ -44,7 +42,7 @@ export const CheckOutPanel = () => {
       setToaDo({ lat: res?.lat, lon: res?.lon });
     }, 500);
     return () => clearTimeout(timeout);
-  }, [formData.address]);
+  }, [formData.address, LayToaDo]);
 
   useEffect(() => {
     const data: order = {
@@ -69,7 +67,7 @@ export const CheckOutPanel = () => {
     setDataOrder(data);
     setOrder(data);
     LayPhiVanCHuyen(true);
-  }, [formData, toaDo, CartDataAdd, typeShip]);
+  }, [formData, toaDo, CartDataAdd, typeShip, isoUTC, LayPhiVanCHuyen, selectvoucher, setDataOrder]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -109,7 +107,7 @@ export const CheckOutPanel = () => {
         isLoading={isSubmitting}
         message="Đang xử lý đơn hàng..."
       />
-      <div className="w-full pb-12">
+      <div className="w-full">
         <ListCoupon
           isOpen={isOpen}
           setIsOpen={setIsOpen}
@@ -117,13 +115,16 @@ export const CheckOutPanel = () => {
           order={order}
         />
 
-        <div className="mb-8 pb-4 border-b border-[var(--color-rule)]">
-          <div className="font-mono text-[11px] uppercase tracking-wider text-[var(--color-ink-muted)] mb-1">
-            CHECKOUT SETTLEMENT
+        <div className="mb-8 pb-4 border-b-2 border-[var(--color-ink)] flex items-end justify-between gap-4">
+          <div>
+            <div className="mono-label text-[var(--color-ink-muted)] mb-1">
+              [CHECKOUT SETTLEMENT · FORM-01]
+            </div>
+            <h1 className="display-m font-display-safe text-[var(--color-ink)]">
+              Xác Nhận Đơn Hàng
+            </h1>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-[var(--color-ink)] uppercase tracking-tight">
-            Xác Nhận Đơn Hàng
-          </h1>
+          <span className="hud-chip bg-[var(--color-bone)]">SSL-256</span>
         </div>
 
         <div className="space-y-8">
@@ -135,37 +136,53 @@ export const CheckOutPanel = () => {
             setTypeShip={setTypeShip}
           />
 
-          <div className="pt-4 border-t border-[var(--color-rule)]">
-            <div className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-ink-muted)] mb-2">
-              METHOD SELECTION
+          <div className="pt-6 border-t-2 border-[var(--color-ink)]">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 bg-[var(--color-ink)] text-[var(--color-paper)] mono-label">
+                  03
+                </span>
+                <h2 className="font-display-safe font-extrabold text-base uppercase text-[var(--color-ink)]">
+                  Thanh Toán · Method Selection
+                </h2>
+              </div>
+              <span className="mono-label text-[var(--color-ink-muted)]">
+                [SELECT 1]
+              </span>
             </div>
             <PaymentOptions value={formData.payment} onChange={handleChange} />
           </div>
 
-          <div className="flex items-center gap-2 pt-2">
+          <div className="flex items-center gap-3 p-3.5 border-2 border-[var(--color-ink)] bg-[var(--color-bone)]">
             <input
               type="checkbox"
               id="saveAddressCheck"
               checked={saveAddressCheck}
               onChange={(e) => setSaveAddressCheck(e.target.checked)}
-              className="h-3.5 w-3.5 rounded-none border border-[var(--color-rule)] text-[var(--color-ink)] cursor-pointer"
+              className="h-5 w-5 accent-[var(--color-ink)] border-2 border-[var(--color-ink)] cursor-pointer"
             />
-            <label htmlFor="saveAddressCheck" className="text-xs font-mono text-[var(--color-ink-muted)] cursor-pointer select-none">
-              Lưu địa chỉ này vào hồ sơ tài khoản
+            <label
+              htmlFor="saveAddressCheck"
+              className="mono-label text-[var(--color-ink)] cursor-pointer select-none flex items-center gap-2"
+            >
+              <CheckSquare size={14} className="text-[var(--color-flash)]" />
+              <span>Lưu địa chỉ này vào hồ sơ tài khoản</span>
             </label>
           </div>
 
-          <div className="flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between pt-6 border-t border-[var(--color-rule)]">
+          <div className="flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between pt-6 border-t-2 border-[var(--color-ink)]">
             <button
+              type="button"
               onClick={() => navigate("/cart")}
-              className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
+              className="min-h-[48px] px-5 border-2 border-[var(--color-ink)] bg-[var(--color-paper)] hover:bg-[var(--color-volt)] inline-flex items-center justify-center gap-2 mono-label text-[var(--color-ink)] shadow-[var(--shadow-hard-sm)] transition-colors cursor-pointer"
             >
-              <ChevronLeft size={14} />
+              <ChevronLeft size={15} />
               <span>Quay lại giỏ hàng</span>
             </button>
             <button
+              type="button"
               onClick={handleSubmit}
-              className="btn btn-primary py-3.5 px-8 rounded-none font-mono text-xs uppercase tracking-wider"
+              className="min-h-[52px] px-8 py-3.5 border-2 border-[var(--color-ink)] bg-[var(--color-flash)] text-[var(--color-paper)] shadow-[var(--shadow-hard)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[var(--shadow-hard-lg)] transition-all font-mono font-extrabold text-xs uppercase tracking-wider cursor-pointer"
             >
               HOÀN TẤT ĐẶT HÀNG
             </button>

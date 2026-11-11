@@ -12,6 +12,8 @@ import {
   RotateCcw,
   ShieldCheck,
 } from "lucide-react";
+import { Marquee } from "../UI/primitives/Marquee";
+import { Ticket } from "../UI/primitives/Ticket";
 import logo from "../../assets/aurelia_logo_svg.svg";
 
 export function Footer() {
@@ -27,21 +29,42 @@ export function Footer() {
   };
 
   return (
-    <footer className="border-t border-[var(--color-rule)] mt-16 bg-[var(--color-bg)]">
+    <footer className="mt-16 border-t-2 border-ink bg-paper text-ink">
+      {/* Top kinetic marquee strip */}
+      <Marquee
+        tone="volt"
+        items={[
+          "[ATELIER-01] MIỄN PHÍ VẬN CHUYỂN ĐƠN TỪ 500.000 ₫",
+          "ĐỔI TRẢ 30 NGÀY TẬN NƠI",
+          "CHẤT LƯỢNG CAM KẾT // BẢO HÀNH 1 NĂM",
+          "ADMIT ONE // SOUNDCHECK AI BODY RIG",
+        ]}
+      />
 
-      <div className="border-b border-[var(--color-rule)] py-6">
-        <div className="container-page">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center md:text-left">
+      {/* Policy band */}
+      <div className="border-b-2 border-ink bg-bone py-6">
+        <div className="container-atelier">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {[
-              { icon: Truck,       title: "Miễn phí vận chuyển", sub: "Đơn hàng từ 500.000 ₫" },
-              { icon: RotateCcw,   title: "Đổi trả 30 ngày",    sub: "Miễn phí tận nơi" },
-              { icon: ShieldCheck, title: "Chất lượng cam kết",  sub: "Bảo hành 1 năm" },
+              { code: "01", icon: Truck, title: "Miễn phí vận chuyển", sub: "Đơn hàng từ 500.000 ₫" },
+              { code: "02", icon: RotateCcw, title: "Đổi trả 30 ngày", sub: "Miễn phí tận nơi" },
+              { code: "03", icon: ShieldCheck, title: "Chất lượng cam kết", sub: "Bảo hành 1 năm" },
             ].map((item) => (
-              <div key={item.title} className="flex items-center gap-3 justify-center md:justify-start">
-                <item.icon size={18} className="text-[var(--color-ink-muted)] flex-shrink-0" />
+              <div
+                key={item.title}
+                className="flex items-center gap-3 border-2 border-ink bg-paper p-3.5 shadow-hard-sm rounded-[2px]"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-ink bg-volt text-ink">
+                  <item.icon size={18} strokeWidth={2.5} aria-hidden="true" />
+                </span>
                 <div>
-                  <span className="font-heading font-semibold text-sm text-[var(--color-ink)]">{item.title}</span>
-                  <span className="text-xs text-[var(--color-ink-muted)] ml-1.5">— {item.sub}</span>
+                  <span className="mono-label block text-[10px] font-bold text-ink-muted">
+                    [{item.code} // POLICY]
+                  </span>
+                  <span className="font-display text-sm font-extrabold uppercase text-ink diacritic-safe">
+                    {item.title}
+                  </span>
+                  <span className="ml-1.5 text-xs text-ink-muted">— {item.sub}</span>
                 </div>
               </div>
             ))}
@@ -49,128 +72,229 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="py-12">
-        <div className="container-page">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+      {/* 4 mono-titled link columns + ticket-shaped newsletter */}
+      <div className="py-12 md:py-16">
+        <div className="container-atelier">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-12">
+            {/* Ticket-shaped newsletter block */}
+            <div className="lg:col-span-5">
+              <Ticket notchClassName="bg-paper" className="bg-bone">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Link to="/" className="inline-flex items-center gap-2">
+                      <img src={logo} alt="Aurelia" className="h-8 w-auto" />
+                    </Link>
+                    <span className="border-2 border-ink bg-volt px-2 py-0.5 mono-label text-[10px] font-extrabold text-ink">
+                      ADMIT ONE
+                    </span>
+                  </div>
 
-            <div className="lg:col-span-2 space-y-4">
-              <Link to="/" className="inline-block">
-                <img src={logo} alt="Aurelia" className="h-8 w-auto" />
-              </Link>
-              <p className="text-sm text-[var(--color-ink-muted)] max-w-sm font-body leading-relaxed">
-                Thời trang hiện đại, thanh lịch cho phong cách sống năng động mỗi ngày.
-              </p>
-
-              <div className="pt-1">
-                <h5 className="font-heading font-semibold text-xs uppercase tracking-wider text-[var(--color-ink)] mb-2">
-                  Nhận tin & ưu đãi
-                </h5>
-                {subscribed ? (
-                  <p className="text-sm text-[var(--color-accent)] font-medium">
-                    ✓ Đăng ký thành công!
+                  <p className="text-sm text-ink-muted">
+                    Thời trang hiện đại, thanh lịch cho phong cách sống năng động mỗi ngày.
                   </p>
-                ) : (
-                  <form onSubmit={handleSubscribe} className="flex gap-0 max-w-sm">
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Email của bạn"
-                      required
-                      className="input flex-1 text-xs border-r-0"
-                    />
-                    <button
-                      type="submit"
-                      aria-label="Đăng ký"
-                      className="px-3 bg-[var(--color-ink)] text-[var(--color-bg)] hover:bg-[var(--color-accent)] transition-colors cursor-pointer"
-                    >
-                      <ArrowRight size={14} />
-                    </button>
-                  </form>
-                )}
+
+                  <div>
+                    <h5 className="mono-label mb-2 text-xs font-extrabold text-ink">
+                      [NHẬN TIN & ƯU ĐÃI]
+                    </h5>
+                    {subscribed ? (
+                      <p className="inline-block border-2 border-ink bg-volt px-3 py-1.5 mono-label text-xs font-extrabold text-ink">
+                        ✓ Đăng ký thành công!
+                      </p>
+                    ) : (
+                      <form onSubmit={handleSubscribe} className="flex gap-0">
+                        <label htmlFor="footer-newsletter-email" className="sr-only">
+                          Email của bạn
+                        </label>
+                        <input
+                          id="footer-newsletter-email"
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="Email của bạn"
+                          required
+                          className="min-h-[48px] flex-1 border-2 border-r-0 border-ink bg-paper px-3.5 text-sm text-ink placeholder:text-ink-muted focus:outline-none"
+                        />
+                        <button
+                          type="submit"
+                          aria-label="Đăng ký"
+                          className="press-collapse flex min-h-[48px] min-w-[52px] items-center justify-center border-2 border-ink bg-ink px-4 text-paper hover:bg-flash cursor-pointer"
+                        >
+                          <ArrowRight size={18} strokeWidth={2.5} aria-hidden="true" />
+                        </button>
+                      </form>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    {[
+                      { icon: Facebook, label: "Facebook", href: "https://facebook.com" },
+                      { icon: Instagram, label: "Instagram", href: "https://instagram.com" },
+                      { icon: Twitter, label: "Twitter", href: "https://twitter.com" },
+                    ].map((s) => (
+                      <a
+                        key={s.label}
+                        href={s.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={s.label}
+                        className="press-collapse flex h-11 w-11 items-center justify-center border-2 border-ink bg-paper text-ink shadow-hard-sm hover:bg-volt"
+                      >
+                        <s.icon size={16} strokeWidth={2.5} aria-hidden="true" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </Ticket>
+            </div>
+
+            {/* 4 mono-titled columns */}
+            <div className="grid grid-cols-2 gap-6 sm:grid-cols-4 lg:col-span-7">
+              <div>
+                <h4 className="mono-label mb-3 border-b-2 border-ink pb-2 text-xs font-extrabold text-ink">
+                  [01 // SẢN PHẨM]
+                </h4>
+                <ul className="space-y-2.5 text-sm font-medium text-ink-muted">
+                  <li>
+                    <Link to="/Fashion/Products" className="hover:text-ink underline-offset-4 hover:underline">
+                      Tất cả sản phẩm
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/Collection" className="hover:text-ink underline-offset-4 hover:underline">
+                      Bộ sưu tập
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/bodyMeasurements" className="hover:text-ink underline-offset-4 hover:underline">
+                      AI Tư vấn dáng người
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/Fashion/Products?tag=sale" className="hover:text-ink underline-offset-4 hover:underline">
+                      Ưu đãi
+                    </Link>
+                  </li>
+                </ul>
               </div>
 
-              <div className="flex items-center gap-4 pt-1">
-                {[
-                  { icon: Facebook,  label: "Facebook",  href: "https://facebook.com" },
-                  { icon: Instagram, label: "Instagram", href: "https://instagram.com" },
-                  { icon: Twitter,   label: "Twitter",   href: "https://twitter.com" },
-                ].map((s) => (
-                  <a
-                    key={s.label}
-                    href={s.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={s.label}
-                    className="text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
-                  >
-                    <s.icon size={16} />
-                  </a>
-                ))}
+              <div>
+                <h4 className="mono-label mb-3 border-b-2 border-ink pb-2 text-xs font-extrabold text-ink">
+                  [02 // VỀ AURELIA]
+                </h4>
+                <ul className="space-y-2.5 text-sm font-medium text-ink-muted">
+                  <li>
+                    <Link to="/about" className="hover:text-ink underline-offset-4 hover:underline">
+                      Câu chuyện
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/about#sustainability" className="hover:text-ink underline-offset-4 hover:underline">
+                      Bền vững
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/account" className="hover:text-ink underline-offset-4 hover:underline">
+                      Tài khoản
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/about#stores" className="hover:text-ink underline-offset-4 hover:underline">
+                      Cửa hàng
+                    </Link>
+                  </li>
+                </ul>
               </div>
-            </div>
 
-            <div>
-              <h4 className="font-heading font-semibold text-xs uppercase tracking-wider text-[var(--color-ink)] mb-4 pb-2 border-b border-[var(--color-rule)]">
-                Sản phẩm
-              </h4>
-              <ul className="space-y-2 text-sm text-[var(--color-ink-muted)]">
-                <li><Link to="/Fashion/Products" className="hover:text-[var(--color-ink)] transition-colors">Tất cả sản phẩm</Link></li>
-                <li><Link to="/Collection" className="hover:text-[var(--color-ink)] transition-colors">Bộ sưu tập</Link></li>
-                <li><Link to="/bodyMeasurements" className="hover:text-[var(--color-ink)] transition-colors">AI Tư vấn dáng người</Link></li>
-                <li><Link to="/Fashion/Products?tag=sale" className="hover:text-[var(--color-ink)] transition-colors">Ưu đãi</Link></li>
-              </ul>
-            </div>
+              <div>
+                <h4 className="mono-label mb-3 border-b-2 border-ink pb-2 text-xs font-extrabold text-ink">
+                  [03 // DỊCH VỤ]
+                </h4>
+                <ul className="space-y-2.5 text-sm font-medium text-ink-muted">
+                  <li>
+                    <Link to="/bodyMeasurements" className="hover:text-ink underline-offset-4 hover:underline">
+                      Soundcheck AI
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/cart" className="hover:text-ink underline-offset-4 hover:underline">
+                      Giỏ hàng
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/search" className="hover:text-ink underline-offset-4 hover:underline">
+                      Tra cứu mẫu
+                    </Link>
+                  </li>
+                </ul>
+              </div>
 
-            <div>
-              <h4 className="font-heading font-semibold text-xs uppercase tracking-wider text-[var(--color-ink)] mb-4 pb-2 border-b border-[var(--color-rule)]">
-                Về Aurelia
-              </h4>
-              <ul className="space-y-2 text-sm text-[var(--color-ink-muted)]">
-                <li><Link to="/about" className="hover:text-[var(--color-ink)] transition-colors">Câu chuyện</Link></li>
-                <li><Link to="/about#sustainability" className="hover:text-[var(--color-ink)] transition-colors">Bền vững</Link></li>
-                <li><Link to="/account" className="hover:text-[var(--color-ink)] transition-colors">Tài khoản</Link></li>
-                <li><Link to="/about#stores" className="hover:text-[var(--color-ink)] transition-colors">Cửa hàng</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-heading font-semibold text-xs uppercase tracking-wider text-[var(--color-ink)] mb-4 pb-2 border-b border-[var(--color-rule)]">
-                Liên hệ
-              </h4>
-              <ul className="space-y-2.5 text-sm text-[var(--color-ink-muted)]">
-                <li className="flex items-start gap-2">
-                  <MapPin size={14} className="mt-0.5 flex-shrink-0" />
-                  <span>123 Lê Lợi, Q.1, TP.HCM</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Mail size={14} className="flex-shrink-0" />
-                  <a href="mailto:support@aurelia.vn" className="hover:text-[var(--color-ink)]">support@aurelia.vn</a>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Phone size={14} className="flex-shrink-0" />
-                  <a href="tel:1900123456" className="hover:text-[var(--color-ink)]">1900 123 456</a>
-                </li>
-              </ul>
+              <div>
+                <h4 className="mono-label mb-3 border-b-2 border-ink pb-2 text-xs font-extrabold text-ink">
+                  [04 // LIÊN HỆ]
+                </h4>
+                <ul className="space-y-2.5 text-sm text-ink-muted">
+                  <li className="flex items-start gap-2">
+                    <MapPin size={15} className="mt-0.5 shrink-0 text-ink" />
+                    <span>123 Lê Lợi, Q.1, TP.HCM</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Mail size={15} className="shrink-0 text-ink" />
+                    <a href="mailto:support@aurelia.vn" className="hover:text-ink break-all">
+                      support@aurelia.vn
+                    </a>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Phone size={15} className="shrink-0 text-ink" />
+                    <a href="tel:1900123456" className="font-mono font-bold text-ink hover:underline">
+                      1900 123 456
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="border-t border-[var(--color-rule)] py-5 text-xs text-[var(--color-ink-muted)]">
-        <div className="container-page">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p>© {new Date().getFullYear()} Aurelia Fashion</p>
-            <div className="flex items-center gap-4">
-              <Link to="/about" className="hover:text-[var(--color-ink)] transition-colors">Điều khoản</Link>
-              <span className="text-[var(--color-rule)]">·</span>
-              <Link to="/about" className="hover:text-[var(--color-ink)] transition-colors">Bảo mật</Link>
-              <span className="text-[var(--color-rule)]">·</span>
-              <Link to="/about" className="hover:text-[var(--color-ink)] transition-colors">Đổi trả</Link>
-            </div>
+      {/* Giant cropped AURELIA brutalist wordmark */}
+      <div className="overflow-hidden border-t-2 border-ink bg-ink text-paper select-none">
+        <div className="container-atelier">
+          <p
+            aria-hidden="true"
+            className="font-display text-[clamp(5rem,22vw,22rem)] font-black uppercase leading-[0.82] tracking-tighter text-paper"
+          >
+            AURELIA
+          </p>
+        </div>
+      </div>
+
+      {/* Barcode strip + copyright */}
+      <div className="border-t-2 border-ink bg-bone py-4 text-xs text-ink">
+        <div className="container-atelier flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="barcode w-36" aria-hidden="true" />
+            <p className="mono-label text-[11px] font-bold">
+              © {new Date().getFullYear()} AURELIA FASHION // ALL RIGHTS RESERVED
+            </p>
+          </div>
+          <div className="flex items-center gap-4 mono-label text-[11px] font-bold">
+            <Link to="/about" className="hover:underline">
+              Điều khoản
+            </Link>
+            <span>·</span>
+            <Link to="/about" className="hover:underline">
+              Bảo mật
+            </Link>
+            <span>·</span>
+            <Link to="/about" className="hover:underline">
+              Đổi trả
+            </Link>
           </div>
         </div>
       </div>
     </footer>
   );
 }
+
+export default Footer;

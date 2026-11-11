@@ -1,6 +1,8 @@
 import { useContext } from "react";
 import { CartContext } from "../../contexts/CartContext";
 import { ListCoupon } from "../ListCoupon";
+import { Receipt, DottedLeaderRow } from "../UI";
+import { Ticket as TicketIcon } from "lucide-react";
 
 export const OrderSummary = ({
   subtotal,
@@ -16,7 +18,7 @@ export const OrderSummary = ({
   const { CartDataAdd, formatPrice, dataOrder } = useContext(CartContext);
 
   return (
-    <div className="sticky top-[80px] p-6 md:p-8">
+    <div className="sticky top-20">
       <ListCoupon
         isOpen={isOpen}
         setIsOpen={setIsOpen}
@@ -24,81 +26,76 @@ export const OrderSummary = ({
         order={dataOrder}
       />
 
-      <div className="mb-6 pb-3 border-b border-[var(--color-rule)]">
-        <div className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-ink-muted)]">
-          SUMMARY
-        </div>
-        <h2 className="text-base font-heading font-bold uppercase tracking-wide text-[var(--color-ink)]">
-          Chi Tiết Đơn Hàng
-        </h2>
-      </div>
-
-      <div className="mb-6 flex flex-col gap-4">
-        {CartDataAdd.map((product) => (
-          <div key={product.itemid} className="flex gap-3 group">
-            <div className="relative h-20 w-16 flex-shrink-0 overflow-hidden rounded-none border border-[var(--color-rule)] bg-[var(--color-bg)]">
-              <span className="absolute top-0 right-0 bg-[var(--color-ink)] text-[var(--color-bg)] text-[10px] font-mono font-bold px-1 py-0.2 rounded-none z-10 tabular-nums">
-                {product.quantity}
-              </span>
-              <img
-                alt={product.name}
-                className="h-full w-full object-cover object-center"
-                src={product.thumnail}
-              />
-            </div>
-            <div className="flex flex-1 flex-col justify-center">
-              <h3 className="text-xs sm:text-sm font-heading font-semibold text-[var(--color-ink)] leading-snug line-clamp-1">
-                {product.name}
-              </h3>
-              <p className="text-[11px] font-mono text-[var(--color-ink-muted)] uppercase tracking-wider mt-0.5">
-                {product.color} · CỠ {product.size}
-              </p>
-            </div>
-            <div className="flex flex-col justify-center text-right">
-              <span className="text-xs sm:text-sm font-mono font-bold text-[var(--color-ink)] tabular-nums">
-                {formatPrice?.(product.price * product.quantity)}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <button
-        className="mb-6 text-xs font-mono uppercase tracking-wider text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors underline underline-offset-4 cursor-pointer"
-        onClick={() => setIsOpen(true)}
+      <Receipt
+        title="CHI TIẾT ĐƠN HÀNG"
+        serial={dataOrder?.orderId?.slice(0, 8).toUpperCase() || "CHK-0001"}
+        footer="ATELIER THERMAL SETTLEMENT RECORD"
       >
-        + ÁP DỤNG MÃ GIẢM GIÁ / COUPON
-      </button>
+        <div className="space-y-4">
+          <div className="flex flex-col gap-3 max-h-[340px] overflow-y-auto pr-1 divide-y-2 divide-dashed divide-[var(--color-ink)]">
+            {CartDataAdd.map((product) => (
+              <div key={product.itemid} className="flex gap-3 pt-3 first:pt-0">
+                <div className="relative h-20 w-16 flex-shrink-0 overflow-hidden border-2 border-[var(--color-ink)] bg-[var(--color-bone)]">
+                  <span className="absolute top-0 right-0 bg-[var(--color-ink)] text-[var(--color-paper)] text-[10px] font-mono font-extrabold px-1.5 py-0.5 z-10 tabular-nums">
+                    x{product.quantity}
+                  </span>
+                  <img
+                    alt={product.name}
+                    className="h-full w-full object-cover object-center"
+                    src={product.thumnail}
+                  />
+                </div>
+                <div className="flex flex-1 flex-col justify-center">
+                  <h3 className="text-xs font-display-safe font-extrabold uppercase text-[var(--color-ink)] line-clamp-1">
+                    {product.name}
+                  </h3>
+                  <p className="mono-label text-[var(--color-ink-muted)] mt-1">
+                    {product.color} · CỠ {product.size}
+                  </p>
+                </div>
+                <div className="flex flex-col justify-center text-right">
+                  <span className="text-xs font-mono font-extrabold text-[var(--color-ink)] tabular-nums">
+                    {formatPrice?.(product.price * product.quantity)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
 
-      <div className="flex flex-col gap-2.5 border-t border-[var(--color-rule)] pt-5 text-xs font-mono">
-        <div className="flex justify-between text-[var(--color-ink-muted)]">
-          <span className="uppercase tracking-wider">TẠM TÍNH</span>
-          <span className="font-bold text-[var(--color-ink)] tabular-nums">{formatPrice?.(subtotal)}</span>
-        </div>
-        <div className="flex justify-between text-[var(--color-ink-muted)]">
-          <span className="uppercase tracking-wider">PHÍ GIAO HÀNG</span>
-          {shippingCost === "0" || !shippingCost ? (
-            <span className="font-bold uppercase text-[var(--color-ink)]">
-              MIỄN PHÍ
-            </span>
-          ) : (
-            <span className="font-bold text-[var(--color-ink)] tabular-nums">
-              {formatPrice?.(Number(shippingCost))}
-            </span>
-          )}
-        </div>
-      </div>
+          <button
+            type="button"
+            className="w-full min-h-[44px] px-4 py-2.5 border-2 border-[var(--color-ink)] bg-[var(--color-volt)] hover:bg-[var(--color-flash)] hover:text-[var(--color-paper)] text-[var(--color-ink)] shadow-[var(--shadow-hard-sm)] transition-colors inline-flex items-center justify-center gap-2 mono-label cursor-pointer"
+            onClick={() => setIsOpen(true)}
+          >
+            <TicketIcon size={15} />
+            <span>+ ÁP DỤNG MÃ GIẢM GIÁ / COUPON</span>
+          </button>
 
-      <div className="mt-5 flex items-baseline justify-between border-t border-[var(--color-rule)] pt-5">
-        <span className="text-sm font-mono font-bold uppercase tracking-wider text-[var(--color-ink)]">
-          TỔNG CỘNG
-        </span>
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-2xl font-heading font-extrabold text-[var(--color-accent)] tabular-nums">
-            {formatPrice?.(subtotal)}
-          </span>
+          <div className="space-y-2 border-t-2 border-[var(--color-ink)] pt-4">
+            <DottedLeaderRow
+              label="TẠM TÍNH"
+              value={formatPrice?.(subtotal) || "0 ₫"}
+            />
+            <DottedLeaderRow
+              label="PHÍ GIAO HÀNG"
+              value={
+                shippingCost === "0" || !shippingCost
+                  ? "MIỄN PHÍ"
+                  : formatPrice?.(Number(shippingCost)) || "0 ₫"
+              }
+            />
+          </div>
+
+          <div className="flex items-baseline justify-between border-t-2 border-[var(--color-ink)] pt-4">
+            <span className="mono-label font-extrabold text-[var(--color-ink)]">
+              TỔNG CỘNG
+            </span>
+            <span className="text-2xl font-mono font-extrabold text-[var(--color-flash)] tabular-nums">
+              {formatPrice?.(subtotal)}
+            </span>
+          </div>
         </div>
-      </div>
+      </Receipt>
     </div>
   );
 };

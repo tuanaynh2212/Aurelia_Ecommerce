@@ -1,9 +1,6 @@
-﻿using AureliaE_Commerce.Context;
 using AureliaE_Commerce.Dto;
-using AureliaE_Commerce.Model;
+using AureliaE_Commerce.Services;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace AureliaE_Commerce.Controller
 {
@@ -11,165 +8,34 @@ namespace AureliaE_Commerce.Controller
     [ApiController]
     public class GetAIAdvice : ControllerBase
     {
-        private readonly IMongoCollection<Client> _clientCollection;
-        private readonly IMongoCollection<Product> _productCollection;
+        private readonly AiSizeService _aiSizeService;
+        private readonly JwtTokenService _jwtTokenService;
 
-        public GetAIAdvice(MongoDbContext dbContext)
+        public GetAIAdvice(AiSizeService aiSizeService, JwtTokenService jwtTokenService)
         {
-            _clientCollection = dbContext.Client;
-            _productCollection = dbContext.SanPham;
-        }
-        private enum Size
-        {
-            XS,
-            S,
-            M,
-            L,
-            XL
-        }
-
-        private class SizeRule
-        {
-            public Size Size { get; set; }
-            public double Bust { get; set; }
-            public double Waist { get; set; }
-            public double Hip { get; set; }
-            public double Shoulder { get; set; }
-        }
-
-        private static readonly List<SizeRule> SizeChart = new()
-        {
-            new() { Size = Size.XS, Bust = 78, Waist = 62, Hip = 84, Shoulder = 35 },
-            new() { Size = Size.S,  Bust = 82, Waist = 66, Hip = 88, Shoulder = 36.5 },
-            new() { Size = Size.M,  Bust = 86, Waist = 70, Hip = 92, Shoulder = 37.5 },
-            new() { Size = Size.L,  Bust = 90, Waist = 74, Hip = 96, Shoulder = 38.5 },
-            new() { Size = Size.XL, Bust = 94, Waist = 78, Hip = 100, Shoulder = 39.5 },
-        };
-
-        private (Size size, string note) CalculateFemaleSize(
-            double bust,
-            double waist,
-            double hip,
-            double shoulder,
-            string productType,
-            string productId
-        )
-        {
-
-            const double SAFE_GAP = 3.0;
-            var candidates = new List<(Size size, double score, string note)>();
-            var filter = Builders<Product>.Filter.Eq(p => p.id, productId);
-            var dataSize = _productCollection.Find(filter).FirstOrDefault();
-            var productSizes = SizeChart.Select(s => s.Size).ToList();
-            foreach (var r in SizeChart)
-            {
-                if (r.Bust < bust - SAFE_GAP) continue;
-                if (productType == "dress" && r.Hip < hip - SAFE_GAP) continue;
-                double score;
-                string note;
-                if (productType == "top")
-                {
-                    score =
-                        Math.Abs(r.Bust - bust) * 0.6 +
-                        Math.Abs(r.Shoulder - shoulder) * 0.4;
-
-                    note = bust > r.Bust
-                        ? "Ưu tiên theo vòng ngực, có thể hơi rộng vai"
-                        : "Form vừa ngực và vai";
-                }
-                else
-                {
-                    score =
-                        Math.Abs(r.Bust - bust) * 0.4 +
-                        Math.Abs(r.Hip - hip) * 0.35 +
-                        Math.Abs(r.Waist - waist) * 0.25;
-
-                    if (hip > bust + 4)
-                        note = "Dáng hông lớn, chọn theo vòng hông, eo có thể rộng";
-                    else if (bust > hip + 4)
-                        note = "Dáng ngực lớn, chọn theo vòng ngực";
-                    else
-                        note = "Form cân đối";
-                }
-
-                candidates.Add((r.Size, score, note));
-            }
-            if (candidates.Count > 0)
-                return candidates.OrderBy(c => c.score).Select(c => (c.size, c.note)).First();
-            var sizeCandidates = candidates.Select(c => c.size).ToList();
-            Size fallbackSize;
-            if (sizeCandidates.Count > 0)
-            {
-                var maxCandidate = sizeCandidates.Max();
-                fallbackSize = productSizes.Contains(maxCandidate) ? maxCandidate : productSizes.Max();
-            }
-            else
-            {
-                fallbackSize = productSizes.Count > 0 ? productSizes.Max() : Size.M;
-            }
-
-            return (fallbackSize, "Kích thước lớn nhất có thể"); ;
-        }
-
-        [NonAction]
-        private string GetUserIdFromToken(string token)
-        {
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(token);
-            var userId = jwtToken.Claims.First(claim => claim.Type == JwtRegisteredClaimNames.Sub).Value;
-            return userId;
+            _aiSizeService = aiSizeService;
+            _jwtTokenService = jwtTokenService;
         }
 
         [HttpPost("GetAdviceSize")]
-        public async Task<IActionResult> GetAdviceSize(
-            [FromBody] ProductGetAdviceFromUserDto dto)
+        public async Task<IActionResult> GetAdviceSize([FromBody] ProductGetAdviceFromUserDto dto)
         {
+            var userId = _jwtTokenService.GetSubjectFromRequestCookie(Request, "client");
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
 
-            var userId = GetUserIdFromToken(Request.Cookies.TryGetValue("access_token_client", out var token) ? token : "");
+            var (hasMeasurements, sizeName, note, message) = await _aiSizeService.GetAdviceSizeAsync(userId, dto);
+            if (!hasMeasurements)
+                return BadRequest(message);
 
-            var client = await _clientCollection
-                .Find(c => c.Id == userId)
-                .FirstOrDefaultAsync();
-
-            if (client?.SoDoNgDUng == null)
-                return BadRequest("Người dùng chưa có số đo");
-
-            var sd = client.SoDoNgDUng;
-
-            var bust = double.Parse(sd.nguc);
-            var waist = double.Parse(sd.eo);
-            var hip = double.Parse(sd.hong);
-            var shoulder = double.Parse(sd.vai);
-
-            var productType =
-                dto.subCategory.Contains("dress") ? "dress" :
-                dto.subCategory.Contains("top") ? "top" :
-                dto.type.Contains("top") ? "top" :
-                dto.type.Contains("dress") ? "dress" :
-                null;
-
-            if (productType == null)
-            {
-                return Ok(new
-                {
-                    message = "Không thể ước tính size cho sản phẩm này"
-                });
-            }
-
-            var result = CalculateFemaleSize(
-                bust,
-                waist,
-                hip,
-                shoulder,
-                productType,
-                dto.ProductId
-            );
+            if (sizeName == null)
+                return Ok(new { message });
 
             return Ok(new
             {
-                size = result.size.ToString(),
-                note = result.note,
-                message = $"AI gợi ý size: {result.size}"
+                size = sizeName,
+                note,
+                message
             });
         }
     }

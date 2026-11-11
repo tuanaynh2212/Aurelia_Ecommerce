@@ -1,69 +1,92 @@
-import type { order } from "../../types/type";
+import type { Cart, order } from "../../types/type";
+import { formatDateOnly, formatVND } from "../../utils/formatters";
 import Timeline from "./TimeLine";
 
-const Sidebar = ({ data }: { data: any }) => {
+interface TrackingSidebarData {
+  data?: order;
+  product?: Cart[];
+  status?: string;
+  ngayTaoDon?: string;
+  address?: string;
+  tracking?: {
+    updateTime: string;
+    lat: number;
+    lon: number;
+  };
+}
+
+const Sidebar = ({ data }: { data?: TrackingSidebarData }) => {
+  const orderObj = data?.data || (data as unknown as order | undefined);
+  const products = data?.product || data?.data?.product || [];
+
   return (
-    <div className="absolute right-0 top-0 h-full w-full md:w-[520px] bg-white z-20 border-l border-aurelia-silver flex flex-col pt-24 pb-8 px-10 md:px-12 shadow-2xl md:shadow-none overflow-hidden">
-      <div className="mb-10">
+    <div className="h-full w-full bg-[var(--color-paper)] flex flex-col p-6 md:p-8 overflow-y-auto">
+      <div className="mb-6 pb-4 border-b-2 border-[var(--color-ink)]">
         <div className="flex justify-between items-start mb-2">
-          <p className="text-aurelia-gray text-xs font-medium uppercase tracking-widest">
-            Tracking Details
-          </p>
-          <span className="inline-flex items-center gap-1 rounded bg-aurelia-light px-2 py-1 text-[10px] font-semibold text-aurelia-charcoal uppercase tracking-wide">
-            {data?.data?.orderId}
+          <span className="hud-chip bg-[var(--color-volt)] text-[var(--color-ink)]">
+            [TRACKING MANIFEST]
+          </span>
+          <span className="px-2 py-0.5 border-2 border-[var(--color-ink)] bg-[var(--color-bone)] mono-label text-[10px]">
+            {orderObj?.orderId?.slice(0, 8)}
           </span>
         </div>
-        <h1 className="font-serif text-3xl md:text-4xl text-aurelia-charcoal leading-tight mb-2">
-          Order #{data?.data?.orderId}
+        <h1 className="display-m font-display-safe text-[var(--color-ink)] mt-2">
+          Order #{orderObj?.orderId?.slice(0, 8)}
         </h1>
-        <p className="text-aurelia-charcoal text-sm font-medium">
+        <p className="mono-label text-[var(--color-ink-muted)] mt-1">
           Estimated Delivery:{" "}
-          <span className="text-primary font-bold">
-            {data?.data?.ngayTaoDon ? new Date(data?.data?.ngayTaoDon).toLocaleDateString() : ''}
+          <span className="text-[var(--color-flash)] font-extrabold">
+            {formatDateOnly(orderObj?.ngayTaoDon)}
           </span>
         </p>
       </div>
-      {data?.product?.map((item:any) => (
-        <div className="flex gap-4 border border-aurelia-light p-3 rounded mb-4 items-center bg-aurelia-light/50">
+
+      {products.map((item: Cart, idx: number) => (
+        <div
+          key={item.itemid || idx}
+          className="flex gap-4 border-2 border-[var(--color-ink)] p-3 mb-3 items-center bg-[var(--color-bone)]"
+        >
           <div
-            className="h-16 w-16 bg-cover bg-center rounded-sm shrink-0 grayscale hover:grayscale-0 transition-all duration-500 shadow-sm"
+            className="h-16 w-16 bg-cover bg-center border-2 border-[var(--color-ink)] shrink-0"
             style={{ backgroundImage: `url(${item.thumnail})` }}
           />
           <div className="flex flex-col justify-center">
-            <h3 className="font-serif text-lg leading-none text-aurelia-charcoal">
+            <h3 className="font-display-safe font-extrabold text-sm uppercase text-[var(--color-ink)]">
               {item.name}
             </h3>
-            <p className="text-aurelia-gray text-xs mt-1">
-              {item.quantity} x ${item.price.toFixed(2)}
+            <p className="font-mono text-xs text-[var(--color-ink-muted)] mt-1 tabular-nums">
+              {item.quantity} x {formatVND(item.price)}
             </p>
           </div>
         </div>
       ))}
-      <Timeline data={data} />
 
-      <div className="mt-auto border-t border-aurelia-light pt-6 grid grid-cols-2 gap-4">
+      <Timeline data={orderObj} />
+
+      <div className="mt-auto border-t-2 border-[var(--color-ink)] pt-5 grid grid-cols-2 gap-4">
         <div>
-          <p className="text-aurelia-gray text-[10px] uppercase tracking-wider mb-1">
+          <p className="mono-label text-[10px] text-[var(--color-ink-muted)] mb-1">
             Courier
           </p>
-          <p className="text-aurelia-charcoal text-sm font-medium">
-            Aurelia Express
+          <p className="font-mono font-extrabold text-xs text-[var(--color-ink)]">
+            AURELIA EXPRESS
           </p>
         </div>
         <div className="text-right">
-          <p className="text-aurelia-gray text-[10px] uppercase tracking-wider mb-1">
+          <p className="mono-label text-[10px] text-[var(--color-ink-muted)] mb-1">
             Service
           </p>
-          <p className="text-aurelia-charcoal text-sm font-medium">
-            Priority Overnight
+          <p className="font-mono font-extrabold text-xs text-[var(--color-ink)]">
+            PRIORITY OVERNIGHT
           </p>
         </div>
       </div>
-      <div className="mt-8 flex gap-3">
-        <button className="flex-1 h-12 flex items-center justify-center border border-aurelia-charcoal bg-white text-aurelia-charcoal text-[10px] uppercase tracking-widest font-bold hover:bg-aurelia-charcoal hover:text-white transition-all rounded-sm">
+
+      <div className="mt-6 flex gap-3">
+        <button className="flex-1 min-h-[48px] flex items-center justify-center border-2 border-[var(--color-ink)] bg-[var(--color-paper)] hover:bg-[var(--color-volt)] text-[var(--color-ink)] mono-label font-extrabold transition-colors cursor-pointer">
           View Receipt
         </button>
-        <button className="flex-1 h-12 flex items-center justify-center bg-aurelia-charcoal text-white text-[10px] uppercase tracking-widest font-bold hover:bg-primary transition-colors rounded-sm shadow-lg shadow-black/10">
+        <button className="flex-1 min-h-[48px] flex items-center justify-center border-2 border-[var(--color-ink)] bg-[var(--color-ink)] hover:bg-[var(--color-flash)] text-[var(--color-paper)] mono-label font-extrabold transition-colors cursor-pointer">
           Contact Concierge
         </button>
       </div>

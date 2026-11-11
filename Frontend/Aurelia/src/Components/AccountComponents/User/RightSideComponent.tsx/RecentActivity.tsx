@@ -1,22 +1,34 @@
 import React, { useState } from "react";
 import type { order } from "../../../../types/type";
-import { formatOrderId, formatDateTime, formatVND, getRelativeTimeVi } from "../../../../utils/formatters";
+import {
+  formatOrderId,
+  formatDateTime,
+  formatVND,
+  getRelativeTimeVi,
+} from "../../../../utils/formatters";
 import { Copy, Check, ArrowRight, Package } from "lucide-react";
+import { Badge } from "../../../UI";
 
 interface RecentActivityProps {
   orders: order[];
   setActiveItem: React.Dispatch<React.SetStateAction<string>> | undefined;
 }
 
-const STATUS_COLOR_MAP: Record<string, { bg: string; text: string; border: string }> = {
-  "Chờ Xác Nhận": { bg: "bg-amber-50", text: "text-amber-800", border: "border-amber-200" },
-  "Đã Xác Nhận": { bg: "bg-blue-50", text: "text-blue-800", border: "border-blue-200" },
-  "Đang Giao": { bg: "bg-purple-50", text: "text-purple-800", border: "border-purple-200" },
-  "Đã Giao": { bg: "bg-emerald-50", text: "text-emerald-800", border: "border-emerald-200" },
-  "Đã Hủy": { bg: "bg-stone-100", text: "text-stone-500", border: "border-stone-200" },
+const STATUS_BADGE_MAP: Record<
+  string,
+  "warning" | "info" | "success" | "danger" | "neutral"
+> = {
+  "Chờ Xác Nhận": "warning",
+  "Đã Xác Nhận": "info",
+  "Đang Giao": "info",
+  "Đã Giao": "success",
+  "Đã Hủy": "danger",
 };
 
-export const RecentActivity: React.FC<RecentActivityProps> = ({ orders, setActiveItem }) => {
+export const RecentActivity: React.FC<RecentActivityProps> = ({
+  orders,
+  setActiveItem,
+}) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const handleCopy = (id: string, e: React.MouseEvent) => {
@@ -29,92 +41,99 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({ orders, setActiv
   const safeOrders = Array.isArray(orders) ? orders.slice(0, 5) : [];
 
   return (
-    <div className="w-full bg-paper border border-rule/80 rounded-tag shadow-tag p-6">
-      <div className="flex items-center justify-between pb-4 mb-4 border-b border-rule/60">
+    <div className="w-full bg-[var(--color-paper)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard-sm)] p-6">
+      <div className="flex items-center justify-between pb-4 mb-4 border-b-2 border-[var(--color-ink)]">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-hole bg-kraft border border-ink/20 shadow-inner" />
-          <h3 className="font-mono text-xs uppercase tracking-widest text-ink font-semibold">
+          <div className="w-2.5 h-2.5 rounded-full bg-[var(--color-volt)] border border-[var(--color-ink)]" />
+          <h3 className="mono-label font-extrabold text-[var(--color-ink)]">
             Hoạt Động Gần Đây
           </h3>
         </div>
         <button
           onClick={() => setActiveItem && setActiveItem("recentOrder")}
-          className="group flex items-center gap-1 font-mono text-xs uppercase tracking-wider text-cobalt hover:text-cobalt-hover transition-colors"
+          className="min-h-[36px] px-3 border-2 border-[var(--color-ink)] bg-[var(--color-bone)] hover:bg-[var(--color-volt)] flex items-center gap-1.5 mono-label text-[var(--color-ink)] transition-colors cursor-pointer"
         >
           <span>Xem tất cả</span>
-          <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
+          <ArrowRight size={13} />
         </button>
       </div>
 
-      <div className="divide-y divide-rule/40">
+      <div className="divide-y-2 divide-dashed divide-[var(--color-ink)]">
         {safeOrders.length === 0 ? (
-          <div className="py-10 text-center text-ink-muted font-mono text-xs">
+          <div className="py-10 text-center text-[var(--color-ink-muted)] font-mono text-xs">
             Chưa có lịch sử giao dịch nào được ghi nhận.
           </div>
         ) : (
-          safeOrders.map((order) => {
-            const shortCode = formatOrderId(order.orderId);
-            const formattedDate = formatDateTime(order.ngayTaoDon);
-            const relativeDate = getRelativeTimeVi(order.ngayTaoDon);
-            const total = order.product?.reduce(
-              (sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1),
-              0
-            ) || 0;
-            const statusConfig = STATUS_COLOR_MAP[order.status] || {
-              bg: "bg-paper",
-              text: "text-ink-muted",
-              border: "border-rule",
-            };
-            const isCopied = copiedId === order.orderId;
+          safeOrders.map((orderItem) => {
+            const shortCode = formatOrderId(orderItem.orderId);
+            const formattedDate = formatDateTime(orderItem.ngayTaoDon);
+            const relativeDate = getRelativeTimeVi(orderItem.ngayTaoDon);
+            const total =
+              orderItem.product?.reduce(
+                (sum, item) =>
+                  sum +
+                  (Number(item.price) || 0) * (Number(item.quantity) || 1),
+                0
+              ) || 0;
+            const badgeStatus = STATUS_BADGE_MAP[orderItem.status] || "neutral";
+            const isCopied = copiedId === orderItem.orderId;
 
             return (
               <div
-                key={order.orderId}
-                className="group flex flex-col sm:flex-row sm:items-center justify-between py-3.5 hover:bg-black/[0.015] px-2 -mx-2 rounded-tag transition-colors gap-2"
+                key={orderItem.orderId}
+                className="flex flex-col sm:flex-row sm:items-center justify-between py-3.5 hover:bg-[var(--color-bone)]/60 px-2 transition-colors gap-2"
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-tag bg-kraft/15 border border-kraft-dark/20 flex items-center justify-center text-ink-muted shrink-0 mt-0.5">
+                  <div className="w-9 h-9 bg-[var(--color-bone)] border-2 border-[var(--color-ink)] flex items-center justify-center text-[var(--color-ink)] shrink-0 mt-0.5">
                     <Package size={15} />
                   </div>
 
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-sm font-semibold text-ink">
+                      <span className="font-mono text-sm font-extrabold text-[var(--color-ink)]">
                         Đơn {shortCode}
                       </span>
                       <button
-                        onClick={(e) => handleCopy(order.orderId, e)}
-                        title={isCopied ? "Đã sao chép!" : "Sao chép mã đơn đầy đủ"}
-                        className="p-1 rounded-tag hover:bg-kraft/20 text-ink-muted hover:text-ink transition-colors"
+                        onClick={(e) => handleCopy(orderItem.orderId, e)}
+                        title={
+                          isCopied ? "Đã sao chép!" : "Sao chép mã đơn đầy đủ"
+                        }
+                        className="p-1 border border-[var(--color-ink)] bg-[var(--color-paper)] hover:bg-[var(--color-volt)] text-[var(--color-ink)] transition-colors cursor-pointer"
                       >
                         {isCopied ? (
-                          <Check size={12} className="text-emerald-600" />
+                          <Check
+                            size={12}
+                            className="text-[var(--color-success)]"
+                          />
                         ) : (
                           <Copy size={12} />
                         )}
                       </button>
                     </div>
 
-                    <div className="flex items-center gap-1.5 font-mono text-xs text-ink-muted mt-0.5" title={relativeDate ? `Đặt lúc: ${formattedDate} (${relativeDate})` : formattedDate}>
+                    <div
+                      className="flex items-center gap-1.5 font-mono text-xs text-[var(--color-ink-muted)] mt-0.5"
+                      title={
+                        relativeDate
+                          ? `Đặt lúc: ${formattedDate} (${relativeDate})`
+                          : formattedDate
+                      }
+                    >
                       <span>{formattedDate}</span>
                       {relativeDate && (
                         <>
                           <span>·</span>
-                          <span className="text-ink-faint">({relativeDate})</span>
+                          <span>({relativeDate})</span>
                         </>
                       )}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between sm:justify-end gap-4 text-right pl-11 sm:pl-0">
-                  <span
-                    className={`inline-block font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-tag border ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
-                  >
-                    {order.status}
-                  </span>
+                <div className="flex items-center justify-between sm:justify-end gap-4 text-right pl-12 sm:pl-0">
+                  <Badge status={badgeStatus}>{orderItem.status}</Badge>
 
-                  <span className="font-mono text-sm font-semibold text-ink sm:min-w-[110px] text-right">
+                  <span className="font-mono text-sm font-extrabold text-[var(--color-ink)] tabular-nums sm:min-w-[110px] text-right">
                     {formatVND(total)}
                   </span>
                 </div>

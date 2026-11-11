@@ -1,313 +1,353 @@
 import { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowUpRight, RefreshCw, ScanLine } from "lucide-react";
 import { FilterProductContext } from "../../contexts/FIlterProduct";
-import { ShoppingBag, ArrowRight, Eye, Sparkles } from "lucide-react";
 import { cn } from "../../utils/cn";
 import { formatVND } from "../../utils/formatters";
 import type { Product } from "../../types/type";
-import { AnimatePresence, motion } from "framer-motion";
+import { filterRealProducts } from "../../utils/productFilters";
+import {
+  getAvailableSizeNames,
+  getPrimaryProductImage,
+  getProductColors,
+  getSalePrice,
+} from "../../utils/productHelpers";
+import { SectionTitle } from "../UI/primitives/SectionTitle";
+import { Receipt, ReceiptRow } from "../UI/primitives/Receipt";
+import { Button } from "../UI/primitives/Button";
+import { swatchHex } from "../UI/three/palette";
 
-const HOTSPOT_CONFIG = [
-  { slot: 0, x: 39, y: 35, label: "Áo Blazer Linen Bespoke" },
-  { slot: 1, x: 58, y: 44, label: "Đầm Lụa Dáng Rũ Thượng Hạng" },
-  { slot: 2, x: 42, y: 72, label: "Quần Âu May Đo Xếp Ly" },
-];
+function pickCuratedCapsule(products: Product[], setIndex: number): Product[] {
+  const pool = filterRealProducts(products);
+  if (pool.length === 0) return [];
 
-interface HotspotTagProps {
-  product: Product;
-  x: number;
-  y: number;
-  index: number;
-  isActive: boolean;
-  onSelect: (index: number | null) => void;
-  label?: string;
-}
+  const sorted = [...pool].sort((a, b) => (b.sold ?? 0) - (a.sold ?? 0));
+  const byType = new Map<string, Product[]>();
+  sorted.forEach((p) => {
+    const key = (p.type || p.subcategory || "OTHER").toUpperCase();
+    const list = byType.get(key) ?? [];
+    list.push(p);
+    byType.set(key, list);
+  });
 
-function HotspotTag({ product, x, y, index, isActive, onSelect, label }: HotspotTagProps) {
-  const navigate = useNavigate();
-  const anchorLeft = x < 55;
+  const interleaved: Product[] = [];
+  const buckets = Array.from(byType.values());
+  const maxLen = Math.max(...buckets.map((b) => b.length));
+  for (let round = 0; round < maxLen; round += 1) {
+    for (const bucket of buckets) {
+      if (bucket[round]) interleaved.push(bucket[round]);
+    }
+  }
 
-  const salePrice =
-    product.discountValue && product.discountValue > 0
-      ? product.discountType === "percentage"
-        ? Math.round(product.price * (1 - product.discountValue / 100))
-        : Math.round(product.price - product.discountValue)
-      : null;
-
-  return (
-    <div
-      className="absolute z-20"
-      style={{ left: `${x}%`, top: `${y}%`, transform: "translate(-50%, -50%)" }}
-    >
-      <button
-        type="button"
-        onClick={() => onSelect(isActive ? null : index)}
-        aria-expanded={isActive}
-        aria-label={isActive ? `Đóng thông tin: ${product.name}` : `Xem thông tin: ${product.name}`}
-        aria-controls={`hotspot-card-${product.id}`}
-        className={cn(
-          "relative group flex items-center justify-center transition-all duration-300 focus:outline-none",
-          isActive ? "scale-110" : "hover:scale-105"
-        )}
-      >
-        <span
-          className={cn(
-            "absolute -inset-2 rounded-full border transition-all duration-500",
-            isActive
-              ? "border-amber-400/80 bg-amber-400/20 scale-125 animate-pulse"
-              : "border-white/60 bg-white/20 group-hover:scale-125 group-hover:border-white"
-          )}
-        />
-
-        <span
-          className={cn(
-            "relative w-8 h-8 rounded-full flex items-center justify-center shadow-lg backdrop-blur-md transition-colors duration-300 border",
-            isActive
-              ? "bg-amber-400 text-neutral-950 border-amber-300 font-bold"
-              : "bg-neutral-900/80 text-white border-white/40 group-hover:bg-neutral-950"
-          )}
-        >
-          <span className="font-mono text-xs font-semibold leading-none">
-            {index + 1}
-          </span>
-        </span>
-
-        {!isActive && label && (
-          <span className="hidden md:block absolute left-10 top-1/2 -translate-y-1/2 whitespace-nowrap bg-neutral-900/85 backdrop-blur-md border border-white/20 text-white font-mono text-[11px] px-2.5 py-1 rounded shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            {label}
-          </span>
-        )}
-      </button>
-
-      <AnimatePresence>
-        {isActive && (
-          <motion.div
-            id={`hotspot-card-${product.id}`}
-            role="dialog"
-            aria-label={product.name}
-            initial={{ opacity: 0, scale: 0.9, y: 8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 8 }}
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className={cn(
-              "absolute z-40 bg-neutral-950/95 backdrop-blur-xl border border-white/15 shadow-2xl rounded-xl w-60 md:w-64 text-white overflow-hidden",
-              anchorLeft ? "left-12 -top-16" : "right-12 -top-16"
-            )}
-          >
-            {(product.thumbnail || product.images?.[0]) && (
-              <div className="relative w-full h-32 overflow-hidden bg-neutral-900">
-                <img
-                  src={product.thumbnail || product.images?.[0]}
-                  alt={product.name}
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-transparent to-transparent opacity-80" />
-                <span className="absolute top-2 left-2 px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider bg-white/10 backdrop-blur-md text-amber-300 border border-amber-300/30">
-                  Item #{index + 1}
-                </span>
-              </div>
-            )}
-
-            <div className="p-3.5 space-y-2">
-              <p className="font-heading text-sm font-medium text-white leading-snug line-clamp-2">
-                {product.name}
-              </p>
-
-              <div className="flex items-baseline gap-2">
-                {salePrice ? (
-                  <>
-                    <span className="font-mono text-sm font-semibold text-amber-300">
-                      {formatVND(salePrice)}
-                    </span>
-                    <span className="font-mono text-xs text-neutral-400 line-through">
-                      {formatVND(product.price)}
-                    </span>
-                  </>
-                ) : (
-                  <span className="font-mono text-sm font-semibold text-white">
-                    {formatVND(product.price)}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex gap-2 pt-1 border-t border-white/10">
-                <button
-                  type="button"
-                  onClick={() => navigate(`/Fashion/Products/${product.id}`)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono text-[11px] uppercase tracking-wider transition-colors"
-                >
-                  <Eye size={12} />
-                  <span>Chi tiết</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigate(`/Fashion/Products/${product.id}`)}
-                  className="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-400 text-neutral-950 hover:bg-amber-300 transition-colors shadow-sm"
-                  aria-label={`Mua ${product.name}`}
-                >
-                  <ShoppingBag size={14} />
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
+  const size = Math.min(4, interleaved.length);
+  const start = (setIndex * 2) % interleaved.length;
+  const picked: Product[] = [];
+  for (let i = 0; i < size; i += 1) {
+    picked.push(interleaved[(start + i) % interleaved.length]);
+  }
+  return picked;
 }
 
 export function LookOfTheWeek() {
   const navigate = useNavigate();
   const { dataProduct } = useContext(FilterProductContext);
-  const [activeSlot, setActiveSlot] = useState<number | null>(null);
+  const [setIndex, setSetIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  const lookProducts = useMemo<Product[]>(() => {
-    if (!dataProduct || dataProduct.length === 0) return [];
-    return [...dataProduct]
-      .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
-      .slice(0, 3);
-  }, [dataProduct]);
+  const lookProducts = useMemo<Product[]>(
+    () => pickCuratedCapsule(dataProduct || [], setIndex),
+    [dataProduct, setIndex]
+  );
 
   if (lookProducts.length === 0) return null;
 
+  const safeActiveIdx = Math.min(activeIndex, lookProducts.length - 1);
+  const activeProduct = lookProducts[safeActiveIdx];
+  const activeImage = getPrimaryProductImage(activeProduct);
+  const activeSalePrice = getSalePrice(activeProduct);
+  const colors = getProductColors(activeProduct);
+  const availableSizes = getAvailableSizeNames(activeProduct);
+
+  const totalSetPrice = lookProducts.reduce(
+    (sum, p) => sum + (getSalePrice(p) ?? p.price),
+    0
+  );
+
+  const handleCycleSet = () => {
+    setSetIndex((prev) => prev + 1);
+    setActiveIndex(0);
+  };
+
   return (
     <section
-      aria-labelledby="look-heading"
-      className="w-full py-12 md:py-20 transition-colors"
-      style={{ background: "var(--color-paper)" }}
+      aria-label="Phối đồ trọng điểm"
+      className="border-b-[3px] border-ink bg-bone py-14 md:py-20"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between pb-8 mb-8 border-b border-[var(--color-rule)] gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles size={14} className="text-amber-700" />
-              <p className="font-mono text-xs tracking-[0.25em] uppercase text-ink-muted">
-                BỘ SƯU TẬP TUẦN NÀY · EDITORIAL BESPOKE
-              </p>
-            </div>
-            <h2
-              id="look-heading"
-              className="font-heading text-3xl md:text-4xl font-semibold text-ink tracking-tight"
+      <div className="container-atelier">
+        <SectionTitle
+          index="06"
+          eyebrow="HEADLINER LOOKBOOK // STAGE WARDROBE"
+          title="PHỐI ĐỒ TRỌNG ĐIỂM"
+          subtitle="Chọn từng món trên bảng phối sân khấu để đối chiếu chất liệu, phom dáng và tổng giá trị set diễn."
+          action={
+            <Button
+              variant="secondary"
+              onClick={handleCycleSet}
+              iconRight={<RefreshCw size={15} strokeWidth={2.5} />}
             >
-              Look Của Tuần
-            </h2>
-          </div>
-          <p className="font-mono text-xs text-ink-muted max-w-md">
-            Phối trang phục may đo thủ công tinh hoa từ Aurelia Atelier. Nhấn vào các điểm đánh số trên hình để khám phá từng thiết kế.
-          </p>
-        </div>
+              Đổi set diễn
+            </Button>
+          }
+        />
 
-        <div className="relative w-full aspect-[3/2] max-h-[640px] rounded-2xl overflow-hidden shadow-2xl border border-[var(--color-rule)] bg-neutral-900 group">
-          <img
-            src="/images/lookbook-editorial.jpg"
-            alt="Look của tuần - Aurelia Atelier Bespoke Collection"
-            className="w-full h-full object-cover object-center transform transition-transform duration-700 group-hover:scale-[1.01]"
-          />
+        <div className="mt-8 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-12">
+          <div className="flex flex-col border-[3px] border-ink bg-paper shadow-hard-lg lg:col-span-7 rounded-[2px] overflow-hidden">
+            <div className="flex items-center justify-between border-b-2 border-ink bg-ink px-4 py-2.5 mono-label text-[10px] font-bold text-paper">
+              <span className="inline-flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-flash animate-rec" aria-hidden="true" />
+                STAGE CAM-A // CAPSULE #{String(setIndex + 1).padStart(2, "0")}
+              </span>
+              <span className="text-volt">
+                PIECE {String(safeActiveIdx + 1).padStart(2, "0")} / {String(lookProducts.length).padStart(2, "0")}
+              </span>
+            </div>
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none" />
-
-          <div className="absolute top-4 left-4 md:top-6 md:left-6 flex items-center gap-2 bg-neutral-950/70 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15 text-white shadow-lg pointer-events-none">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-            <span className="font-mono text-[10px] md:text-xs uppercase tracking-wider text-neutral-200">
-              Look No. 04 · Autumn Harmony
-            </span>
-          </div>
-
-          <div className="hidden sm:flex absolute bottom-4 left-4 md:bottom-6 md:left-6 items-center gap-2 bg-neutral-950/65 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/15 text-white/90 text-xs font-mono">
-            <span>Chạm số để xem thông số & giá niêm yết</span>
-          </div>
-
-          {lookProducts.map((product, i) => (
-            <HotspotTag
-              key={product.id}
-              product={product}
-              x={HOTSPOT_CONFIG[i]?.x ?? 30 + i * 20}
-              y={HOTSPOT_CONFIG[i]?.y ?? 40}
-              index={i}
-              isActive={activeSlot === i}
-              onSelect={(idx) => setActiveSlot(idx)}
-              label={HOTSPOT_CONFIG[i]?.label}
-            />
-          ))}
-        </div>
-
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-          {lookProducts.map((product, i) => {
-            const isHighlighted = activeSlot === i;
-            const salePrice =
-              product.discountValue && product.discountValue > 0
-                ? product.discountType === "percentage"
-                  ? Math.round(product.price * (1 - product.discountValue / 100))
-                  : Math.round(product.price - product.discountValue)
-                : null;
-
-            return (
-              <div
-                key={product.id}
-                onMouseEnter={() => setActiveSlot(i)}
-                onMouseLeave={() => setActiveSlot(null)}
-                onClick={() => navigate(`/Fashion/Products/${product.id}`)}
-                className={cn(
-                  "cursor-pointer relative p-4 rounded-xl border transition-all duration-300 flex items-center gap-4 bg-paper",
-                  isHighlighted
-                    ? "border-amber-600/80 shadow-lg -translate-y-1 ring-1 ring-amber-600/30"
-                    : "border-[var(--color-rule)] hover:border-ink/40 hover:shadow-md"
-                )}
-              >
-                <div
-                  className={cn(
-                    "w-9 h-9 rounded-full flex items-center justify-center font-mono font-bold text-xs flex-shrink-0 transition-colors",
-                    isHighlighted
-                      ? "bg-amber-400 text-neutral-950 shadow-sm"
-                      : "bg-neutral-200 text-neutral-800"
-                  )}
-                >
-                  0{i + 1}
-                </div>
-
-                {(product.thumbnail || product.images?.[0]) && (
-                  <div className="w-16 h-20 rounded-lg overflow-hidden bg-neutral-100 flex-shrink-0 border border-neutral-200">
-                    <img
-                      src={product.thumbnail || product.images?.[0]}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                )}
-
-                <div className="flex-1 min-w-0">
-                  <p className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-                    {HOTSPOT_CONFIG[i]?.label || "Trang phục phối"}
-                  </p>
-                  <h3 className="font-heading text-sm font-medium text-ink truncate mt-0.5">
-                    {product.name}
-                  </h3>
-                  <div className="flex items-baseline gap-2 mt-1">
-                    {salePrice ? (
-                      <>
-                        <span className="font-mono text-sm font-semibold text-amber-700">
-                          {formatVND(salePrice)}
-                        </span>
-                        <span className="font-mono text-xs text-ink-muted line-through">
-                          {formatVND(product.price)}
-                        </span>
-                      </>
+            <div className="grid flex-1 grid-cols-1 md:grid-cols-12">
+              <div className="relative min-h-[340px] md:col-span-8 md:min-h-[440px] overflow-hidden bg-bone">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeProduct.id}
+                    initial={{ opacity: 0.35, scale: 1.02 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0.35 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute inset-0"
+                  >
+                    {activeImage ? (
+                      <img
+                        src={activeImage}
+                        alt={activeProduct.name}
+                        className="h-full w-full object-cover object-center"
+                      />
                     ) : (
-                      <span className="font-mono text-sm font-semibold text-ink">
-                        {formatVND(product.price)}
-                      </span>
+                      <div className="studio-grid-bg flex h-full w-full items-center justify-center">
+                        <span className="mono-label text-xs font-bold text-ink-muted">
+                          NO PREVIEW
+                        </span>
+                      </div>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+
+                <span aria-hidden="true" className="pointer-events-none absolute left-3 top-3 h-4 w-4 border-l-2 border-t-2 border-ink" />
+                <span aria-hidden="true" className="pointer-events-none absolute right-3 top-3 h-4 w-4 border-r-2 border-t-2 border-ink" />
+                <span aria-hidden="true" className="pointer-events-none absolute bottom-16 left-3 h-4 w-4 border-b-2 border-l-2 border-ink" />
+                <span aria-hidden="true" className="pointer-events-none absolute bottom-16 right-3 h-4 w-4 border-b-2 border-r-2 border-ink" />
+
+                <div className="pointer-events-none absolute inset-x-3 bottom-3 flex flex-wrap items-end justify-between gap-2">
+                  <div className="border-2 border-ink bg-paper px-3 py-1.5 shadow-hard-sm">
+                    <p className="mono-label text-[9px] font-bold text-ink-muted">
+                      {activeProduct.brand || "AURELIA"} // {activeProduct.type}
+                    </p>
+                    <p className="max-w-[230px] truncate font-sans text-xs font-extrabold text-ink">
+                      {activeProduct.name}
+                    </p>
+                  </div>
+
+                  <div className="border-2 border-ink bg-volt px-3 py-1.5 font-mono text-xs font-black tabular text-ink shadow-hard-sm">
+                    {formatVND(activeSalePrice ?? activeProduct.price)}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                role="listbox"
+                aria-label="Danh sách món trong set phối đồ"
+                className="grid grid-cols-2 gap-[2px] border-t-2 border-ink bg-ink md:col-span-4 md:grid-cols-1 md:auto-rows-fr md:border-l-2 md:border-t-0"
+              >
+                {lookProducts.map((item, idx) => {
+                  const thumb = getPrimaryProductImage(item);
+                  const isCurrent = idx === safeActiveIdx;
+                  const price = getSalePrice(item) ?? item.price;
+
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      role="option"
+                      aria-selected={isCurrent}
+                      onClick={() => setActiveIndex(idx)}
+                      onMouseEnter={() => setActiveIndex(idx)}
+                      className={cn(
+                        "flex min-h-[76px] items-center gap-3 p-3 text-left transition-colors cursor-pointer",
+                        isCurrent ? "bg-volt text-ink" : "bg-paper text-ink hover:bg-bone"
+                      )}
+                    >
+                      <div className="relative h-14 w-12 shrink-0 overflow-hidden border-2 border-ink bg-bone">
+                        {thumb ? (
+                          <img
+                            src={thumb}
+                            alt={item.name}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : null}
+                        <span className="absolute left-0 top-0 bg-ink px-1 font-mono text-[9px] font-bold text-paper">
+                          0{idx + 1}
+                        </span>
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <p className="mono-label text-[9px] font-bold text-ink-muted truncate">
+                          {item.brand || "AURELIA"}
+                        </p>
+                        <p className="line-clamp-2 font-sans text-xs font-bold leading-snug text-ink">
+                          {item.name}
+                        </p>
+                        <p className="mt-0.5 font-mono text-[11px] font-extrabold tabular text-ink">
+                          {formatVND(price)}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col justify-between gap-4 lg:col-span-5">
+            <div className="border-[3px] border-ink bg-paper p-5 shadow-hard rounded-[2px]">
+              <div className="flex items-center justify-between gap-2 border-b-2 border-dashed border-ink pb-3">
+                <span className="border-2 border-ink bg-volt px-2 py-0.5 mono-label text-[10px] font-extrabold text-ink">
+                  SPECIMEN #0{safeActiveIdx + 1}
+                </span>
+                <span className="mono-label text-[10px] font-bold text-ink-muted">
+                  {activeProduct.brand || "AURELIA"} // {activeProduct.origin || "STUDIO"}
+                </span>
+              </div>
+
+              <h3 className="mt-3 font-display text-xl font-black uppercase tracking-tight text-ink diacritic-safe">
+                {activeProduct.name}
+              </h3>
+
+              <div className="mt-2 flex items-baseline gap-2.5 font-mono tabular">
+                <span className="text-xl font-black text-ink">
+                  {formatVND(activeSalePrice ?? activeProduct.price)}
+                </span>
+                {activeSalePrice && (
+                  <span className="text-xs text-ink-muted line-through">
+                    {formatVND(activeProduct.price)}
+                  </span>
+                )}
+                {activeProduct.discountValue > 0 && (
+                  <span className="border border-ink bg-volt px-1.5 py-0.5 text-[10px] font-extrabold text-ink">
+                    -{activeProduct.discountValue}%
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-3 border-y-2 border-dashed border-ink py-3 text-xs">
+                <div>
+                  <p className="mono-label text-[9px] font-bold text-ink-muted">CHẤT LIỆU</p>
+                  <p className="mt-0.5 font-semibold text-ink">
+                    {activeProduct.material || "Chưa cập nhật"}
+                  </p>
+                </div>
+                <div>
+                  <p className="mono-label text-[9px] font-bold text-ink-muted">KHO HIỆN TẠI</p>
+                  <p className="mt-0.5 font-mono font-bold tabular text-ink">
+                    {activeProduct.stock > 0 ? `CÒN ${activeProduct.stock} SP` : "HẾT HÀNG"}
+                  </p>
+                </div>
+                <div>
+                  <p className="mono-label text-[9px] font-bold text-ink-muted">SIZE SẴN CÓ</p>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {availableSizes.length > 0 ? (
+                      availableSizes.slice(0, 5).map((sz) => (
+                        <span
+                          key={sz}
+                          className="border border-ink bg-bone px-1.5 py-0.5 font-mono text-[10px] font-bold text-ink"
+                        >
+                          {sz}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="font-mono text-[10px] text-ink-muted">FREE</span>
                     )}
                   </div>
                 </div>
-
-                <div className="text-ink-muted group-hover:text-ink transition-transform group-hover:translate-x-1">
-                  <ArrowRight size={16} />
+                <div>
+                  <p className="mono-label text-[9px] font-bold text-ink-muted">BẢNG MÀU</p>
+                  <div className="mt-1 flex items-center gap-1.5">
+                    {colors.length > 0 ? (
+                      colors.slice(0, 5).map((col) => (
+                        <span
+                          key={col}
+                          title={col}
+                          className="h-4 w-4 border-2 border-ink"
+                          style={{ backgroundColor: swatchHex(col) }}
+                        />
+                      ))
+                    ) : (
+                      <span className="font-mono text-[10px] text-ink-muted">TIÊU CHUẨN</span>
+                    )}
+                  </div>
                 </div>
               </div>
-            );
-          })}
+
+              <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                <Button
+                  variant="primary"
+                  block
+                  onClick={() => navigate(`/Fashion/Products/${activeProduct.id}`)}
+                  iconRight={<ArrowUpRight size={15} strokeWidth={2.5} />}
+                >
+                  Xem sản phẩm
+                </Button>
+                <Button
+                  variant="secondary"
+                  block
+                  onClick={() => navigate("/bodyMeasurements")}
+                  iconRight={<ScanLine size={15} strokeWidth={2.5} />}
+                >
+                  Thử size AI
+                </Button>
+              </div>
+            </div>
+
+            <Receipt
+              code={`[SETLIST // 0${setIndex + 1}]`}
+              title="STAGE WARDROBE MANIFEST"
+              totalLabel={`TỔNG SET (${lookProducts.length} MÓN)`}
+              totalValue={formatVND(totalSetPrice)}
+              totalKey={`${setIndex}-${totalSetPrice}`}
+            >
+              {lookProducts.map((p, idx) => {
+                const price = getSalePrice(p) ?? p.price;
+                const isSelected = idx === safeActiveIdx;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setActiveIndex(idx)}
+                    className="block w-full text-left cursor-pointer hover:bg-bone transition-colors"
+                  >
+                    <ReceiptRow
+                      tone={isSelected ? "volt" : "default"}
+                      bold={isSelected}
+                      label={
+                        <span className="inline-block max-w-[175px] sm:max-w-[205px] truncate align-bottom">
+                          0{idx + 1}. {p.name}
+                        </span>
+                      }
+                      value={formatVND(price)}
+                    />
+                  </button>
+                );
+              })}
+            </Receipt>
+          </div>
         </div>
       </div>
     </section>

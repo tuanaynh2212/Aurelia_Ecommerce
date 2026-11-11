@@ -6,8 +6,9 @@ import { CartContext } from "../contexts/CartContext";
 import { CartItemRow } from "../Components/CartComponents/CartItemRow";
 import { CartSummary } from "../Components/CartComponents/CartSummary";
 import { Container } from "../Components/layout/Container";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Ticket as TicketIcon, ShoppingBag } from "lucide-react";
 import { DynamicMetaTags } from "../Components/SEO/DynamicMetaTags";
+import { Ticket, Button } from "../Components/UI";
 
 export const Cart = () => {
   const { CartDataAdd } = useContext(CartContext);
@@ -22,62 +23,148 @@ export const Cart = () => {
         url={window.location.href}
       />
 
-      <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-ink)] flex flex-col">
+      <div className="min-h-screen bg-[var(--color-bone)]/85 text-[var(--color-ink)] flex flex-col">
         <Navbar />
 
         <main id="main-content" className="flex-1 py-8 md:py-12">
           <Container>
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[var(--color-rule)] pb-4 mb-8">
+            {/* Brutalist Top Dossier Header */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b-2 border-[var(--color-ink)] pb-5 mb-8 bg-[var(--color-paper)] p-6 shadow-[var(--shadow-hard)] border-2">
               <div>
-                <div className="font-mono text-[11px] uppercase tracking-wider text-[var(--color-ink-muted)] mb-1">
-                  ORDER INVENTORY · CART REVIEW
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="hud-chip bg-[var(--color-volt)] text-[var(--color-ink)]">
+                    [CASHIER-DESK]
+                  </span>
+                  <span className="mono-label text-[var(--color-ink-muted)]">
+                    ORDER INVENTORY · CART REVIEW
+                  </span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-heading font-bold text-[var(--color-ink)] tracking-tight">
+                <h1 className="display-l font-display-safe text-[var(--color-ink)]">
                   Giỏ Hàng
                 </h1>
-                <p className="text-xs font-mono text-[var(--color-ink-muted)] mt-1 uppercase tracking-wide">
-                  HIỆN CÓ {count} MẶT HÀNG TRONG DANH SÁCH
+                <p className="mono-label text-[var(--color-ink-muted)] mt-1">
+                  HIỆN CÓ{" "}
+                  <span className="bg-[var(--color-volt)] text-[var(--color-ink)] px-1.5 py-0.5 font-extrabold">
+                    {count}
+                  </span>{" "}
+                  MẶT HÀNG TRONG DANH SÁCH
                 </p>
               </div>
 
               <button
                 onClick={() => navigate("/Fashion/Products")}
-                className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors self-start sm:self-auto cursor-pointer"
+                className="min-h-[44px] px-4 py-2 border-2 border-[var(--color-ink)] bg-[var(--color-paper)] hover:bg-[var(--color-volt)] inline-flex items-center gap-2 mono-label text-[var(--color-ink)] shadow-[var(--shadow-hard-sm)] transition-colors self-start sm:self-auto cursor-pointer"
               >
-                <ArrowLeft size={13} />
+                <ArrowLeft size={14} />
                 <span>Tiếp tục chọn sản phẩm</span>
               </button>
             </div>
 
             {count > 0 ? (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                <div className="lg:col-span-7 space-y-3">
-                  {CartDataAdd.map((item) => (
-                    <CartItemRow key={item.itemid} item={item} />
-                  ))}
+                {/* 8-col 2px-ruled item rows + horizontal notched Ticket voucher rail */}
+                <div className="lg:col-span-8 space-y-6">
+                  <div className="border-2 border-[var(--color-ink)] bg-[var(--color-paper)] shadow-[var(--shadow-hard)] divide-y-2 divide-[var(--color-ink)]">
+                    <div className="px-4 py-2.5 bg-[var(--color-ink)] text-[var(--color-paper)] flex items-center justify-between">
+                      <span className="mono-label text-[var(--color-paper)]">
+                        [MANIFEST ITEMS // {count} UNITS]
+                      </span>
+                      <span className="mono-label text-[var(--color-volt)]">
+                        CALIBRATED SPEC
+                      </span>
+                    </div>
+                    {CartDataAdd.map((item) => (
+                      <CartItemRow key={item.itemid} item={item} />
+                    ))}
+                  </div>
+
+                  {/* Horizontal notched Ticket voucher rail */}
+                  <div className="border-2 border-[var(--color-ink)] bg-[var(--color-paper)] p-5 shadow-[var(--shadow-hard)]">
+                    <div className="flex items-center justify-between mb-3 pb-2 border-b-2 border-[var(--color-ink)]">
+                      <div className="flex items-center gap-2">
+                        <TicketIcon size={15} className="text-[var(--color-flash)]" />
+                        <span className="mono-label text-[var(--color-ink)]">
+                          ATELIER VOUCHER RAIL · ÁP DỤNG TẠI BƯỚC THANH TOÁN
+                        </span>
+                      </div>
+                      <span className="mono-label text-[var(--color-ink-muted)]">
+                        [ADMIT ONE]
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Ticket
+                        serial="VCH-SHIP-01"
+                        header="FREESHIP VOUCHER"
+                        stampText="READY"
+                        stub={
+                          <button
+                            type="button"
+                            onClick={() => navigate("/payment")}
+                            className="min-h-[44px] px-3 py-1.5 border-2 border-[var(--color-ink)] bg-[var(--color-volt)] mono-label text-[var(--color-ink)] cursor-pointer"
+                          >
+                            DÙNG MÃ
+                          </button>
+                        }
+                      >
+                        <p className="font-bold text-xs uppercase text-[var(--color-ink)]">
+                          Miễn phí vận chuyển tiêu chuẩn
+                        </p>
+                        <p className="mono-label text-[var(--color-ink-muted)] mt-1">
+                          Đơn hàng từ 500.000 ₫ hoặc chọn mã tại Checkout
+                        </p>
+                      </Ticket>
+
+                      <Ticket
+                        serial="VCH-ATELIER-02"
+                        header="MEMBER TIER PRIVILEGE"
+                        stampText="ACTIVE"
+                        stub={
+                          <button
+                            type="button"
+                            onClick={() => navigate("/payment")}
+                            className="min-h-[44px] px-3 py-1.5 border-2 border-[var(--color-ink)] bg-[var(--color-paper)] hover:bg-[var(--color-volt)] mono-label text-[var(--color-ink)] cursor-pointer"
+                          >
+                            KIỂM TRA
+                          </button>
+                        }
+                      >
+                        <p className="font-bold text-xs uppercase text-[var(--color-ink)]">
+                          Ưu đãi hạng thẻ & Coupon đơn hàng
+                        </p>
+                        <p className="mono-label text-[var(--color-ink-muted)] mt-1">
+                          Tự động khấu trừ theo hạng thành viên tại quầy thu ngân
+                        </p>
+                      </Ticket>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="lg:col-span-5 sticky top-24">
+                {/* 4-col sticky Receipt summary */}
+                <div className="lg:col-span-4 sticky top-20">
                   <CartSummary tax={0} />
                 </div>
               </div>
             ) : (
-              <div className="py-20 text-center max-w-lg mx-auto bg-[var(--color-surface)] rounded-none border border-[var(--color-rule)] p-8">
-                <div className="font-mono text-xs uppercase tracking-wider text-[var(--color-ink-muted)] mb-2">
-                  LEDGER EMPTY · NO ITEMS
+              <div className="py-16 text-center max-w-xl mx-auto bg-[var(--color-paper)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard-lg)] p-8">
+                <div className="w-12 h-12 mx-auto mb-4 border-2 border-[var(--color-ink)] bg-[var(--color-volt)] flex items-center justify-center shadow-[var(--shadow-hard-sm)]">
+                  <ShoppingBag size={20} className="text-[var(--color-ink)]" />
                 </div>
-                <h2 className="text-xl font-heading font-bold text-[var(--color-ink)] mb-2">
+                <div className="mono-label text-[var(--color-ink-muted)] mb-2">
+                  [LEDGER EMPTY · 00 ITEMS]
+                </div>
+                <h2 className="display-m font-display-safe text-[var(--color-ink)] mb-3">
                   Giỏ hàng hiện chưa có mặt hàng nào
                 </h2>
                 <p className="text-xs font-mono text-[var(--color-ink-muted)] mb-6">
                   Tất cả sản phẩm đã chọn sẽ xuất hiện tại đây kèm theo bảng kiểm tra số lượng và kích cỡ chi tiết.
                 </p>
-                <button
+                <Button
+                  variant="accent"
                   onClick={() => navigate("/Fashion/Products")}
-                  className="btn btn-primary px-8 py-3 rounded-none font-mono text-xs uppercase tracking-wider"
                 >
                   Xem danh mục sản phẩm
-                </button>
+                </Button>
               </div>
             )}
           </Container>

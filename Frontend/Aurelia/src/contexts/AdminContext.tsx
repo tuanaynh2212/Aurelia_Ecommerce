@@ -1,36 +1,119 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { useLocation } from "react-router-dom";
 import { api_Config, UseApiUrl } from "../services/api";
-import axios from "axios";
+import { api_Response } from "../services/http";
 import type { Coupon, order } from "../types/type";
 import { Toaster } from "../Components/Toaster";
 import { AuthContext } from "./Author";
-import { api_Response } from "../services/http";
+
+export interface AdminRevenueSummary {
+  totalRevenue: number;
+  growthRateRevenue: number;
+  totalOrders: number;
+  growthRateOrders: number;
+}
+
+export interface AdminUserSummary {
+  soLuongKhachDangKy: number;
+  tyLeKhachHang: number;
+  tyLeKhachHangMoi?: number;
+  soLuongCoupon: number;
+  tyLeCoupon: number;
+}
+
+export interface StoreRevenuePoint {
+  shopName: string;
+  revenue: number;
+}
+
+export interface BestSellingProduct {
+  id: string | number;
+  name: string;
+  price?: string | number;
+  sales?: number;
+  type?: string;
+  sold?: number;
+}
+
+export interface AdminBannerRecord {
+  id?: string;
+  linkUrl?: string;
+  mainTitle?: string;
+  h1?: string;
+  h2?: string;
+  subtitle?: string;
+  pagaraph?: string;
+  textInButton?: string;
+  textButton?: string;
+  active?: boolean;
+  layout?: string;
+  colorMainTitle?: string;
+  colorText?: string;
+  [key: string]: unknown;
+}
+
+export interface AdminShopSummary {
+  id: string;
+  name: string;
+  city: string;
+  revenue: number;
+  growth?: string;
+  rating?: number;
+  phone?: string;
+}
+
+export interface MonthlyRevenuePoint {
+  thang: string;
+  revenue: number;
+  orders: number;
+}
+
+export interface CategoryStockPoint {
+  type: string;
+  value: number;
+}
+
+export interface ServiceUsagePoint {
+  service: string;
+  totalUse: number;
+}
 
 type AdminContextType = {
-  dataRevenue: any;
-  dataUser: any;
-  doanhThuCuaHang: any[];
-  bestSellingProducts: any[];
-  MainBanner: any[];
-  StoryBanner: any[];
-  dataShop: any[];
+  dataRevenue: AdminRevenueSummary | null;
+  dataUser: AdminUserSummary | null;
+  doanhThuCuaHang: StoreRevenuePoint[];
+  bestSellingProducts: BestSellingProduct[];
+  MainBanner: AdminBannerRecord[];
+  StoryBanner: AdminBannerRecord[];
+  dataShop: AdminShopSummary[];
   coupons: Coupon[];
-  revenueData: any[];
-  categoryData: any[];
-  ServiceData: any[];
+  revenueData: MonthlyRevenuePoint[];
+  categoryData: CategoryStockPoint[];
+  ServiceData: ServiceUsagePoint[];
   dataVoucher: Coupon[];
   selectvoucher: Coupon[];
   setSelectvoucher: React.Dispatch<React.SetStateAction<Coupon[]>>;
-  handleClick: (type: string, data: any) => void;
-  uptodatabase: (type: string, data: any) => void;
-  handleDeleteCoupon: (couponId: string) => void;
-  handleAddCoupon: (couponData: any) => void;
-  handleUpdateCoupon: (couponData: any) => void;
-  handleToggleCouponStatus: (couponId: string, bool: boolean) => void;
-  suggestVoucher: (order: order | undefined) => void;
+  handleClick: (type: string, data: unknown) => Promise<boolean>;
+  uptodatabase: (type: string, data: unknown) => Promise<boolean>;
+  handleDeleteCoupon: (couponId: string) => Promise<void>;
+  handleAddCoupon: (couponData: unknown) => Promise<void>;
+  handleUpdateCoupon: (couponData: unknown) => Promise<void>;
+  handleToggleCouponStatus: (couponId: string, bool: boolean) => Promise<void>;
+  suggestVoucher: (order: order | undefined) => Promise<void>;
 };
-export const AdminContext = createContext({
+
+const JSON_HEADERS = { "Content-Type": "application/json" } as const;
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const AdminContext = createContext<AdminContextType>({
   dataRevenue: null,
   dataUser: null,
   doanhThuCuaHang: [],
@@ -38,239 +121,305 @@ export const AdminContext = createContext({
   MainBanner: [],
   StoryBanner: [],
   dataShop: [],
-  coupons: [] as Coupon[],
+  coupons: [],
   revenueData: [],
   categoryData: [],
   ServiceData: [],
-  dataVoucher: [] as Coupon[],
-  selectvoucher: [] as Coupon[],
+  dataVoucher: [],
+  selectvoucher: [],
   setSelectvoucher: () => {},
-  handleClick: () => {},
-  uptodatabase: () => {},
-  handleDeleteCoupon: () => {},
-  handleAddCoupon: () => {},
-  handleUpdateCoupon: () => {},
-  handleToggleCouponStatus: () => {},
-  suggestVoucher: () => {},
-} as AdminContextType);
+  handleClick: async () => false,
+  uptodatabase: async () => false,
+  handleDeleteCoupon: async () => {},
+  handleAddCoupon: async () => {},
+  handleUpdateCoupon: async () => {},
+  handleToggleCouponStatus: async () => {},
+  suggestVoucher: async () => {},
+});
 
-export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
-  {
-    const location = useLocation();
-    const [dataRevenue, setDataRevenue] = useState<any>(null);
-    const [dataUser, setDataUser] = useState<any>(null);
-    const [doanhThuCuaHang, setDoanhThuCuaHang] = useState<any[]>([]);
-    const [bestSellingProducts, setBestSellingProducts] = useState<any[]>([]);
-    const [MainBanner, setMainBanner] = useState<any[]>([]);
-    const [StoryBanner, setStoryBanner] = useState<any[]>([]);
-    const [dataShop, setDataShop] = useState<any[]>([]);
-    const [revenueData, setRevenueData] = useState<any>(null);
-    const [categoryData, setCategoryData] = useState<any[]>([]);
-    const [ServiceData, setServiceData] = useState<any[]>([]);
-    const [dataVoucher, setDataVoucher] = useState<Coupon[]>([]);
-    const [selectvoucher, setSelectvoucher] = useState<Coupon[]>([]);
-    const { userData } = useContext(AuthContext);
-    const handleClick = async (type: string, data: any) => {
-      try {
-        if (type === "Main") {
-          api_Response(
-            UseApiUrl(api_Config.Banner.AdjustMainBanner),
-            "POST",
-            data
-          );
-          Toaster.success("✅ Banner updated successfully!");
-        } else {
-          api_Response(
-            UseApiUrl(api_Config.Banner.AdjustStoryBanner),
-            "POST",
-            data
-          );
-          Toaster.success("✅ Banner updated successfully!");
-        }
-      } catch (error) {
-        Toaster.error("❌ Error updating banner:");
-      }
-    };
-    const uptodatabase = async (type: string, data: any) => {
-      try {
-        if (type === "Main" || type.includes("Main")) {
-          api_Response(
-            UseApiUrl(api_Config.Banner.AddMainBanner),
-            "POST",
-            data
-          );
-        } else {
-          api_Response(
-            UseApiUrl(api_Config.Banner.AddStoryBanner),
-            "POST",
-            data
-          );
-        }
-      } catch (error) {
-        console.error("❌ Error updating banner:", error);
-      }
-    };
-    const fetchDataRevenue = async () => {
-      try {
-        const [
-          bannerRes,
-          revenueRes,
-          userRes,
-          shopRes,
-          bestSellingRes,
-          dataShopRes,
-          revenueDataRes,
-        ] = await Promise.all([
-          axios.get(UseApiUrl(api_Config.Banner.Getbanner)),
-          axios.get(UseApiUrl(api_Config.Admin.RevenueData)),
-          axios.get(UseApiUrl(api_Config.Admin.UserDataAndDiscount)),
-          axios.get(UseApiUrl(api_Config.Admin.DoanhThuCuaHang)),
-          axios.get(UseApiUrl(api_Config.Admin.DanhSachSanPhamBanChay)),
-          axios.get(UseApiUrl(api_Config.Admin.GetShopInfo)),
-          axios.get(UseApiUrl(api_Config.Admin.GetDoanhThuCaNam)),
-        ]);
-        setMainBanner(bannerRes.data.mainBanner);
-        setStoryBanner(bannerRes.data.storyBanner || []);
-        setDataRevenue(revenueRes.data);
-        setDataUser(userRes.data);
-        setDoanhThuCuaHang(shopRes.data.dataShop || []);
-        setBestSellingProducts(bestSellingRes.data.listSold || []);
-        setDataShop(dataShopRes.data || []);
-        setRevenueData(revenueDataRes.data.revenue || []);
-        setCategoryData(revenueDataRes.data.stockByType || []);
-        setServiceData(revenueDataRes.data.appointMent || []);
-      } catch (error) {
-        console.error("❌ Error fetching data:", error);
-      }
-    };
+export const AdminProvider = ({ children }: { children: ReactNode }) => {
+  const location = useLocation();
+  const { userData } = useContext(AuthContext);
 
-    useEffect(() => {
-      fetchDataRevenue();
-    }, [location]);
-    useEffect(() => {
-      const Current = new Date().getMonth() + 1;
-      const currentDate = new Date().getDate();
-      const nextMonth = new Date().getMonth() + 2;
-      if (Current < nextMonth && currentDate === 1) {
-        axios.get(UseApiUrl(api_Config.Admin.ResetSoldProduct));
-      }
-    });
-    {
-      {
+  const [dataRevenue, setDataRevenue] = useState<AdminRevenueSummary | null>(null);
+  const [dataUser, setDataUser] = useState<AdminUserSummary | null>(null);
+  const [doanhThuCuaHang, setDoanhThuCuaHang] = useState<StoreRevenuePoint[]>([]);
+  const [bestSellingProducts, setBestSellingProducts] = useState<BestSellingProduct[]>([]);
+  const [MainBanner, setMainBanner] = useState<AdminBannerRecord[]>([]);
+  const [StoryBanner, setStoryBanner] = useState<AdminBannerRecord[]>([]);
+  const [dataShop, setDataShop] = useState<AdminShopSummary[]>([]);
+  const [revenueData, setRevenueData] = useState<MonthlyRevenuePoint[]>([]);
+  const [categoryData, setCategoryData] = useState<CategoryStockPoint[]>([]);
+  const [ServiceData, setServiceData] = useState<ServiceUsagePoint[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [dataVoucher, setDataVoucher] = useState<Coupon[]>([]);
+  const [selectvoucher, setSelectvoucher] = useState<Coupon[]>([]);
 
-        const [coupons, setCoupons] = useState<Coupon[]>([]);
-        const fetchCoupons = async () => {
-          try {
-            const data = await api_Response(
-              UseApiUrl(api_Config.Coupon.getCoupons),
-              "GET"
-            );
-            setCoupons(data as Coupon[]);
-          } catch (error) {
-            console.error("❌ Error fetching coupons:", error);
-          }
-        };
+  const fetchDataRevenue = useCallback(async () => {
+    try {
+      const [
+        bannerRes,
+        revenueRes,
+        userRes,
+        shopRes,
+        bestSellingRes,
+        dataShopRes,
+        annualRevenueRes,
+      ] = await Promise.all([
+        api_Response<{
+          mainBanner?: AdminBannerRecord[];
+          storyBanner?: AdminBannerRecord[];
+        }>(UseApiUrl(api_Config.Banner.Getbanner), "GET"),
+        api_Response<AdminRevenueSummary>(
+          UseApiUrl(api_Config.Admin.RevenueData),
+          "GET"
+        ),
+        api_Response<AdminUserSummary>(
+          UseApiUrl(api_Config.Admin.UserDataAndDiscount),
+          "GET"
+        ),
+        api_Response<{ dataShop?: StoreRevenuePoint[] }>(
+          UseApiUrl(api_Config.Admin.DoanhThuCuaHang),
+          "GET"
+        ),
+        api_Response<{ listSold?: BestSellingProduct[] }>(
+          UseApiUrl(api_Config.Admin.DanhSachSanPhamBanChay),
+          "GET"
+        ),
+        api_Response<AdminShopSummary[]>(
+          UseApiUrl(api_Config.Admin.GetShopInfo),
+          "GET"
+        ),
+        api_Response<{
+          revenue?: MonthlyRevenuePoint[];
+          stockByType?: CategoryStockPoint[];
+          appointMent?: ServiceUsagePoint[];
+        }>(UseApiUrl(api_Config.Admin.GetDoanhThuCaNam), "GET"),
+      ]);
 
-        useEffect(() => {
-          fetchCoupons();
-        }, []);
-        const handleAddCoupon = async (couponData: any) => {
-          try {
-            await api_Response(
-              UseApiUrl(api_Config.Coupon.addCoupon),
-              "POST",
-              couponData
-            );
-            Toaster.success("✅ Coupon added successfully!");
-            fetchCoupons();
-          } catch (error) {
-            Toaster.error("Failed to add coupon");
-          }
-        };
-        const handleUpdateCoupon = async (couponData: any) => {
-          try {
-            await axios.post(
-              UseApiUrl(api_Config.Coupon.updateCoupon),
-              couponData,
-              { headers: { "Content-Type": "application/json" } }
-            );
-            Toaster.success("✅ Coupon updated successfully!");
-            fetchCoupons();
-          } catch (error) {
-            Toaster.error("Failed to update coupon");
-          }
-        };
-        const handleDeleteCoupon = async (voucherId: string) => {
-          try {
-            await axios.delete(
-              `${UseApiUrl(
-                api_Config.Coupon.deleteCoupon
-              )}?voucherId=${voucherId}`
-            );
-            Toaster.success("✅ Coupon deleted successfully!");
-            fetchCoupons();
-          } catch (error) {
-            Toaster.error("Failed to delete coupon");
-          }
-        };
-        const handleToggleCouponStatus = async (id: string, bool: boolean) => {
-          try {
-            await axios.post(
-              UseApiUrl(api_Config.Coupon.toggleCouponStatus),
-              { id, active: bool },
-              { headers: { "Content-Type": "application/json" } }
-            );
-            Toaster.success("✅ Coupon status toggled successfully!");
-            fetchCoupons();
-          } catch (error) {
-            Toaster.error("Failed to toggle coupon status");
-          }
-        };
-
-        const suggestVoucher = async (order: order | undefined) => {
-          try {
-            const response = await axios.post(
-              `${UseApiUrl(api_Config.Coupon.suggestVoucher)}?id=${
-                userData.id
-              }`,
-              order,
-              { headers: { "Content-Type": "application/json" } }
-            );
-            setDataVoucher(response.data);
-            fetchCoupons();
-          } catch (error) {}
-        };
-
-        return (
-          <AdminContext.Provider
-            value={{
-              categoryData,
-              revenueData,
-              dataRevenue,
-              dataUser,
-              doanhThuCuaHang,
-              bestSellingProducts,
-              MainBanner,
-              StoryBanner,
-              coupons,
-              dataShop,
-              ServiceData,
-              dataVoucher,
-              selectvoucher,
-              setSelectvoucher,
-              handleClick,
-              uptodatabase,
-              handleDeleteCoupon,
-              handleAddCoupon,
-              handleUpdateCoupon,
-              handleToggleCouponStatus,
-              suggestVoucher,
-            }}
-          >
-            {children}
-          </AdminContext.Provider>
-        );
-      }
+      setMainBanner(bannerRes?.mainBanner || []);
+      setStoryBanner(bannerRes?.storyBanner || []);
+      setDataRevenue(revenueRes);
+      setDataUser(userRes);
+      setDoanhThuCuaHang(shopRes?.dataShop || []);
+      setBestSellingProducts(bestSellingRes?.listSold || []);
+      setDataShop(dataShopRes || []);
+      setRevenueData(annualRevenueRes?.revenue || []);
+      setCategoryData(annualRevenueRes?.stockByType || []);
+      setServiceData(annualRevenueRes?.appointMent || []);
+    } catch (error) {
+      console.error("❌ Error fetching data:", error);
     }
-  }
+  }, []);
+
+  const handleClick = useCallback(
+    async (type: string, data: unknown): Promise<boolean> => {
+      try {
+        const endpoint =
+          type === "Main"
+            ? api_Config.Banner.AdjustMainBanner
+            : api_Config.Banner.AdjustStoryBanner;
+        await api_Response(UseApiUrl(endpoint), "POST", data, JSON_HEADERS);
+        Toaster.success("Đã cập nhật banner thành công!");
+        await fetchDataRevenue();
+        return true;
+      } catch {
+        Toaster.error("Không thể cập nhật banner. Vui lòng thử lại!");
+        return false;
+      }
+    },
+    [fetchDataRevenue]
+  );
+
+  const uptodatabase = useCallback(
+    async (type: string, data: unknown): Promise<boolean> => {
+      try {
+        const isMain = type === "Main" || type.includes("Main");
+        const endpoint = isMain
+          ? api_Config.Banner.AddMainBanner
+          : api_Config.Banner.AddStoryBanner;
+        await api_Response(UseApiUrl(endpoint), "POST", data, JSON_HEADERS);
+        Toaster.success("Đã thêm banner mới thành công!");
+        await fetchDataRevenue();
+        return true;
+      } catch (error) {
+        console.error("❌ Error adding banner:", error);
+        Toaster.error("Không thể thêm banner mới. Vui lòng thử lại!");
+        return false;
+      }
+    },
+    [fetchDataRevenue]
+  );
+
+  const fetchCoupons = useCallback(async () => {
+    try {
+      const data = await api_Response<Coupon[]>(
+        UseApiUrl(api_Config.Coupon.getCoupons),
+        "GET"
+      );
+      setCoupons(data || []);
+    } catch (error) {
+      console.error("❌ Error fetching coupons:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchDataRevenue();
+  }, [location, fetchDataRevenue]);
+
+  useEffect(() => {
+    if (new Date().getDate() === 1) {
+      void api_Response(
+        UseApiUrl(api_Config.Admin.ResetSoldProduct),
+        "GET"
+      ).catch(() => {});
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchCoupons();
+  }, [fetchCoupons]);
+
+  const handleAddCoupon = useCallback(
+    async (couponData: unknown) => {
+      try {
+        await api_Response(
+          UseApiUrl(api_Config.Coupon.addCoupon),
+          "POST",
+          couponData,
+          JSON_HEADERS
+        );
+        Toaster.success("✅ Coupon added successfully!");
+        await fetchCoupons();
+      } catch {
+        Toaster.error("Failed to add coupon");
+      }
+    },
+    [fetchCoupons]
+  );
+
+  const handleUpdateCoupon = useCallback(
+    async (couponData: unknown) => {
+      try {
+        await api_Response(
+          UseApiUrl(api_Config.Coupon.updateCoupon),
+          "POST",
+          couponData,
+          JSON_HEADERS
+        );
+        Toaster.success("✅ Coupon updated successfully!");
+        await fetchCoupons();
+      } catch {
+        Toaster.error("Failed to update coupon");
+      }
+    },
+    [fetchCoupons]
+  );
+
+  const handleDeleteCoupon = useCallback(
+    async (voucherId: string) => {
+      try {
+        await api_Response(
+          `${UseApiUrl(api_Config.Coupon.deleteCoupon)}?voucherId=${voucherId}`,
+          "DELETE"
+        );
+        Toaster.success("✅ Coupon deleted successfully!");
+        await fetchCoupons();
+      } catch {
+        Toaster.error("Failed to delete coupon");
+      }
+    },
+    [fetchCoupons]
+  );
+
+  const handleToggleCouponStatus = useCallback(
+    async (id: string, bool: boolean) => {
+      try {
+        await api_Response(
+          UseApiUrl(api_Config.Coupon.toggleCouponStatus),
+          "POST",
+          { id, active: bool },
+          JSON_HEADERS
+        );
+        Toaster.success("✅ Coupon status toggled successfully!");
+        await fetchCoupons();
+      } catch {
+        Toaster.error("Failed to toggle coupon status");
+      }
+    },
+    [fetchCoupons]
+  );
+
+  const suggestVoucher = useCallback(
+    async (order: order | undefined) => {
+      if (!userData?.id) return;
+      try {
+        const data = await api_Response<Coupon[]>(
+          `${UseApiUrl(api_Config.Coupon.suggestVoucher)}?id=${userData.id}`,
+          "POST",
+          order,
+          JSON_HEADERS
+        );
+        setDataVoucher(data || []);
+        await fetchCoupons();
+      } catch {
+        // Ignore suggestion errors when order payload is incomplete
+      }
+    },
+    [userData?.id, fetchCoupons]
+  );
+
+  const contextValue = useMemo(
+    () => ({
+      categoryData,
+      revenueData,
+      dataRevenue,
+      dataUser,
+      doanhThuCuaHang,
+      bestSellingProducts,
+      MainBanner,
+      StoryBanner,
+      coupons,
+      dataShop,
+      ServiceData,
+      dataVoucher,
+      selectvoucher,
+      setSelectvoucher,
+      handleClick,
+      uptodatabase,
+      handleDeleteCoupon,
+      handleAddCoupon,
+      handleUpdateCoupon,
+      handleToggleCouponStatus,
+      suggestVoucher,
+    }),
+    [
+      categoryData,
+      revenueData,
+      dataRevenue,
+      dataUser,
+      doanhThuCuaHang,
+      bestSellingProducts,
+      MainBanner,
+      StoryBanner,
+      coupons,
+      dataShop,
+      ServiceData,
+      dataVoucher,
+      selectvoucher,
+      handleClick,
+      uptodatabase,
+      handleDeleteCoupon,
+      handleAddCoupon,
+      handleUpdateCoupon,
+      handleToggleCouponStatus,
+      suggestVoucher,
+    ]
+  );
+
+  return (
+    <AdminContext.Provider value={contextValue}>
+      {children}
+    </AdminContext.Provider>
+  );
 };

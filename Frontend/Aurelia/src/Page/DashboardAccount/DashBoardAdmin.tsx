@@ -1,5 +1,5 @@
 import { Settings } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { OverView } from "../../Components/AdminBrandComponent/DashBoardComponent/OverView";
 import { BannerSetting } from "../../Components/AdminBrandComponent/DashBoardComponent/Banner/BannerSetting";
 import { SideBar } from "../../Components/AdminBrandComponent/DashBoardComponent/SideBar";
@@ -8,11 +8,15 @@ import Coupon from "../../Components/AdminBrandComponent/DashBoardComponent/Coup
 import { Revenue } from "../../Components/AdminBrandComponent/DashBoardComponent/Revenue";
 import Collections from "../../Components/AdminBrandComponent/DashBoardComponent/Collections";
 import ProductManagement from "../../Components/AdminBrandComponent/DashBoardComponent/ProductManagement";
-
-
+import { spatialActions } from "../../Components/UI/three/SpatialStore";
 
 export const AdminDashboard = () => {
   const [status, setStatus] = useState("Dashboard");
+
+  useEffect(() => {
+    spatialActions.setStation("CONTROL_ROOM");
+  }, []);
+
   const statusComponent = (status: string) => {
     switch (status) {
       case "Dashboard":
@@ -20,7 +24,7 @@ export const AdminDashboard = () => {
       case "Banner":
         return <BannerSetting />;
       case "Mã giảm giá":
-        return <Coupon/>;
+        return <Coupon />;
       case "Cửa hàng":
         return <Stores />;
       case "Doanh thu":
@@ -34,13 +38,15 @@ export const AdminDashboard = () => {
       default:
     }
   };
+
   return (
-    <div className=" flex  bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800 flex-row 
-    h-[110vh] w-full">
-      <div >
+    <div className="flex bg-bone text-ink flex-row min-h-screen w-full">
+      <div className="shrink-0">
         <SideBar onClick={setStatus} status={status} type="admin" />
       </div>
-      <div className="w-full h-[110vh]">{statusComponent(status)}</div>
+      <div className="flex-1 min-w-0 min-h-screen bg-bone">
+        {statusComponent(status)}
+      </div>
     </div>
   );
 };

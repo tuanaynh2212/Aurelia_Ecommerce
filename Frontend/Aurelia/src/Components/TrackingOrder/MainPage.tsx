@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Navbar } from "../HomeLayoutComponent/Navbar";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import { api_Config, UseApiUrl } from "../../services/api";
+import { api_Response } from "../../services/http";
 import type { order } from "../../types/type";
+import { Navbar } from "../HomeLayoutComponent/Navbar";
 import RightSiteMap from "./RightSiteMap";
 import Sidebar from "./SideBar";
 
@@ -12,30 +12,32 @@ export const MainPage = () => {
   const [data, setData] = useState<order>();
 
   useEffect(() => {
-    const fetch = async () => {
-      const res = await axios.get(
-        `${UseApiUrl(api_Config.Shop.LayDonHangTheoID)}?id=${id}`,
-      );
-      setData(res.data);
+    if (!id) return;
+    const fetchOrder = async () => {
+      try {
+        const res = await api_Response<order>(
+          `${UseApiUrl(api_Config.Shop.LayDonHangTheoID)}?id=${id}`,
+          "GET"
+        );
+        setData(res);
+      } catch {
+        setData(undefined);
+      }
     };
-    fetch();
+    fetchOrder();
   }, [id]);
 
   return (
-    <>
+    <div className="min-h-screen bg-[var(--color-bone)] text-[var(--color-ink)] flex flex-col">
       <Navbar />
-      <main className=" flex relative mt-16">
-        <div className="w-2/3">
-        <RightSiteMap data={data} id={id} />
+      <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 relative">
+        <div className="lg:col-span-8 min-h-[60vh] lg:min-h-[calc(100vh-4rem)] border-b-2 lg:border-b-0 lg:border-r-2 border-[var(--color-ink)]">
+          <RightSiteMap data={data as never} id={id} />
         </div>
-        <div className="w-1/3">
-        <Sidebar data={data} />
+        <div className="lg:col-span-4 bg-[var(--color-paper)]">
+          <Sidebar data={data as never} />
         </div>
-
       </main>
-      <div className="md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-40 bg-aurelia-charcoal text-white rounded-full px-6 py-3 text-[10px] uppercase tracking-widest font-bold shadow-xl">
-        Order Details
-      </div>
-    </>
+    </div>
   );
 };

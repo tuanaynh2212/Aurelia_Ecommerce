@@ -7,194 +7,49 @@ import {
   Search,
   ShoppingBag,
   User,
-  ChevronRight,
+  Heart,
+  ChevronDown,
 } from "lucide-react";
 import { CartContext } from "../../contexts/CartContext";
+import { FilterProductContext } from "../../contexts/FIlterProduct";
+import { CollectionContext } from "../../contexts/SeasonContext";
 import { cn } from "../../utils/cn";
-import logo from "../../assets/aurelia_logo_svg.svg";
+import { Marquee } from "../UI/primitives/Marquee";
+import { Dropdown } from "../UI/primitives/Overlays";
+import { CollectionMegaMenu } from "./CollectionMegaMenu";
+import { MobileNav } from "./MobileNav";
+import { isNavLinkActive, NAV_LINKS } from "./navLinks";
 
-const NAV_LINKS = [
-  { label: "Home",        path: "/" },
-  { label: "Collections", path: "/Collection" },
-  { label: "Products",    path: "/Fashion/Products" },
-  { label: "About",       path: "/about" },
-] as const;
+const ANNOUNCEMENT_ITEMS = [
+  "[ATELIER-01] FREE SHIPPING ON ORDERS OVER 500.000 ₫",
+  "ADMIT ONE // SOUNDCHECK AI BODY MEASUREMENT",
+  "SIDE A // KINETIC ATELIER MONOLITH",
+  "CALIBRATED GARMENT TAGS",
+];
 
 function AnnouncementBar() {
-  const [visible, setVisible] = useState(true);
-  if (!visible) return null;
-  return (
-    <div
-      className="relative bg-[var(--color-ink)] text-[var(--color-bg)] text-center py-2 px-8 text-xs tracking-wider font-body font-medium"
-      role="banner"
-    >
-      FREE SHIPPING ON ORDERS OVER 500.000 ₫
-      <button
-        aria-label="Dismiss announcement"
-        onClick={() => setVisible(false)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[var(--color-bg)] hover:opacity-70 transition-opacity cursor-pointer"
-      >
-        <X size={12} aria-hidden="true" />
-      </button>
-    </div>
-  );
-}
-
-interface MobileNavProps {
-  open: boolean;
-  onClose: () => void;
-  cartCount: number;
-}
-
-function MobileNav({ open, onClose, cartCount }: MobileNavProps) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [searchQuery, setSearchQuery] = useState("");
-
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
-  }, [open]);
-
-  const handleNav = (path: string) => {
-    navigate(path);
-    onClose();
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      onClose();
-    }
-  };
-
-  return (
-    <AnimatePresence>
-      {open && (
-        <>
-          <motion.div
-            key="backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="fixed inset-0 bg-[var(--color-ink)]/30 z-[1099]"
-            onClick={onClose}
-            aria-hidden="true"
-          />
-
-          <motion.div
-            key="drawer"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Navigation menu"
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 350 }}
-            className="fixed top-0 right-0 h-full w-[min(340px,88vw)] z-[1100] bg-[var(--color-bg)] flex flex-col border-l border-[var(--color-rule)]"
-          >
-            <div className="flex items-center justify-between px-5 h-14 border-b border-[var(--color-rule)]">
-              <span className="font-heading font-bold text-sm tracking-tight">MENU</span>
-              <button
-                onClick={onClose}
-                aria-label="Close menu"
-                className="p-2 -mr-2 text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
-              >
-                <X size={18} aria-hidden="true" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSearch} className="px-5 pt-4">
-              <label htmlFor="mobile-search" className="sr-only">Search products</label>
-              <div className="relative">
-                <Search
-                  size={14}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-muted)]"
-                  aria-hidden="true"
-                />
-                <input
-                  id="mobile-search"
-                  type="search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Tìm sản phẩm..."
-                  className="input pl-8 text-xs"
-                />
-              </div>
-            </form>
-
-            <nav aria-label="Mobile navigation" className="flex-1 px-5 pt-5 overflow-y-auto">
-              <ul className="flex flex-col">
-                {NAV_LINKS.map((link) => {
-                  const isActive = location.pathname === link.path;
-                  return (
-                    <li key={link.path} className="border-b border-[var(--color-rule)]">
-                      <button
-                        onClick={() => handleNav(link.path)}
-                        className={cn(
-                          "w-full text-left px-0 py-3.5 flex items-center justify-between",
-                          "font-body text-sm font-medium",
-                          "transition-colors cursor-pointer",
-                          isActive
-                            ? "text-[var(--color-accent)]"
-                            : "text-[var(--color-ink)] hover:text-[var(--color-accent)]"
-                        )}
-                      >
-                        {link.label}
-                        <ChevronRight size={14} className="text-[var(--color-ink-muted)]" />
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-
-              <div className="mt-5 flex flex-col gap-1">
-                <button
-                  onClick={() => handleNav("/account")}
-                  className="w-full text-left py-3 font-body text-sm text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors flex items-center gap-2.5 cursor-pointer"
-                >
-                  <User size={16} aria-hidden="true" />
-                  Account
-                </button>
-                <button
-                  onClick={() => handleNav("/cart")}
-                  className="w-full text-left py-3 font-body text-sm text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors flex items-center gap-2.5 cursor-pointer"
-                >
-                  <ShoppingBag size={16} aria-hidden="true" />
-                  Cart
-                  {cartCount > 0 && (
-                    <span className="ml-auto text-[10px] font-semibold text-[var(--color-accent)]">
-                      ({cartCount})
-                    </span>
-                  )}
-                </button>
-              </div>
-            </nav>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  );
+  return <Marquee compact tone="ink" items={ANNOUNCEMENT_ITEMS} />;
 }
 
 export function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const { CartDataAdd } = useContext(CartContext);
-  const cartCount = CartDataAdd?.length ?? 0;
+  const { dataFavouriteItemUser } = useContext(FilterProductContext);
+  const { collectionData } = useContext(CollectionContext);
 
-  const [mobileOpen, setMobileOpen]   = useState(false);
-  const [scrolled, setScrolled]       = useState(false);
-  const [searchOpen, setSearchOpen]   = useState(false);
+  const cartCount = CartDataAdd?.length ?? 0;
+  const favCount = dataFavouriteItemUser?.length ?? 0;
+
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [bumpKey, setBumpKey] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 16);
+    const handler = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handler, { passive: true });
     return () => window.removeEventListener("scroll", handler);
   }, []);
@@ -205,6 +60,10 @@ export function Header() {
     }
   }, [searchOpen]);
 
+  useEffect(() => {
+    setBumpKey((k) => k + 1);
+  }, [cartCount]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -214,11 +73,16 @@ export function Header() {
     }
   };
 
+  const previewSeasons = Array.isArray(collectionData)
+    ? collectionData.slice(0, 6)
+    : [];
+  const featuredSeason = previewSeasons[0];
+
   return (
     <>
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only fixed top-4 left-4 z-[2000] px-3 py-1.5 bg-[var(--color-accent)] text-white text-xs font-semibold"
+        className="sr-only focus:not-sr-only fixed left-4 top-4 z-[2000] border-2 border-ink bg-volt px-4 py-2 mono-label text-xs font-extrabold text-ink shadow-hard"
       >
         Skip to content
       </a>
@@ -227,115 +91,169 @@ export function Header() {
 
       <header
         className={cn(
-          "sticky top-0 z-[100] w-full transition-all duration-200",
-          "border-b border-[var(--color-rule)]",
-          scrolled ? "glass-warm" : "bg-[var(--color-bg)]"
+          "sticky top-0 z-[100] h-16 w-full border-b-2 border-ink bg-paper transition-transform duration-150",
+          scrolled && "shadow-hard-sm"
         )}
       >
-        <div className="container-page">
-          <div className="h-14 flex items-center justify-between gap-4">
-
+        <div className="container-atelier h-full">
+          <div className="flex h-full items-center justify-between gap-3">
             <button
+              type="button"
               onClick={() => navigate("/")}
               aria-label="Aurelia — Home"
-              className="flex-shrink-0 cursor-pointer"
+              className="hit-area-expand inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center gap-2 cursor-pointer"
             >
-              <img src={logo} alt="Aurelia" className="h-8 w-auto" />
+              <span className="inline-flex h-8 items-center border-2 border-ink bg-ink px-3 font-display text-sm font-black uppercase tracking-[0.2em] text-paper shadow-hard-sm rounded-[2px]">
+                AURELIA
+              </span>
+              <span className="hidden sm:inline-block border-2 border-ink bg-volt px-1.5 py-0.5 mono-label text-[10px] font-extrabold text-ink">
+                LAB
+              </span>
             </button>
 
-            <nav aria-label="Main navigation" className="hidden md:flex items-center gap-0">
+            <nav
+              aria-label="Main navigation"
+              className="hidden lg:flex items-center gap-1"
+            >
               {NAV_LINKS.map((link) => {
-                const isActive = location.pathname === link.path ||
-                  (link.path !== "/" && location.pathname.startsWith(link.path));
+                const isActive = isNavLinkActive(location.pathname, link.path);
+                const navButtonClass = cn(
+                  "inline-flex min-h-[44px] items-center px-3.5 py-2 font-display text-xs font-extrabold uppercase tracking-wider cursor-pointer rounded-[2px] border-2",
+                  isActive
+                    ? "border-ink bg-volt text-ink shadow-hard-sm"
+                    : "border-transparent text-ink hover:border-ink hover:bg-bone"
+                );
+
+                if (link.path === "/Collection") {
+                  return (
+                    <Dropdown
+                      key={link.path}
+                      align="center"
+                      panelClassName="w-[min(760px,90vw)] p-5"
+                      trigger={
+                        <button
+                          type="button"
+                          onClick={() => navigate(link.path)}
+                          className={cn(navButtonClass, "gap-1.5")}
+                        >
+                          <span>{link.label}</span>
+                          <ChevronDown
+                            size={14}
+                            strokeWidth={2.5}
+                            aria-hidden="true"
+                          />
+                        </button>
+                      }
+                    >
+                      <CollectionMegaMenu
+                        previewSeasons={previewSeasons}
+                        featuredSeason={featuredSeason}
+                      />
+                    </Dropdown>
+                  );
+                }
+
                 return (
                   <button
                     key={link.path}
+                    type="button"
                     onClick={() => navigate(link.path)}
-                    className={cn(
-                      "px-4 py-2 font-body text-[13px] font-medium tracking-wide uppercase",
-                      "transition-colors duration-150 cursor-pointer",
-                      isActive
-                        ? "text-[var(--color-ink)]"
-                        : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
-                    )}
+                    className={navButtonClass}
                   >
                     {link.label}
-                    {isActive && (
-                      <span className="block h-[1px] w-full bg-[var(--color-ink)] mt-0.5" />
-                    )}
                   </button>
                 );
               })}
             </nav>
 
-            <div className="flex items-center gap-0.5">
+            <div className="flex items-center gap-2">
               <AnimatePresence mode="wait">
                 {searchOpen ? (
                   <motion.form
                     key="search-form"
                     initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: 200, opacity: 1 }}
+                    animate={{ width: 220, opacity: 1 }}
                     exit={{ width: 0, opacity: 0 }}
                     transition={{ duration: 0.15, ease: "easeOut" }}
                     onSubmit={handleSearch}
                     className="overflow-hidden"
                   >
-                    <label htmlFor="desktop-search" className="sr-only">Search</label>
+                    <label htmlFor="desktop-search" className="sr-only">
+                      Search
+                    </label>
                     <input
                       ref={searchInputRef}
                       id="desktop-search"
                       type="search"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyDown={(e) => e.key === "Escape" && setSearchOpen(false)}
-                      placeholder="Search..."
-                      className="input py-1.5 text-xs"
+                      onKeyDown={(e) =>
+                        e.key === "Escape" && setSearchOpen(false)
+                      }
+                      placeholder="Tìm sản phẩm..."
+                      className="block h-11 w-full border-2 border-ink bg-paper px-3 text-xs font-medium text-ink rounded-[2px]"
                     />
                   </motion.form>
                 ) : null}
               </AnimatePresence>
 
               <button
+                type="button"
                 aria-label={searchOpen ? "Close search" : "Open search"}
                 aria-expanded={searchOpen}
                 onClick={() => setSearchOpen((v) => !v)}
-                className="p-2 text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
+                className="press-collapse flex h-11 w-11 items-center justify-center border-2 border-ink bg-paper text-ink shadow-hard-sm hover:bg-volt cursor-pointer rounded-[2px]"
               >
-                {searchOpen ? <X size={18} /> : <Search size={18} />}
-              </button>
-
-              <button
-                aria-label="My account"
-                onClick={() => navigate("/account")}
-                className="hidden sm:flex p-2 text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
-              >
-                <User size={18} aria-hidden="true" />
-              </button>
-
-              <button
-                aria-label={`Cart, ${cartCount} item${cartCount !== 1 ? "s" : ""}`}
-                onClick={() => navigate("/cart")}
-                className="relative p-2 text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
-              >
-                <ShoppingBag size={18} aria-hidden="true" />
-                {cartCount > 0 && (
-                  <span
-                    className="absolute -top-0.5 -right-0.5 w-4 h-4 flex items-center justify-center bg-[var(--color-accent)] text-white text-[9px] font-bold rounded-full leading-none"
-                    aria-hidden="true"
-                  >
-                    {cartCount > 9 ? "9+" : cartCount}
-                  </span>
+                {searchOpen ? (
+                  <X size={18} strokeWidth={2.5} />
+                ) : (
+                  <Search size={18} strokeWidth={2.5} />
                 )}
               </button>
 
               <button
+                type="button"
+                aria-label={`Yêu thích (${favCount})`}
+                onClick={() => navigate("/account?tab=favourite")}
+                className="press-collapse hidden sm:inline-flex h-11 items-center gap-1.5 border-2 border-ink bg-paper px-2.5 mono-label text-xs font-extrabold text-ink shadow-hard-sm hover:bg-volt cursor-pointer rounded-[2px]"
+              >
+                <Heart size={16} strokeWidth={2.5} aria-hidden="true" />
+                <span className="tabular">{favCount}</span>
+              </button>
+
+              <button
+                type="button"
+                aria-label="My account"
+                onClick={() => navigate("/account")}
+                className="press-collapse hidden sm:flex h-11 w-11 items-center justify-center border-2 border-ink bg-paper text-ink shadow-hard-sm hover:bg-volt cursor-pointer rounded-[2px]"
+              >
+                <User size={18} strokeWidth={2.5} aria-hidden="true" />
+              </button>
+
+              <button
+                type="button"
+                aria-label={`Cart, ${cartCount} item${cartCount !== 1 ? "s" : ""}`}
+                onClick={() => navigate("/cart")}
+                className="press-collapse relative inline-flex h-11 items-center gap-2 border-2 border-ink bg-ink px-3 text-paper shadow-hard-flash hover:bg-flash cursor-pointer rounded-[2px]"
+              >
+                <ShoppingBag size={17} strokeWidth={2.5} aria-hidden="true" />
+                <span
+                  key={bumpKey}
+                  className="animate-bump inline-flex min-w-6 items-center justify-center border-l-2 border-dashed border-paper/50 pl-2 font-mono text-xs font-extrabold tabular text-volt"
+                >
+                  {cartCount}
+                </span>
+              </button>
+
+              <button
+                type="button"
                 aria-label="Open menu"
                 aria-expanded={mobileOpen}
                 aria-controls="mobile-nav"
                 onClick={() => setMobileOpen(true)}
-                className="md:hidden p-2 text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
+                className="press-collapse flex lg:hidden h-11 w-11 items-center justify-center border-2 border-ink bg-paper text-ink shadow-hard-sm hover:bg-volt cursor-pointer rounded-[2px]"
               >
-                <Menu size={20} aria-hidden="true" />
+                <Menu size={20} strokeWidth={2.5} aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -347,6 +265,7 @@ export function Header() {
           open={mobileOpen}
           onClose={() => setMobileOpen(false)}
           cartCount={cartCount}
+          favCount={favCount}
         />
       </div>
     </>

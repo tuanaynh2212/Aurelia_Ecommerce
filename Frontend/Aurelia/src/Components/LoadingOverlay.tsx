@@ -1,12 +1,15 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { Equalizer } from "./UI/primitives/Meter";
 
 interface LoadingOverlayProps {
   isLoading: boolean;
   message?: string;
 }
 
-export const LoadingOverlay = ({ isLoading, message = "Đang xử lý..." }: LoadingOverlayProps) => {
+export const LoadingOverlay = ({
+  isLoading,
+  message = "Đang xử lý...",
+}: LoadingOverlayProps) => {
   return (
     <AnimatePresence>
       {isLoading && (
@@ -14,29 +17,28 @@ export const LoadingOverlay = ({ isLoading, message = "Đang xử lý..." }: Loa
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/20 backdrop-blur-sm"
+          transition={{ duration: 0.15 }}
+          className="fixed inset-0 z-[9998] flex items-center justify-center bg-ink/60 p-4"
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
+            initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className=" shadow-2xl  px-8 py-6 flex flex-col items-center gap-4 min-w-[200px]"
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="flex min-w-[260px] flex-col items-center gap-4 border-[3px] border-ink bg-paper px-8 py-6 shadow-hard-lg rounded-[2px]"
           >
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center"
-            >
-              <Loader2 className="w-6 h-6 text-black" strokeWidth={2.5} />
-            </motion.div>
-            <p className="text-white font-medium text-sm">{message}</p>
+            <span className="mono-label text-[10px] font-bold text-ink-muted">
+              [OPTICAL RIG // BUSY]
+            </span>
+            <div className="flex h-12 w-12 items-center justify-center border-2 border-ink bg-volt">
+              <Equalizer bars={5} label={message} />
+            </div>
+            <p className="font-mono text-xs font-extrabold uppercase tracking-wider text-ink">
+              {message}
+            </p>
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
   );
 };
-
-

@@ -4,6 +4,7 @@ import { Toaster } from "../Toaster";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, ShieldCheck, Truck } from "lucide-react";
 import { formatVND } from "../../utils/formatters";
+import { Receipt, DottedLeaderRow, SegmentMeter } from "../UI";
 
 interface CartSummaryProps {
   tax: number;
@@ -15,7 +16,7 @@ export const CartSummary: React.FC<CartSummaryProps> = ({ tax }) => {
 
   const subtotal = useMemo(
     () => (CartDataAdd || []).reduce((s, i) => s + i.price * i.quantity, 0),
-    [CartDataAdd]
+    [CartDataAdd],
   );
 
   const shippingFee = subtotal >= 500000 || subtotal === 0 ? 0 : 30000;
@@ -29,75 +30,76 @@ export const CartSummary: React.FC<CartSummaryProps> = ({ tax }) => {
     navigate("/payment");
   };
 
+  const freeShipProgress = Math.min(100, Math.round((subtotal / 500000) * 100));
+
   return (
-    <div className="bg-[var(--color-surface)] rounded-none border border-[var(--color-rule)] p-5 sm:p-6 space-y-5">
-      <div className="border-b border-[var(--color-rule)] pb-3">
-        <div className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-ink-muted)]">
-          SUMMARY
-        </div>
-        <h3 className="font-heading font-bold text-lg text-[var(--color-ink)] uppercase tracking-wide">
-          Tóm Tắt Đơn Hàng
-        </h3>
-      </div>
-
-      <div className="space-y-3 text-xs sm:text-sm font-mono">
-        <div className="flex justify-between text-[var(--color-ink-muted)]">
-          <span>TẠM TÍNH ({CartDataAdd?.length || 0} MỤC)</span>
-          <span className="font-bold text-[var(--color-ink)] tabular-nums">{formatVND(subtotal)}</span>
-        </div>
-
-        <div className="flex justify-between text-[var(--color-ink-muted)]">
-          <span>PHÍ VẬN CHUYỂN</span>
-          <span>
-            {shippingFee === 0 ? (
-              <span className="text-[var(--color-ink)] font-bold uppercase">MIỄN PHÍ</span>
-            ) : (
-              <span className="text-[var(--color-ink)] tabular-nums">{formatVND(shippingFee)}</span>
-            )}
-          </span>
-        </div>
-
-        {tax > 0 && (
-          <div className="flex justify-between text-[var(--color-ink-muted)]">
-            <span>THUẾ VAT</span>
-            <span className="text-[var(--color-ink)] tabular-nums">{formatVND(tax)}</span>
+    <Receipt
+      title="TÓM TẮT ĐƠN HÀNG"
+      serial="RCPT-CART-01"
+      footer="BẢO MẬT GIAO DỊCH CHUẨN SSL 256-BIT"
+    >
+      <div className="space-y-4">
+        {/* 10-segment Free-ship Meter */}
+        <div className="p-3 bg-[var(--color-bone)] border-2 border-[var(--color-ink)] space-y-2">
+          <div className="flex items-center gap-2 mono-label text-[var(--color-ink)]">
+            <Truck size={14} className="text-[var(--color-flash)] shrink-0" />
+            <span>
+              {subtotal >= 500000
+                ? "✓ ĐÃ ĐẠT TIÊU CHUẨN MIỄN PHÍ GIAO HÀNG TOÀN QUỐC"
+                : `MUA THÊM ${formatVND(500000 - subtotal)} ĐỂ ĐƯỢC FREESHIP`}
+            </span>
           </div>
-        )}
+          <SegmentMeter
+            value={freeShipProgress}
+            max={100}
+            segments={10}
+            accent={subtotal >= 500000 ? "volt" : "flash"}
+            showValue={false}
+          />
+        </div>
 
-        <div className="pt-3 border-t border-[var(--color-rule)] flex justify-between items-baseline">
-          <span className="font-mono font-bold text-sm text-[var(--color-ink)] uppercase">
+        {/* Dotted leader receipt rows */}
+        <div className="space-y-2.5 py-2">
+          <DottedLeaderRow
+            label={`TẠM TÍNH (${CartDataAdd?.length || 0} MỤC)`}
+            value={formatVND(subtotal)}
+          />
+          <DottedLeaderRow
+            label="PHÍ VẬN CHUYỂN"
+            value={shippingFee === 0 ? "MIỄN PHÍ" : formatVND(shippingFee)}
+          />
+          {tax > 0 && (
+            <DottedLeaderRow label="THUẾ VAT" value={formatVND(tax)} />
+          )}
+        </div>
+
+        {/* CSS-3D Total Digit Roll Display */}
+        <div className="pt-3 border-t-2 border-[var(--color-ink)] flex justify-between items-baseline">
+          <span className="mono-label font-extrabold text-[var(--color-ink)]">
             TỔNG CỘNG
           </span>
-          <span className="font-heading font-extrabold text-xl text-[var(--color-accent)] tabular-nums">
+          <span
+            key={total}
+            className="font-mono font-extrabold text-2xl text-[var(--color-flash)] tabular-nums transition-transform duration-300"
+          >
             {formatVND(total)}
           </span>
         </div>
-      </div>
 
-      <button
-        onClick={handleCheckout}
-        className="btn btn-primary w-full py-3.5 rounded-none font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 group"
-      >
-        <span>TIẾN HÀNH THANH TOÁN</span>
-        <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-      </button>
+        <button
+          onClick={handleCheckout}
+          className="w-full min-h-[52px] px-6 py-3.5 border-2 border-[var(--color-ink)] bg-[var(--color-flash)] text-[var(--color-paper)] shadow-[var(--shadow-hard)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[var(--shadow-hard-lg)] active:translate-x-[2px] active:translate-y-[2px] transition-all font-mono font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <span>TIẾN HÀNH THANH TOÁN</span>
+          <ArrowRight size={15} />
+        </button>
 
-      <div className="p-3 rounded-none bg-[var(--color-bg)] border border-[var(--color-rule)] text-[11px] font-mono text-[var(--color-ink-muted)] space-y-1">
-        <div className="flex items-center gap-2">
-          <Truck size={14} className="text-[var(--color-accent)] flex-shrink-0" />
-          <span>
-            {subtotal >= 500000
-              ? "✓ ĐÃ ĐẠT TIÊU CHUẨN MIỄN PHÍ GIAO HÀNG TOÀN QUỐC"
-              : `MUA THÊM ${formatVND(500000 - subtotal)} ĐỂ ĐƯỢC FREESHIP`}
-          </span>
+        <div className="flex items-center justify-center gap-2 mono-label text-[var(--color-ink-muted)] pt-1">
+          <ShieldCheck size={14} className="text-[var(--color-success)]" />
+          <span>ATELIER VERIFIED CHECKOUT</span>
         </div>
       </div>
-
-      <div className="flex items-center justify-center gap-2 text-[11px] font-mono text-[var(--color-ink-muted)] pt-1 uppercase">
-        <ShieldCheck size={13} className="text-[var(--color-accent)]" />
-        <span>BẢO MẬT GIAO DỊCH CHUẨN SSL 256-BIT</span>
-      </div>
-    </div>
+    </Receipt>
   );
 };
 

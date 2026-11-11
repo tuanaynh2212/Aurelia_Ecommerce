@@ -1,39 +1,56 @@
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import { FilterProductContext } from "../../contexts/FIlterProduct";
-import { X } from "lucide-react";
+import { Breadcrumb } from "../UI/primitives/Overlays";
+import { Sticker } from "../UI/primitives/Sticker";
+import { filterRealProducts } from "../../utils/productFilters";
 
 export const BannerTitle = () => {
-  const { key, setKey } = useContext(FilterProductContext);
+  const { key, setKey, dataProduct } = useContext(FilterProductContext);
+  const realCount = useMemo(
+    () => filterRealProducts(dataProduct).length,
+    [dataProduct]
+  );
 
   return (
-    <div className="w-full border-b border-[var(--color-rule)] bg-[var(--color-surface)]/40 py-8 px-4 sm:px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div className="w-full border-b-2 border-ink bg-bone py-8">
+      <div className="container-atelier">
+        <Breadcrumb
+          items={[
+            { label: "HOME", to: "/" },
+            { label: "CATALOGUE" },
+          ]}
+        />
+
+        <div className="mt-2 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <div className="inline-block font-mono text-[11px] uppercase tracking-wider text-[var(--color-ink-muted)] mb-2">
-              CATALOGUE INDEX · ALL INVENTORY
+            <div className="inline-block border-2 border-ink bg-volt px-2.5 py-0.5 mono-label text-[11px] font-extrabold text-ink mb-2">
+              [CATALOGUE INDEX · ALL INVENTORY]
             </div>
-            <h1 className="text-3xl sm:text-4xl font-heading font-bold text-[var(--color-ink)] tracking-tight">
-              Danh Mục Sản Phẩm
-            </h1>
-            <p className="mt-2 text-sm text-[var(--color-ink-muted)] font-body max-w-xl">
+            <div className="flex flex-wrap items-baseline gap-3 overflow-hidden">
+              <h1 className="display-xl font-display-safe text-ink">
+                Danh Mục Sản Phẩm
+              </h1>
+              <span
+                className="text-outline font-display text-3xl md:text-5xl font-black tabular select-none"
+                aria-label={`Tổng số ${realCount}`}
+              >
+                ({realCount})
+              </span>
+            </div>
+            <p className="mt-2 max-w-xl text-sm text-ink-muted">
               Sản phẩm may mặc và phụ kiện Aurelia. Chất liệu tự nhiên, cấu trúc đường may hoàn thiện và thông số kích thước minh bạch.
             </p>
           </div>
 
           {key && (
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-none bg-[var(--color-bg)] border border-[var(--color-ink)] self-start md:self-auto">
-              <span className="text-[11px] font-mono text-[var(--color-ink-muted)] uppercase tracking-wider">Lọc:</span>
-              <span className="text-xs font-mono font-bold text-[var(--color-ink)] uppercase">
-                {key}
-              </span>
-              <button
-                onClick={() => setKey("")}
-                className="p-0.5 hover:bg-[var(--color-surface)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
-                aria-label="Xóa bộ lọc"
+            <div className="self-start md:self-auto">
+              <Sticker
+                tone="volt"
+                onRemove={() => setKey("")}
+                removeLabel="Xóa bộ lọc"
               >
-                <X size={13} />
-              </button>
+                LỌC: {key}
+              </Sticker>
             </div>
           )}
         </div>

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { Ticket, Package, Truck } from "lucide-react";
 import { AdminContext } from "../../../../contexts/AdminContext";
 import { Section } from "./Section";
@@ -17,23 +17,27 @@ export default function Voucher() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-rule/60 gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-tag bg-kraft/15 border border-kraft-dark/20 flex items-center justify-center text-ink">
-            <Ticket size={16} />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b-2 border-[var(--color-ink)] gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-[var(--color-volt)] border-2 border-[var(--color-ink)] flex items-center justify-center text-[var(--color-ink)] shadow-[var(--shadow-hard-sm)]">
+            <Ticket size={18} />
           </div>
           <div>
-            <h1 className="font-heading text-lg font-semibold text-ink">
+            <h1 className="font-display-safe text-lg font-extrabold uppercase text-[var(--color-ink)]">
               Mã Giảm Giá & Phiếu Quà Tặng
             </h1>
-            <p className="font-mono text-xs text-ink-muted">
+            <p className="mono-label text-[var(--color-ink-muted)]">
               Đặc quyền ưu đãi dành riêng cho tài khoản của quý khách
             </p>
           </div>
         </div>
 
-        <div className="font-mono text-xs text-ink-muted">
-          Tổng số: <strong className="text-ink">{orderCoupons.length + shipCoupons.length}</strong> mã khả dụng
+        <div className="mono-label text-[var(--color-ink-muted)]">
+          Tổng số:{" "}
+          <strong className="bg-[var(--color-volt)] text-[var(--color-ink)] px-1.5 py-0.5 font-extrabold">
+            {orderCoupons.length + shipCoupons.length}
+          </strong>{" "}
+          mã khả dụng
         </div>
       </div>
 
@@ -55,4 +59,3 @@ export default function Voucher() {
     </div>
   );
 }
-

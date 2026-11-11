@@ -1,120 +1,135 @@
-
-import { useContext, useState, useMemo } from "react";
+import { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowUpRight, Box, LayoutGrid } from "lucide-react";
 import { FilterProductContext } from "../../contexts/FIlterProduct";
 import { ProductTag, TagSkeleton } from "../hangtag/ProductTag";
-import { cn } from "../../utils/cn";
+import { MerchSelector3D } from "../hangtag/MerchSelector3D";
+import { SectionTitle } from "../UI/primitives/SectionTitle";
+import { Tabs } from "../UI/primitives/Overlays";
+import { Button } from "../UI/primitives/Button";
 import type { Product } from "../../types/type";
-
-function getCategories(products: Product[]): string[] {
-  const set = new Set<string>();
-  products.forEach((p) => {
-    if (p.type) set.add(p.type);
-  });
-  return ["Tất cả", ...Array.from(set)];
-}
+import { filterRealProducts } from "../../utils/productFilters";
+import { cn } from "../../utils/cn";
 
 export function ThisWeekWall() {
   const navigate = useNavigate();
-  const { dataProduct, isLoading } = useContext(FilterProductContext);
-  const [activeCategory, setActiveCategory] = useState("Tất cả");
+  const { dataProduct: rawProducts, isLoading } = useContext(FilterProductContext);
+  const dataProduct = useMemo(() => filterRealProducts(rawProducts), [rawProducts]);
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<"3d" | "grid">("3d");
 
-  const categories = useMemo(() => getCategories(dataProduct || []), [dataProduct]);
+  const categories = useMemo(() => {
+    if (!dataProduct?.length) return ["all"];
+    const set = new Set<string>(["all"]);
+    dataProduct.forEach((p) => {
+      if (p.type) set.add(p.type);
+    });
+    return Array.from(set).slice(0, 6);
+  }, [dataProduct]);
 
   const filtered = useMemo<Product[]>(() => {
-    if (!dataProduct) return [];
-    const list = activeCategory === "Tất cả"
-      ? dataProduct
-      : dataProduct.filter((p) => p.type === activeCategory);
-    return [...list]
-      .sort((a, b) => (b.sold ?? 0) - (a.sold ?? 0))
-      .slice(0, 8);
+    if (!dataProduct?.length) return [];
+    const base =
+      activeCategory === "all"
+        ? dataProduct
+        : dataProduct.filter((p) => p.type === activeCategory);
+    return base.slice(0, 8);
   }, [dataProduct, activeCategory]);
 
-  const showSkeletons = isLoading;
+  const showSkeletons = isLoading && filtered.length === 0;
 
   return (
     <section
-      aria-labelledby="this-week-heading"
-      className="w-full"
-      style={{ background: "var(--color-paper)" }}
+      aria-label="Quầy merch tuần này"
+      className="border-b-[3px] border-ink bg-paper"
     >
-      <div className="container-page py-12 md:py-16">
-
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 border-b border-[var(--color-rule)] pb-5">
-          <div>
-            <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-faint mb-1">
-              — Cập nhật hàng tuần
-            </p>
-            <h2
-              id="this-week-heading"
-              className="font-heading text-2xl md:text-3xl font-semibold text-ink leading-tight"
-            >
-              Tuần này tại Aurellia
-            </h2>
-          </div>
-          <button
-            onClick={() => navigate("/Fashion/Products")}
-            className="font-mono text-xs tracking-wider uppercase text-ink-muted underline underline-offset-2 hover:text-ink transition-colors self-start sm:self-end pb-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt"
-          >
-            Xem tất cả →
-          </button>
+      {/* Concert Merch Tent Awning Trim */}
+      <div className="border-b-2 border-ink bg-ink text-paper">
+        <div className="container-atelier flex items-center justify-between py-2 mono-label text-[10px] font-extrabold">
+          <span className="text-volt">MERCH BOOTH // SECTOR 05 — OFFICIAL TOUR GOODS</span>
+          <span className="hidden sm:inline text-fog">3D INTERACTIVE STAGE SELECT</span>
         </div>
+        <div aria-hidden="true" className="hazard-stripe h-2 w-full border-t border-paper/20" />
+      </div>
 
-        <div
-          className="w-full h-px mb-0"
-          style={{ background: "var(--color-rule)" }}
-          aria-hidden="true"
+      <div className="container-atelier py-14 md:py-20">
+        <SectionTitle
+          index="05"
+          eyebrow="MERCH BOOTH // 3D STAGE SELECTOR"
+          title="QUẦY MERCH TUẦN NÀY"
+          count={filtered.length}
+          action={
+            <Button
+              variant="secondary"
+              onClick={() => navigate("/Fashion/Products")}
+              iconRight={<ArrowUpRight size={16} strokeWidth={2.5} />}
+            >
+              Xem toàn bộ kệ
+            </Button>
+          }
         />
 
-        <div
-          className="flex gap-2 overflow-x-auto pb-2 pt-4 mb-0 scrollbar-none"
-          role="group"
-          aria-label="Lọc theo danh mục"
-        >
-          {categories.map((cat) => (
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <Tabs
+            activeId={activeCategory}
+            onChange={setActiveCategory}
+            items={categories.map((cat) => ({
+              id: cat,
+              label: cat === "all" ? "Tất cả" : cat,
+            }))}
+          />
+
+          {/* 3D Stage vs 2D Grid Switcher */}
+          <div
+            role="group"
+            aria-label="Chế độ xem sản phẩm"
+            className="inline-flex border-2 border-ink bg-bone p-0.5 rounded-[2px] shadow-hard-sm"
+          >
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={cn("chip flex-shrink-0", activeCategory === cat && "is-active")}
-              aria-pressed={activeCategory === cat}
+              type="button"
+              onClick={() => setViewMode("3d")}
+              aria-pressed={viewMode === "3d"}
+              className={cn(
+                "inline-flex items-center gap-1.5 px-3 py-1.5 mono-label text-[10px] font-extrabold cursor-pointer transition-colors rounded-[1px]",
+                viewMode === "3d" ? "bg-volt text-ink" : "text-ink-muted hover:text-ink"
+              )}
             >
-              {cat}
+              <Box size={13} strokeWidth={2.5} aria-hidden="true" />
+              <span>SELECT 3D</span>
             </button>
-          ))}
+            <button
+              type="button"
+              onClick={() => setViewMode("grid")}
+              aria-pressed={viewMode === "grid"}
+              className={cn(
+                "inline-flex items-center gap-1.5 px-3 py-1.5 mono-label text-[10px] font-extrabold cursor-pointer transition-colors rounded-[1px]",
+                viewMode === "grid" ? "bg-ink text-paper" : "text-ink-muted hover:text-ink"
+              )}
+            >
+              <LayoutGrid size={13} strokeWidth={2.5} aria-hidden="true" />
+              <span>LƯỚI 2D</span>
+            </button>
+          </div>
         </div>
 
-        <div
-          className="grid grid-cols-2 md:grid-cols-4 gap-x-3 gap-y-0 pt-2"
-          role="list"
-          aria-label="Sản phẩm tuần này"
-          aria-busy={isLoading}
-        >
-          {showSkeletons
-            ? Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} role="listitem">
-                  <TagSkeleton stringLength={28} />
-                </div>
-              ))
-            : filtered.length === 0
-            ? (
-                <div className="col-span-4 text-center py-16">
-                  <p className="font-mono text-sm text-ink-faint">
-                    Không có sản phẩm trong danh mục này.
-                  </p>
-                </div>
-              )
-            : filtered.map((p, i) => (
-                <div key={p.id} role="listitem">
-                  <ProductTag
-                    product={p}
-                    index={i}
-                    stringLength={28}
-                  />
-                </div>
-              ))}
-        </div>
+        {showSkeletons ? (
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+            {Array.from({ length: 8 }, (_, i) => (
+              <TagSkeleton key={i} />
+            ))}
+          </div>
+        ) : viewMode === "3d" ? (
+          <MerchSelector3D key={activeCategory} products={filtered} />
+        ) : (
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+            {filtered.map((product, idx) => (
+              <ProductTag key={product.id} product={product} index={idx} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
 }
+
+export default ThisWeekWall;

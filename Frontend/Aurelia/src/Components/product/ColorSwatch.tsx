@@ -1,6 +1,6 @@
-import * as React from "react";
-import { cn } from "../../utils/cn";
 import { Check } from "lucide-react";
+import { cn } from "../../utils/cn";
+import { swatchHex } from "../UI/three/palette";
 
 export interface ColorSwatchProps {
   colors: string[];
@@ -10,36 +10,10 @@ export interface ColorSwatchProps {
   className?: string;
 }
 
-const colorMap: Record<string, string> = {
-  black: "#1F1F1F",
-  white: "#FFFFFF",
-  cream: "#F6F4EE",
-  beige: "#EDE9E0",
-  brown: "#685044",
-  navy: "#1B2A38",
-  blue: "#3E5C76",
-  green: "#4A5D4E",
-  sage: "#7D8C7B",
-  pink: "#D9A094",
-  rose: "#C2847A",
-  red: "#A63A24",
-  gray: "#8C887F",
-  grey: "#8C887F",
-  denim: "#2F4858",
-  charcoal: "#262422",
-};
-
-function resolveColor(c: string): string {
-  const lower = c.toLowerCase().trim();
-  if (colorMap[lower]) return colorMap[lower];
-  if (lower.startsWith("#") || lower.startsWith("rgb")) return lower;
-  return "#D6D0C2";
-}
-
 const sizeClasses = {
-  sm: "w-4 h-4",
-  md: "w-5 h-5",
-  lg: "w-6 h-6",
+  sm: "w-5 h-5",
+  md: "w-7 h-7",
+  lg: "w-9 h-9",
 };
 
 export function ColorSwatch({
@@ -52,35 +26,36 @@ export function ColorSwatch({
   if (!colors || colors.length === 0) return null;
 
   return (
-    <div className={cn("flex items-center gap-1.5 flex-wrap", className)}>
+    <div className={cn("flex items-center gap-2 flex-wrap", className)}>
       {colors.map((color) => {
-        const bg = resolveColor(color);
+        const bg = swatchHex(color);
         const isSelected = selected === color;
-        const isWhite = bg.toLowerCase() === "#ffffff" || bg.toLowerCase() === "#f6f4ee";
 
         return (
           <button
             key={color}
             type="button"
             title={color}
+            aria-label={`Màu ${color}`}
+            aria-pressed={isSelected}
             onClick={(e) => {
               e.stopPropagation();
               onSelect?.(color);
             }}
             className={cn(
               sizeClasses[size],
-              "rounded-none transition-colors duration-150 relative flex items-center justify-center cursor-pointer",
-              "border border-[var(--color-rule)]",
+              "hit-area-expand relative flex items-center justify-center rounded-full border-2 border-ink cursor-pointer transition-transform",
               isSelected
-                ? "ring-1 ring-[var(--color-ink)] ring-offset-1 border-[var(--color-ink)]"
-                : "hover:border-[var(--color-ink)]"
+                ? "ring-2 ring-volt ring-offset-2 ring-offset-paper scale-110"
+                : "hover:scale-105"
             )}
             style={{ backgroundColor: bg }}
           >
             {isSelected && (
               <Check
-                size={size === "sm" ? 9 : 11}
-                className={isWhite ? "text-[var(--color-ink)]" : "text-white"}
+                size={size === "sm" ? 10 : 14}
+                strokeWidth={3}
+                className="text-ink drop-shadow-[0_1px_0_var(--color-paper)]"
               />
             )}
           </button>

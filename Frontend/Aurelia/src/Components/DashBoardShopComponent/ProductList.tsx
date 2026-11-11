@@ -15,6 +15,13 @@ import {
 import { DashBoardShopCOntext } from "../../contexts/DashBoardShopContext";
 import { Export } from "./ProductListComponents/Export";
 import { AddProduct } from "./ProductListComponents/AddProduct";
+import { SplitFlap, SegmentMeter } from "../UI";
+import type { Product } from "../../types/type";
+
+interface ShopInventoryProduct {
+  productId: string;
+  sold: number;
+}
 
 const ProductList = () => {
   const { datasanPham } = useContext(DashBoardShopCOntext);
@@ -23,29 +30,37 @@ const ProductList = () => {
   const [viewMode, setViewMode] = useState("grid");
   const [popUpAddProduct, setPopUpAddProduct] = useState(false);
   const [idProduct, setIdProduct] = useState("");
-  const filteredProducts = datasanPham?.danhSachSanPham?.filter((p: any) => {
-    const matchSearch =
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.brand.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchType = filterType === "all" || p.type === filterType;
-    return matchSearch && matchType;
-  });
-  const [title, setTitle] = useState("Thêm Sản Phẩm Mới");
-  const totalProducts = datasanPham?.tongSanPham;
-  const totalValue = datasanPham?.tongGiaTriKho;
-  const totalSold = datasanPham?.shopData?.products?.reduce(
-    (sum: any, p: any) => sum + p.sold,
-    0
+
+  const filteredProducts = datasanPham?.danhSachSanPham?.filter(
+    (p: Product) => {
+      const matchSearch =
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.brand.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchType = filterType === "all" || p.type === filterType;
+      return matchSearch && matchType;
+    }
   );
-  const avgRating = (
-    datasanPham?.danhSachSanPham?.reduce(
-      (sum: any, p: any) => sum + p.rating,
+
+  const [title, setTitle] = useState("Thêm Sản Phẩm Mới");
+  const totalProducts = datasanPham?.tongSanPham ?? 0;
+  const totalValue = datasanPham?.tongGiaTriKho ?? 0;
+  const totalSold =
+    datasanPham?.shopData?.products?.reduce(
+      (sum: number, p: ShopInventoryProduct) => sum + p.sold,
       0
-    ) / datasanPham?.danhSachSanPham?.length
-  ).toFixed(1);
+    ) ?? 0;
+  const avgRating = datasanPham?.danhSachSanPham?.length
+    ? (
+        datasanPham.danhSachSanPham.reduce(
+          (sum: number, p: Product) => sum + p.rating,
+          0
+        ) / datasanPham.danhSachSanPham.length
+      ).toFixed(1)
+    : "0.0";
+
   const sold = (id: string) => {
     let sl = 0;
-    datasanPham?.shopData?.products.forEach((p: any) => {
+    datasanPham?.shopData?.products?.forEach((p: ShopInventoryProduct) => {
       if (p.productId === id) {
         sl = p.sold;
       }
@@ -53,354 +68,355 @@ const ProductList = () => {
     return sl;
   };
 
-  const formatPrice = (price: any) => {
+  const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(price);
   };
 
+  const uniqueTypes: string[] =
+    datasanPham?.danhSachSanPham?.reduce((types: string[], p: Product) => {
+      if (!types.includes(p.type)) types.push(p.type);
+      return types;
+    }, []) || [];
+
   return (
     <>
       {popUpAddProduct ? (
-        <div className="w-full h-screen fixed inset-0 flex items-center justify-center z-100 bg-black/70">
-          <AddProduct title={title} onClose={setPopUpAddProduct} dataEdit={filteredProducts} ProductId={idProduct} sold={datasanPham.shopData.products.find((p: any) => p.productId === idProduct)?.sold || 0} />
+        <div className="w-full h-screen fixed inset-0 flex items-center justify-center z-50 bg-[var(--color-ink)]/70">
+          <AddProduct
+            title={title}
+            onClose={setPopUpAddProduct}
+            dataEdit={filteredProducts || []}
+            ProductId={idProduct}
+            sold={
+              datasanPham?.shopData?.products?.find(
+                (p: ShopInventoryProduct) => p.productId === idProduct
+              )?.sold || 0
+            }
+          />
         </div>
-      ) : (
-        ""
-      )}
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-zinc-50">
-        <div className=" mx-auto p-8">
-          <div className="mb-10">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h1 className="text-4xl serif text-gray-900 mb-3 tracking-tight">
-                  Quản Lý Sản Phẩm
-                </h1>
-                <p className="text-lg text-gray-500">
-                  Tối ưu hóa và theo dõi toàn bộ sản phẩm
+      ) : null}
+
+      <div className="min-h-screen bg-[var(--color-bone)] p-4 md:p-6 space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 p-6 bg-[var(--color-paper)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard)]">
+          <div>
+            <span className="hud-chip bg-[var(--color-volt)] text-[var(--color-ink)]">
+              [CONTROL ROOM // INVENTORY]
+            </span>
+            <h1 className="display-l font-display-safe text-[var(--color-ink)] mt-2">
+              Quản Lý Sản Phẩm
+            </h1>
+            <p className="font-mono text-xs text-[var(--color-ink-muted)] mt-1">
+              Tối ưu hóa và theo dõi toàn bộ sản phẩm
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Export Data={datasanPham?.shopData?.products} />
+            <button
+              onClick={() => {
+                setPopUpAddProduct(true);
+                setTitle("Thêm Sản Phẩm Mới");
+              }}
+              className="min-h-[48px] px-5 py-2.5 bg-[var(--color-flash)] text-[var(--color-paper)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard)] mono-label font-extrabold flex items-center gap-2 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              Thêm Sản Phẩm
+            </button>
+          </div>
+        </div>
+
+        {/* Scoreboard KPI Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {[
+            {
+              label: "Tổng Sản Phẩm",
+              val: String(totalProducts),
+              icon: Package,
+            },
+            {
+              label: "Giá Trị Kho",
+              val: `${(totalValue / 1000000).toFixed(1)}M`,
+              icon: DollarSign,
+            },
+            { label: "Đã Bán", val: String(totalSold), icon: TrendingUp },
+            { label: "Đánh Giá TB", val: String(avgRating), icon: Star },
+          ].map((kpi) => (
+            <div
+              key={kpi.label}
+              className="bg-[var(--color-paper)] p-5 border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard)] space-y-3"
+            >
+              <div className="flex items-center justify-between border-b-2 border-dashed border-[var(--color-ink)] pb-2">
+                <p className="mono-label text-[var(--color-ink-muted)]">
+                  {kpi.label}
                 </p>
+                <div className="w-9 h-9 bg-[var(--color-ink)] text-[var(--color-paper)] flex items-center justify-center">
+                  <kpi.icon className="w-4 h-4" />
+                </div>
               </div>
-              <div className="flex gap-3">
-                <Export Data={datasanPham?.shopData?.products} />
+              <SplitFlap value={kpi.val} size="sm" />
+            </div>
+          ))}
+        </div>
+
+        {/* Filter Bar */}
+        <div className="bg-[var(--color-paper)] p-4 border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard-sm)]">
+          <div className="flex flex-col md:flex-row gap-4 items-center">
+            <div className="flex-1 relative w-full">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-muted)] w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm sản phẩm, thương hiệu..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full min-h-[44px] pl-10 pr-4 py-2 bg-[var(--color-bone)] border-2 border-[var(--color-ink)] font-mono text-xs focus:outline-none focus:bg-[var(--color-paper)]"
+              />
+            </div>
+
+            <div className="flex gap-3 w-full md:w-auto">
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="min-h-[44px] px-4 py-2 bg-[var(--color-bone)] border-2 border-[var(--color-ink)] mono-label text-[var(--color-ink)] focus:outline-none"
+              >
+                <option value="all">Tất cả loại</option>
+                {uniqueTypes.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+
+              <div className="flex border-2 border-[var(--color-ink)] bg-[var(--color-bone)]">
                 <button
-                  onClick={() => {setPopUpAddProduct(true); setTitle("Thêm Sản Phẩm Mới")}}
-                  className="px-6 py-3 bg-gray-900 text-white hover:bg-gray-800 transition-all font-medium flex items-center gap-2 shadow-lg shadow-gray-900/10"
+                  onClick={() => setViewMode("grid")}
+                  className={`min-w-[44px] min-h-[40px] flex items-center justify-center cursor-pointer ${
+                    viewMode === "grid"
+                      ? "bg-[var(--color-volt)] text-[var(--color-ink)]"
+                      : "text-[var(--color-ink-muted)]"
+                  }`}
                 >
-                  <Plus className="w-5 h-5" />
-                  Thêm Sản Phẩm
+                  <Grid className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`min-w-[44px] min-h-[40px] flex items-center justify-center border-l-2 border-[var(--color-ink)] cursor-pointer ${
+                    viewMode === "list"
+                      ? "bg-[var(--color-volt)] text-[var(--color-ink)]"
+                      : "text-[var(--color-ink-muted)]"
+                  }`}
+                >
+                  <List className="w-4 h-4" />
                 </button>
               </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-white  shadow-sm p-6 border border-gray-100 hover:shadow-md transition-all">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-gray-100  flex items-center justify-center">
-                    <Package className="w-6 h-6 text-gray-700" />
-                  </div>
-                </div>
-                <p className="text-sm text-gray-500 mb-1">Tổng Sản Phẩm</p>
-                <p className="text-3xl serif text-gray-900">
-                  {totalProducts}
-                </p>
-              </div>
-
-              <div className="bg-white  shadow-sm p-6 border border-gray-100 hover:shadow-md transition-all">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-gray-100  flex items-center justify-center">
-                    <DollarSign className="w-6 h-6 text-gray-700" />
-                  </div>
-                </div>
-                <p className="text-sm text-gray-500 mb-1">Giá Trị Kho</p>
-                <p className="text-3xl serif text-gray-900">
-                  {(totalValue / 1000000).toFixed(1)}M
-                </p>
-              </div>
-
-              <div className="bg-white  shadow-sm p-6 border border-gray-100 hover:shadow-md transition-all">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-gray-100  flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6 text-gray-700" />
-                  </div>
-                </div>
-                <p className="text-sm text-gray-500 mb-1">Đã Bán</p>
-                <p className="text-3xl serif text-gray-900">{totalSold}</p>
-              </div>
-
-              <div className="bg-white shadow-sm p-6 border border-gray-100 hover:shadow-md transition-all">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-gray-100  flex items-center justify-center">
-                    <Star className="w-6 h-6 text-gray-700" />
-                  </div>
-                </div>
-                <p className="text-sm text-gray-500 mb-1">Đánh Giá TB</p>
-                <p className="text-3xl serif text-gray-900">{avgRating}</p>
-              </div>
-            </div>
           </div>
+        </div>
 
-          <div className="bg-white  shadow-sm p-6 mb-6 border border-gray-100">
-            <div className="flex flex-col md:flex-row gap-4 items-center">
-              <div className="flex-1 relative w-full">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm sản phẩm, thương hiệu..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 focus:outline-none focus:border-gray-400 focus:bg-white transition-all"
-                />
-              </div>
-
-              <div className="flex gap-3">
-                <select
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
-                  className="px-5 py-3 bg-gray-50 border border-gray-200  focus:outline-none focus:border-gray-400 font-medium text-gray-700"
-                >
-                  <option value="all">Tất cả loại</option>
-                  {datasanPham?.danhSachSanPham
-                    .reduce((types: any, p: any) => {
-                      if (!types.includes(p.type)) types.push(p.type);
-                      return types;
-                    }, [])
-                    .map((type: any) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                </select>
-
-                <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
-                  <button
-                    onClick={() => setViewMode("grid")}
-                    className={`p-2.5  transition-all ${
-                      viewMode === "grid"
-                        ? "bg-white shadow-sm"
-                        : "hover:bg-white/50"
-                    }`}
-                  >
-                    <Grid className="w-5 h-5 text-gray-600" />
-                  </button>
-                  <button
-                    onClick={() => setViewMode("list")}
-                    className={`p-2.5  transition-all ${
-                      viewMode === "list"
-                        ? "bg-white shadow-sm"
-                        : "hover:bg-white/50"
-                    }`}
-                  >
-                    <List className="w-5 h-5 text-gray-600" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {viewMode === "grid" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredProducts?.map((product: any) => (
-                <div
-                  key={product.id}
-                  className="bg-white  shadow-sm overflow-hidden border border-gray-100 hover:shadow-lg transition-all  hover:-translate-y-1 group"
-                >
-                  <div className="relative overflow-hidden bg-gray-50">
-                    <img
-                      src={product.thumbnail}
-                      alt={product.name}
-                      className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1 shadow-lg">
-                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                      <span className="serif text-gray-900 text-sm">
-                        {product.rating}
-                      </span>
-                    </div>
-                    <div className="absolute top-4 left-4">
-                      <span className="px-3 py-1.5 bg-gray-900/90 backdrop-blur-sm text-white rounded-full text-xs font-semibold shadow-lg">
-                        {product.type}
-                      </span>
-                    </div>
+        {viewMode === "grid" ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {filteredProducts?.map((product: Product) => (
+              <div
+                key={product.id}
+                className="bg-[var(--color-paper)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard)] overflow-hidden flex flex-col justify-between"
+              >
+                <div className="relative overflow-hidden bg-[var(--color-bone)] border-b-2 border-[var(--color-ink)]">
+                  <img
+                    src={product.thumbnail}
+                    alt={product.name}
+                    className="w-full h-56 object-cover"
+                  />
+                  <div className="absolute top-2.5 right-2.5 bg-[var(--color-volt)] border-2 border-[var(--color-ink)] px-2 py-0.5 flex items-center gap-1 mono-label font-extrabold">
+                    <Star className="w-3 h-3 fill-current" />
+                    <span>{product.rating}</span>
                   </div>
+                  <div className="absolute top-2.5 left-2.5">
+                    <span className="px-2 py-0.5 bg-[var(--color-ink)] text-[var(--color-paper)] mono-label text-[10px]">
+                      {product.type}
+                    </span>
+                  </div>
+                </div>
 
-                  <div className="p-5">
-                    <h3 className=" text-gray-900 mb-2 text-lg line-clamp-2 group-hover:text-gray-700 transition-colors">
-                      {product.name.length > 30
-                        ? `${product.name.slice(0, 25)}...`
-                        : product.name}
+                <div className="p-4 space-y-3">
+                  <div>
+                    <h3 className="font-display-safe font-extrabold uppercase text-sm text-[var(--color-ink)] line-clamp-1">
+                      {product.name}
                     </h3>
-                    <p className="text-sm text-gray-500 mb-4">
+                    <p className="mono-label text-[10px] text-[var(--color-ink-muted)]">
                       {product.brand}
                     </p>
+                  </div>
 
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <p className="text-2xl font-bold text-gray-900">
-                          {formatPrice(product.price)}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-gray-500">Tồn kho</p>
-                        <p
-                          className={`font-bold ${
-                            product.stock > 50
-                              ? "text-gray-900"
-                              : product.stock > 20
-                              ? "text-gray-600"
-                              : "text-gray-400"
-                          }`}
-                        >
-                          {product.stock}
-                        </p>
-                      </div>
+                  <div className="flex items-center justify-between">
+                    <p className="font-mono text-base font-extrabold text-[var(--color-flash)] tabular-nums">
+                      {formatPrice(product.price)}
+                    </p>
+                    <span className="mono-label text-[10px] text-[var(--color-ink)]">
+                      KHO: {product.stock}
+                    </span>
+                  </div>
+
+                  {/* 10-segment stock bar */}
+                  <SegmentMeter
+                    value={product.stock}
+                    max={100}
+                    segments={10}
+                    accent={product.stock > 20 ? "volt" : "flash"}
+                    showValue={false}
+                  />
+
+                  <div className="grid grid-cols-2 gap-2 mono-label text-[10px]">
+                    <div className="bg-[var(--color-bone)] border border-[var(--color-ink)] p-2">
+                      <p className="text-[var(--color-ink-muted)]">Đã bán</p>
+                      <p className="font-extrabold text-[var(--color-ink)]">
+                        {sold(product.id)}
+                      </p>
                     </div>
-
-                    <div className="flex items-center gap-2 mb-4 text-sm">
-                      <div className="flex-1 bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-100">
-                        <p className="text-xs text-gray-500 mb-0.5">Đã bán</p>
-                        <p className="font-bold text-gray-900">
-                          {sold(product.id)}
-                        </p>
-                      </div>
-                      <div className="flex-1 bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-100">
-                        <p className="text-xs text-gray-500 mb-0.5">Xuất xứ</p>
-                        <p className="font-bold text-gray-900 text-sm">
-                          {product.origin}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <button onClick={()=>{setTitle("Sửa Sản Phẩm"); setPopUpAddProduct(true),setIdProduct(product.id)}} className="flex-1 px-4 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-all font-medium text-sm">
-                        <Edit2 className="w-4 h-4 inline mr-1" />
-                        Sửa
-                      </button>
-                      <button className="px-4 py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-all">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                    <div className="bg-[var(--color-bone)] border border-[var(--color-ink)] p-2">
+                      <p className="text-[var(--color-ink-muted)]">Xuất xứ</p>
+                      <p className="font-extrabold text-[var(--color-ink)] truncate">
+                        {product.origin}
+                      </p>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-gray-50 border-b border-gray-100">
-                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        Sản Phẩm
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        Loại
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        Giá
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        Tồn Kho
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        Đã Bán
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        Rating
-                      </th>
-                      <th className="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        Thao Tác
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {filteredProducts?.map((product: any) => (
-                      <tr
-                        key={product.id}
-                        className="hover:bg-gray-50 transition-all"
-                      >
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-4">
-                            <img
-                              src={product.thumbnail}
-                              alt={product.name}
-                              className="w-16 h-16 rounded-xl object-cover border border-gray-100"
-                            />
-                            <div>
-                              <p className="font-bold text-gray-900">
-                                {product.name.length > 50
-                                  ? `${product.name.slice(0, 50)}...`
-                                  : product.name}
-                              </p>
-                              <p className="text-sm text-gray-500">
-                                {product.brand}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold">
-                            {product.type}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 font-bold text-gray-900">
-                          {formatPrice(product.price)}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-bold">
-                            {product.stock}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 font-semibold text-gray-700">
-                          {sold(product.id)}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                            <span className="font-bold text-gray-900">
-                              {product.rating}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center justify-center gap-2">
-                            <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-all">
-                              <Eye className="w-5 h-5" />
-                            </button>
-                            <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-all">
-                              <Edit2 className="w-5 h-5" />
-                            </button>
-                            <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-all">
-                              <Trash2 className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
 
-          {filteredProducts?.length === 0 && (
-            <div className="bg-white rounded-2xl shadow-sm p-16 text-center border border-gray-100">
-              <div className="w-24 h-24 bg-gray-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                <Package className="w-12 h-12 text-gray-400" />
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      onClick={() => {
+                        setTitle("Sửa Sản Phẩm");
+                        setPopUpAddProduct(true);
+                        setIdProduct(product.id);
+                      }}
+                      className="flex-1 min-h-[40px] px-3 py-2 bg-[var(--color-ink)] hover:bg-[var(--color-volt)] text-[var(--color-paper)] hover:text-[var(--color-ink)] border-2 border-[var(--color-ink)] mono-label font-extrabold transition-colors cursor-pointer"
+                    >
+                      <Edit2 className="w-3.5 h-3.5 inline mr-1" />
+                      Sửa
+                    </button>
+                    <button className="min-w-[40px] min-h-[40px] flex items-center justify-center bg-[var(--color-bone)] hover:bg-[var(--color-danger)] hover:text-[var(--color-paper)] text-[var(--color-ink)] border-2 border-[var(--color-ink)] transition-colors cursor-pointer">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                Không tìm thấy sản phẩm
-              </h3>
-              <p className="text-gray-500 mb-6">
-                Thử điều chỉnh bộ lọc hoặc thêm sản phẩm mới vào hệ thống
-              </p>
-              <button className="px-6 py-3 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-all font-medium shadow-lg shadow-gray-900/10">
-                <Plus className="w-4 h-4 inline mr-2" />
-                Thêm Sản Phẩm Đầu Tiên
-              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-[var(--color-paper)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard)] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-[var(--color-ink)] text-[var(--color-paper)] border-b-2 border-[var(--color-ink)]">
+                    <th className="px-4 py-3 text-left mono-label">Sản Phẩm</th>
+                    <th className="px-4 py-3 text-left mono-label">Loại</th>
+                    <th className="px-4 py-3 text-left mono-label">Giá</th>
+                    <th className="px-4 py-3 text-left mono-label">Tồn Kho</th>
+                    <th className="px-4 py-3 text-left mono-label">Đã Bán</th>
+                    <th className="px-4 py-3 text-left mono-label">Rating</th>
+                    <th className="px-4 py-3 text-center mono-label">
+                      Thao Tác
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y-2 divide-[var(--color-ink)]">
+                  {filteredProducts?.map((product: Product) => (
+                    <tr
+                      key={product.id}
+                      className="hover:bg-[var(--color-bone)] transition-colors"
+                    >
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={product.thumbnail}
+                            alt={product.name}
+                            className="w-12 h-12 object-cover border-2 border-[var(--color-ink)]"
+                          />
+                          <div>
+                            <p className="font-display-safe font-extrabold text-xs uppercase text-[var(--color-ink)] line-clamp-1">
+                              {product.name}
+                            </p>
+                            <p className="mono-label text-[10px] text-[var(--color-ink-muted)]">
+                              {product.brand}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="px-2 py-0.5 bg-[var(--color-bone)] border border-[var(--color-ink)] mono-label text-[10px]">
+                          {product.type}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs font-extrabold text-[var(--color-flash)] tabular-nums">
+                        {formatPrice(product.price)}
+                      </td>
+                      <td className="px-4 py-3 w-40">
+                        <SegmentMeter
+                          value={product.stock}
+                          max={100}
+                          segments={10}
+                          accent={product.stock > 20 ? "volt" : "flash"}
+                        />
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs font-bold text-[var(--color-ink)] tabular-nums">
+                        {sold(product.id)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1 font-mono text-xs font-extrabold">
+                          <Star className="w-3.5 h-3.5 text-[var(--color-flash)] fill-current" />
+                          <span>{product.rating}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button className="p-2 border border-[var(--color-ink)] bg-[var(--color-bone)] hover:bg-[var(--color-volt)] cursor-pointer">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setTitle("Sửa Sản Phẩm");
+                              setPopUpAddProduct(true);
+                              setIdProduct(product.id);
+                            }}
+                            className="p-2 border border-[var(--color-ink)] bg-[var(--color-bone)] hover:bg-[var(--color-volt)] cursor-pointer"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button className="p-2 border border-[var(--color-ink)] bg-[var(--color-bone)] hover:bg-[var(--color-danger)] hover:text-[var(--color-paper)] cursor-pointer">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {filteredProducts?.length === 0 && (
+          <div className="bg-[var(--color-paper)] border-2 border-dashed border-[var(--color-ink)] p-14 text-center">
+            <div className="w-16 h-16 bg-[var(--color-volt)] border-2 border-[var(--color-ink)] flex items-center justify-center mx-auto mb-4">
+              <Package className="w-8 h-8 text-[var(--color-ink)]" />
+            </div>
+            <h3 className="font-display-safe text-lg font-extrabold uppercase text-[var(--color-ink)] mb-2">
+              Không tìm thấy sản phẩm
+            </h3>
+            <p className="font-mono text-xs text-[var(--color-ink-muted)] mb-5">
+              Thử điều chỉnh bộ lọc hoặc thêm sản phẩm mới vào hệ thống
+            </p>
+            <button
+              onClick={() => {
+                setPopUpAddProduct(true);
+                setTitle("Thêm Sản Phẩm Mới");
+              }}
+              className="min-h-[44px] px-6 py-2.5 bg-[var(--color-flash)] text-[var(--color-paper)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard-sm)] mono-label font-extrabold cursor-pointer"
+            >
+              <Plus className="w-4 h-4 inline mr-2" />
+              Thêm Sản Phẩm Đầu Tiên
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

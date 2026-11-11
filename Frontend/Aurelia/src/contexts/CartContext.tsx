@@ -5,12 +5,13 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { type order, type Cart } from "../types/type";
 import axios from "axios";
+import { type order, type Cart } from "../types/type";
 import { Toaster } from "../Components/Toaster";
 import { api_Config, UseApiUrl } from "../services/api";
-import { AdminContext } from "./AdminContext";
 import { api_Response } from "../services/http";
+import { formatVND } from "../utils/formatters";
+import { AdminContext } from "./AdminContext";
 import { AuthContext } from "./Author";
 
 type CartContexts = {
@@ -21,10 +22,14 @@ type CartContexts = {
   setCartDataAdd: React.Dispatch<React.SetStateAction<Cart[]>>;
   LayToaDo: (address: string) => Promise<{ lat: number; lon: number } | null>;
   phiVanChuyen: string;
+  distance?: number | string;
   LayPhiVanCHuyen: (DuLieuDauRa: boolean) => Promise<void>;
   formatPrice?: (num: number) => string;
 };
 
+const JSON_HEADERS = { "Content-Type": "application/json" } as const;
+
+// eslint-disable-next-line react-refresh/only-export-components
 export const CartContext = createContext<CartContexts>({
   CartDataAdd: [],
   dataOrder: undefined,
@@ -33,68 +38,57 @@ export const CartContext = createContext<CartContexts>({
   setDataOrder: () => {},
   setCartDataAdd: () => {},
   phiVanChuyen: "",
+  distance: undefined,
   LayPhiVanCHuyen: async () => {},
-  formatPrice: (num: number) =>
-    new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(num),
+  formatPrice: formatVND,
 });
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const { userData } = useContext(AuthContext);
   const { setSelectvoucher } = useContext(AdminContext);
-  const [CartDataAdd, setCartDataAdd] = useState<Cart[]>(
-    JSON.parse(localStorage.getItem("cartItems") || "[]")
-      ? JSON.parse(localStorage.getItem("cartItems") || "[]")
-      : userData?.gioHangCuaBan || []
-  );
+  const [CartDataAdd, setCartDataAdd] = useState<Cart[]>(() => {
+    try {
+      const saved = localStorage.getItem("cartItems");
+      return saved ? JSON.parse(saved) : userData?.gioHangCuaBan || [];
+    } catch {
+      return userData?.gioHangCuaBan || [];
+    }
+  });
   const [dataOrder, setDataOrder] = useState<order | undefined>();
   const [phiVanChuyen, setPhiVanChuyen] = useState("");
+  const [distance, setDistance] = useState<number | string | undefined>();
   const [shopId, setShopId] = useState<string>("");
-  const token = useMemo(() => localStorage.getItem("token"), []);
-   const formatPrice = (num: number) =>
-     new Intl.NumberFormat("vi-VN", {
-       style: "currency",
-       currency: "VND",
-     }).format(num);
+
   const handleClickPayment = useCallback(async () => {
-    if (!dataOrder) return;
+    if (!dataOrder || shopId === "") return;
 
     try {
-      if (shopId === "") {
-        return;
-      }
-      console.log("Data Order:", dataOrder);
       setSelectvoucher([]);
-      api_Response(
+      await api_Response(
         `${UseApiUrl(api_Config.User.SuccessPayAddOrder)}?shopId=${shopId}`,
         "POST",
         dataOrder,
-        { "Content-Type": "application/json" ,withCredentials: true}
+        JSON_HEADERS
       );
-      await axios.put(
-        UseApiUrl(api_Config.Product.UpdateQuantityProduct),
-        dataOrder.product.map((item) => ({
-          productId: item.itemid,
-          quantity: item.quantity,
-        }))
-      );
-      api_Response(
-        UseApiUrl(api_Config.User.UpdateTier),
-        "POST",
-        {},
-        { "Content-Type": "application/json",withCredentials: true }
-      );
+      await Promise.all([
+        api_Response(
+          UseApiUrl(api_Config.Product.UpdateQuantityProduct),
+          "PUT",
+          dataOrder.product.map((item) => ({
+            productId: item.itemid,
+            quantity: item.quantity,
+          }))
+        ),
+        api_Response(UseApiUrl(api_Config.User.UpdateTier), "POST", {}, JSON_HEADERS),
+        api_Response(UseApiUrl(api_Config.User.XoaGioHang), "DELETE", {}, {}),
+      ]);
       localStorage.removeItem("cartItems");
       setCartDataAdd([]);
-      api_Response(UseApiUrl(api_Config.User.XoaGioHang), "DELETE", {}, {});
       Toaster.success("Thanh toán thành công! Đơn hàng đã được tạo.");
-    } catch (error) {
-      console.error(error);
+    } catch {
       Toaster.error("Thanh toán không thành công! Vui lòng thử lại.");
     }
-  }, [dataOrder, shopId, token, setSelectvoucher]);
+  }, [dataOrder, shopId, setSelectvoucher]);
 
   const LayToaDo = useCallback(
     async (address: string): Promise<{ lat: number; lon: number } | null> => {
@@ -116,8 +110,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           return { lat, lon };
         }
         return null;
-      } catch (err) {
-        console.error("Lỗi khi gọi LocationIQ:", err);
+      } catch {
         return null;
       }
     },
@@ -127,14 +120,22 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const LayPhiVanCHuyen = useCallback(
     async (DuLieuDauRa: boolean) => {
       try {
-        const data = await axios.post(
+        const data = await api_Response<{
+          shippingFee: string;
+          storeId: string;
+          distance?: number | string;
+        }>(
           `${UseApiUrl(api_Config.Shop.SapXepDon)}?nana=${DuLieuDauRa}`,
+          "POST",
           dataOrder,
-          { headers: { "Content-Type": "application/json" } }
+          JSON_HEADERS
         );
-        setPhiVanChuyen(data.data.shippingFee);
-        setShopId(data.data.storeId);
-      } catch {}
+        setPhiVanChuyen(data.shippingFee);
+        setShopId(data.storeId);
+        setDistance(data.distance);
+      } catch {
+        // Ignore transient shipping quote failures while typing address
+      }
     },
     [dataOrder]
   );
@@ -149,7 +150,8 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       LayToaDo,
       LayPhiVanCHuyen,
       phiVanChuyen,
-      formatPrice
+      distance,
+      formatPrice: formatVND,
     }),
     [
       CartDataAdd,
@@ -158,6 +160,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       LayToaDo,
       LayPhiVanCHuyen,
       phiVanChuyen,
+      distance,
     ]
   );
 

@@ -1,4 +1,3 @@
-
 import { useContext } from "react";
 import { AuthContext } from "../../contexts/Author";
 import { DashBoard } from "../../Components/AccountComponents/User/DashBoard";
@@ -21,4 +20,3 @@ export const Account = () => {
     </>
   );
 };
-

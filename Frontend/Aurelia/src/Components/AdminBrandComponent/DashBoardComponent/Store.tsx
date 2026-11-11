@@ -7,59 +7,61 @@ import {
   MoreVertical,
   Filter,
   Search,
-  Building2,
 } from "lucide-react";
 import { useContext, useState } from "react";
 import { AdminContext } from "../../../contexts/AdminContext";
+import { SplitFlap } from "../../UI/primitives/SplitFlap";
 
 export const Stores = () => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("Tất cả");
-  const {dataShop}=useContext(AdminContext);
+  const { dataShop } = useContext(AdminContext);
   const filteredStores = dataShop.filter(
     (s) =>
       s?.city?.toLowerCase().includes(search.toLowerCase()) &&
-      (filter === "Tất cả" || s.city === filter)
+      (filter === "Tất cả" || s.city === filter),
   );
 
   const fadeUp: Variants = {
-    hidden: { opacity: 0, y: 40 },
+    hidden: { opacity: 0, y: 20 },
     show: (i: number) => ({
       opacity: 1,
       y: 0,
-      transition: { delay: i * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+      transition: { delay: i * 0.05, duration: 0.3 },
     }),
-
   };
 
   return (
-    <div className="h-[110vh] bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-3 md:p-8 overflow-y-auto w-[300px] md:w-full">
+    <div className="min-h-screen bg-bone p-4 md:p-8 overflow-y-auto w-full space-y-6">
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col sm:flex-row justify-between sm:items-end gap-4 mb-12"
+        className="bg-paper border-2 border-ink shadow-hard p-6 flex flex-col lg:flex-row justify-between lg:items-end gap-4"
       >
         <div>
-          <h1 className="text-5xl serif bg-clip-text flex items-center gap-3">
+          <span className="mono-label text-[10px] text-flash block mb-1">
+            [ATELIER NETWORK // STORE LOCATIONS]
+          </span>
+          <h1 className="font-display-safe text-3xl md:text-4xl font-black uppercase text-ink">
             Hệ thống Cửa hàng Aurelia
           </h1>
-          <p className="text-gray-600 mt-2 text-sm">
+          <p className="font-mono text-xs text-ink-muted mt-1">
             Quản lý, theo dõi & tối ưu hiệu suất vận hành của chuỗi cửa hàng trên toàn quốc.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="relative">
             <Search
-              size={18}
-              className="absolute left-3 top-2.5 text-gray-400"
+              size={16}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted"
             />
             <input
               type="text"
               placeholder="Tìm kiếm cửa hàng..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-4 py-2 rounded-xl border border-gray-200 shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
+              className="h-12 pl-10 pr-4 border-2 border-ink bg-bone font-mono text-xs text-ink focus:bg-paper outline-none"
             />
           </div>
 
@@ -67,27 +69,34 @@ export const Stores = () => {
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="pl-9 pr-4 py-2 rounded-xl border border-gray-200 shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white appearance-none cursor-pointer"
+              className="h-12 pl-9 pr-8 border-2 border-ink bg-bone font-mono text-xs font-bold uppercase text-ink focus:bg-paper outline-none cursor-pointer"
             >
-              {dataShop.reduce((acc: any[], store) => {
-                if (!acc.find((item) => item.value === store.city)) {
-                  acc.push({ value: store.city, label: store.city });
-                }
-                return acc;
-              }, []).map((option) => {
-                return (<option key={option.value} value={option.value}>{option.label}</option>);
-              })}
+              {dataShop
+                .reduce(
+                  (acc: Array<{ value: string; label: string }>, store) => {
+                    if (!acc.find((item) => item.value === store.city)) {
+                      acc.push({ value: store.city, label: store.city });
+                    }
+                    return acc;
+                  },
+                  [],
+                )
+                .map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               <option value="Tất cả">Tất cả</option>
             </select>
             <Filter
-              size={16}
-              className="absolute left-2.5 top-2.5 text-gray-400 pointer-events-none"
+              size={15}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-ink pointer-events-none"
             />
           </div>
         </div>
       </motion.div>
 
-      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-10">
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredStores.map((store, i) => (
           <motion.div
             key={store.id}
@@ -95,54 +104,67 @@ export const Stores = () => {
             initial="hidden"
             animate="show"
             custom={i}
-            whileHover={{ scale: 1.02 }}
-            className="bg-white  shadow-[0_10px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] border border-gray-100 transition-all overflow-hidden group relative"
+            className="bg-paper border-2 border-ink shadow-hard overflow-hidden group relative flex flex-col justify-between"
           >
-            <div className="relative h-56 overflow-hidden">
-              <motion.img
-                src={"https://i.pinimg.com/1200x/7e/ba/40/7eba4003040262ea71a3a57be399fd13.jpg"}
+            <div className="relative h-52 overflow-hidden border-b-2 border-ink bg-bone">
+              <img
+                src="https://i.pinimg.com/1200x/7e/ba/40/7eba4003040262ea71a3a57be399fd13.jpg"
                 alt={store.name}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-70"></div>
-              <div className="absolute top-3 right-3 bg-white/80 backdrop-blur-md rounded-full p-1.5 shadow">
-                <MoreVertical size={18} className="text-gray-600" />
+              <div className="absolute top-3 right-3 bg-paper border-2 border-ink p-1.5 shadow-hard-sm">
+                <MoreVertical size={16} className="text-ink" />
               </div>
-              <div className="absolute bottom-4 left-4">
-                <p className="text-white font-semibold text-lg drop-shadow-lg">{store.name}</p>
-                <p className="text-gray-200 text-sm flex items-center gap-1">
-                  <MapPin size={14} /> {store.city}
+              <div className="absolute bottom-3 left-3 right-3 bg-ink/90 text-paper border-2 border-ink p-3">
+                <p className="font-display-safe font-black uppercase text-base text-paper truncate">
+                  {store.name}
+                </p>
+                <p className="font-mono text-xs text-volt flex items-center gap-1 mt-0.5">
+                  <MapPin size={12} /> {store.city}
                 </p>
               </div>
             </div>
 
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="bg-indigo-50 p-4 rounded-2xl text-center">
-                  <p className="text-xs  font-medium">Doanh thu</p>
-                  <p className="text-lg font-semibold text-gray-900">
-                    {store.revenue.toLocaleString()}₫
+            <div className="p-5 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-bone border-2 border-ink p-3">
+                  <p className="font-mono text-[10px] font-bold uppercase text-ink-muted mb-1">
+                    Doanh thu
                   </p>
-                  <span className="text-emerald-600 text-xs font-medium flex items-center justify-center gap-1">
+                  <div className="overflow-x-auto my-1">
+                    <SplitFlap
+                      value={`${store.revenue.toLocaleString()}₫`}
+                      size="sm"
+                    />
+                  </div>
+                  <span className="font-mono text-[10px] font-bold text-success flex items-center gap-1 mt-1">
                     <TrendingUp size={12} /> {store.growth}
                   </span>
                 </div>
 
-                <div className="bg-purple-50 p-4 rounded-2xl text-center">
-                  <p className="text-xs  font-medium">Đánh giá</p>
-                  <p className="flex justify-center items-center gap-1 font-semibold text-gray-900">
-                    <Star className="text-yellow-400 fill-yellow-400" size={16} /> {store.rating}
+                <div className="bg-bone border-2 border-ink p-3 flex flex-col justify-between">
+                  <p className="font-mono text-[10px] font-bold uppercase text-ink-muted">
+                    Đánh giá
                   </p>
-                  <p className="text-xs text-gray-400">Khách hàng</p>
+                  <p className="flex items-center gap-1.5 font-mono text-xl font-bold text-ink my-1">
+                    <Star className="text-flash fill-flash" size={16} />{" "}
+                    {store.rating}
+                  </p>
+                  <p className="font-mono text-[10px] uppercase text-ink-muted">
+                    Khách hàng
+                  </p>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-sm text-gray-600">
-                <div className="flex items-center gap-1">
-                  <Phone size={14} className="" />
+              <div className="flex items-center justify-between pt-3 border-t-2 border-ink font-mono text-xs text-ink">
+                <div className="flex items-center gap-1.5 font-bold">
+                  <Phone size={14} className="text-flash" />
                   {store.phone}
                 </div>
-                <button className="px-4 py-1.5 text-xs font-semibold   hover:from-indigo-200 hover:to-purple-200 transition-all">
+                <button
+                  type="button"
+                  className="min-h-[40px] px-4 py-1.5 bg-ink text-paper border-2 border-ink font-mono text-[11px] font-bold uppercase hover:bg-flash transition-colors cursor-pointer"
+                >
                   Xem chi tiết
                 </button>
               </div>
@@ -152,9 +174,11 @@ export const Stores = () => {
       </div>
 
       {filteredStores.length === 0 && (
-        <p className="text-center text-gray-500 mt-10">
-          Không tìm thấy cửa hàng nào phù hợp.
-        </p>
+        <div className="bg-paper border-2 border-dashed border-ink p-12 text-center">
+          <p className="font-mono text-xs font-bold uppercase text-ink-muted">
+            Không tìm thấy cửa hàng nào phù hợp.
+          </p>
+        </div>
       )}
     </div>
   );

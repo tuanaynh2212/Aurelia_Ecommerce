@@ -2,129 +2,82 @@ import { useContext } from "react";
 import type { order } from "../../types/type";
 import { CreditCardIcon, HomeIcon } from "lucide-react";
 import { CartContext } from "../../contexts/CartContext";
+import { Receipt, DottedLeaderRow } from "../UI";
 
 export const OrderSummaryGrid = ({ data }: { data: order | undefined }) => {
-  const {formatPrice}=useContext(CartContext)
+  const { formatPrice } = useContext(CartContext);
+  const itemsSubtotal =
+    data?.product?.reduce((acc, item) => acc + item.price * item.quantity, 0) ??
+    0;
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-      <div className="flex flex-col gap-4">
-        <h4 className="font-serif text-xl font-bold text-[#111318]  pb-2 border-b border-[#dbdfe6] dark:border-gray-700">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="bg-[var(--color-paper)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard-sm)] p-5 flex flex-col gap-3">
+        <h4 className="font-display-safe text-base font-extrabold uppercase text-[var(--color-ink)] pb-2 border-b-2 border-[var(--color-ink)]">
           Shipping Details
         </h4>
-        <div className="flex flex-col gap-1 text-sm text-[#616f89] dark:text-gray-300 leading-relaxed">
-          <p className="font-bold text-[#111318]  text-base mb-1">
+        <div className="flex flex-col gap-1 font-mono text-xs text-[var(--color-ink-muted)] leading-relaxed">
+          <p className="font-extrabold text-[var(--color-ink)] text-sm mb-1">
             {data?.address}
           </p>
-          <p>{data?.address}, VN 5555451</p>
+          <p>{data?.address}, VN</p>
           <p>Viet Nam</p>
-          <p className="mt-2">{data?.phone}</p>
+          <p className="mt-2 font-extrabold text-[var(--color-ink)]">
+            {data?.phone}
+          </p>
         </div>
       </div>
-      {
-        data?.payment==="paypal" ? (
-      <div className="flex flex-col gap-4">
-        <h4 className="font-serif text-xl font-bold text-[#111318]  pb-2 border-b border-[#dbdfe6] dark:border-gray-700">
+
+      <div className="bg-[var(--color-paper)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard-sm)] p-5 flex flex-col gap-3">
+        <h4 className="font-display-safe text-base font-extrabold uppercase text-[var(--color-ink)] pb-2 border-b-2 border-[var(--color-ink)]">
           Payment Method
         </h4>
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-3 text-[#111318] ">
-            {data?.payment==="paypal" ? <CreditCardIcon className="w-8 h-8 text-gray-500"/> : data?.payment==="cod" ? <HomeIcon className="w-8 h-8 text-gray-500"/> : <CreditCardIcon className="w-8 h-8 text-gray-500"/>}
-            <div>
-              <p className="text-sm font-bold">
-                {data?.payment.toUpperCase()} ending in
-              </p>
-              <p className="text-xs text-[#616f89] dark:text-gray-400">
-                Exp 12 / 26
-              </p>
-            </div>
+        <div className="flex items-center gap-3 text-[var(--color-ink)] pt-2">
+          <div className="p-2.5 bg-[var(--color-volt)] border-2 border-[var(--color-ink)]">
+            {data?.payment === "cod" ? (
+              <HomeIcon className="w-5 h-5" />
+            ) : (
+              <CreditCardIcon className="w-5 h-5" />
+            )}
           </div>
-        </div>
-      </div>):data?.payment==="card" ?(
-        <div className="flex flex-col gap-4">
-        <h4 className="font-serif text-xl font-bold text-[#111318]  pb-2 border-b border-[#dbdfe6] dark:border-gray-700">
-            Payment Method
-        </h4>
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-3 text-[#111318] ">
-            <CreditCardIcon className="w-8 h-8 text-gray-500"/>
-            <div>
-              <p className="text-sm font-bold">
-                {data?.payment.toUpperCase()} ending in {""}
-              </p>
-              <p className="text-xs text-[#616f89] dark:text-gray-400">
-                Exp 12 / 26
-              </p>
-            </div>
-            </div>
-        </div>
-        </div>
-        ):(
-          <div className="flex flex-col gap-4">
-          <h4 className="font-serif text-xl font-bold text-[#111318]  pb-2 border-b border-[#dbdfe6] dark:border-gray-700">
-                Payment Method
-            </h4>
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-3 text-[#111318] dark:text-white">
-                <HomeIcon className="w-8 h-8 text-gray-500"/>
-                <div>
-                  <p className="text-sm font-bold">
-                    {data?.payment.toUpperCase()}
-                    </p>
-                </div>
-                </div>
-            </div>
-            </div>
-        )
-      }
-
-      <div className="flex flex-col gap-4">
-        <h4 className="font-serif text-xl font-bold text-[#111318]  pb-2 border-b border-[#dbdfe6] dark:border-gray-700">
-          Order Summary
-        </h4>
-        <div className="flex flex-col gap-3">
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-[#616f89] dark:text-gray-400">Subtotal</span>
-            <span className="font-medium text-[#111318] ">
-              $
-              {formatPrice?.(
-                data?.product?.reduce(
-                  (acc, item) => acc + item.price * item.quantity,
-                  0,
-                ) ?? 0
-              )}
-            </span>
-          </div>
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-[#616f89] dark:text-gray-400">
-              Shipping (Express)
-            </span>
-            <span className="font-medium text-[#111318] ">
-              ${formatPrice?.(25000)}
-            </span>
-          </div>
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-[#616f89] dark:text-gray-400">
-              Estimated Tax
-            </span>
-            <span className="font-medium text-[#111318] ">
-              ${formatPrice?.(0.0)}
-            </span>
-          </div>
-          <div className="h-px bg-[#dbdfe6] dark:bg-gray-700 my-1"></div>
-          <div className="flex justify-between items-center text-lg font-bold text-[#111318] ">
-            <span className="font-serif">Grand Total</span>
-            <span>
-              $
-              {formatPrice?.(
-                (data?.product?.reduce(
-                  (acc, item) => acc + item.price * item.quantity,
-                  0,
-                ) ?? 0) + 25000
-              )}
-            </span>
+          <div>
+            <p className="font-mono text-sm font-extrabold uppercase">
+              {data?.payment?.toUpperCase() || "COD"}
+            </p>
+            <p className="mono-label text-[10px] text-[var(--color-ink-muted)]">
+              ATELIER VERIFIED SETTLEMENT
+            </p>
           </div>
         </div>
       </div>
+
+      <Receipt
+        title="ORDER SUMMARY"
+        serial={data?.orderId?.slice(0, 8) || "SUM-01"}
+      >
+        <div className="space-y-2.5">
+          <DottedLeaderRow
+            label="SUBTOTAL"
+            value={formatPrice?.(itemsSubtotal) || "0 ₫"}
+          />
+          <DottedLeaderRow
+            label="SHIPPING (EXPRESS)"
+            value={formatPrice?.(25000) || "25.000 ₫"}
+          />
+          <DottedLeaderRow
+            label="ESTIMATED TAX"
+            value={formatPrice?.(0) || "0 ₫"}
+          />
+          <div className="pt-2 border-t-2 border-[var(--color-ink)] flex justify-between items-baseline">
+            <span className="mono-label font-extrabold text-[var(--color-ink)]">
+              GRAND TOTAL
+            </span>
+            <span className="font-mono text-lg font-extrabold text-[var(--color-flash)] tabular-nums">
+              {formatPrice?.(itemsSubtotal + 25000)}
+            </span>
+          </div>
+        </div>
+      </Receipt>
     </div>
   );
 };

@@ -1,16 +1,26 @@
+import { forwardRef, type HTMLAttributes } from "react";
 import { cn } from "../../utils/cn";
-import { forwardRef } from "react";
 
-interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface ContainerProps extends HTMLAttributes<HTMLDivElement> {
   narrow?: boolean;
+  size?: "sm" | "md" | "lg" | "xl" | "full";
 }
 
-const Container = forwardRef<HTMLDivElement, ContainerProps>(
-  ({ className, narrow = false, ...props }, ref) => (
+const SIZE_CLASSES: Record<NonNullable<ContainerProps["size"]>, string> = {
+  sm: "max-w-3xl",
+  md: "max-w-5xl",
+  lg: "max-w-7xl",
+  xl: "max-w-[1440px]",
+  full: "max-w-none",
+};
+
+export const Container = forwardRef<HTMLDivElement, ContainerProps>(
+  ({ className, narrow = false, size = "xl", ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
-        "container-page",
+        "container-atelier",
+        SIZE_CLASSES[size],
         narrow && "max-w-4xl",
         className
       )}
@@ -20,19 +30,19 @@ const Container = forwardRef<HTMLDivElement, ContainerProps>(
 );
 Container.displayName = "Container";
 
-interface SectionProps extends React.HTMLAttributes<HTMLElement> {
+export interface SectionWrapperProps extends HTMLAttributes<HTMLElement> {
   as?: "section" | "div" | "main" | "aside";
   spacious?: boolean;
 }
 
-const Section = forwardRef<HTMLElement, SectionProps>(
+export const Section = forwardRef<HTMLElement, SectionWrapperProps>(
   ({ className, as: Tag = "section", spacious = false, ...props }, ref) => (
-    // @ts-expect-error — ref type varies by tag, safe in practice
+    // @ts-expect-error — polymorphic tag ref
     <Tag
       ref={ref}
       className={cn(
-        "section-padding",
-        spacious && "py-24 md:py-32",
+        "py-12 md:py-16",
+        spacious && "py-20 md:py-28",
         className
       )}
       {...props}
@@ -40,5 +50,3 @@ const Section = forwardRef<HTMLElement, SectionProps>(
   )
 );
 Section.displayName = "Section";
-
-export { Container, Section };

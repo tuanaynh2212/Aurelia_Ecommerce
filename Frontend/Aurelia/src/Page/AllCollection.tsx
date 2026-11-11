@@ -13,9 +13,9 @@ export const AllCollection = () => {
         description="Mục lục lưu trữ và phân loại các bộ sưu tập thời trang theo niên độ tại Aurelia."
         url={window.location.href}
       />
-      <div className="flex flex-col min-h-screen bg-[var(--color-bg)] text-[var(--color-ink)]">
+      <div className="flex flex-col min-h-screen bg-bone text-ink">
         <Navbar />
-        <main id="main-content" className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-20">
+        <main id="main-content" className="container-atelier flex-grow pb-20">
           <Hero />
           <SeasonGrid />
           <ArchivesSection />

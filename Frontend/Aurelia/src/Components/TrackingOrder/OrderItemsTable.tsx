@@ -1,5 +1,6 @@
 import React from "react";
 import type { Cart } from "../../types/type";
+import { formatVND } from "../../utils/formatters";
 
 interface OrderItemsTableProps {
   data: Cart[] | undefined;
@@ -7,75 +8,62 @@ interface OrderItemsTableProps {
 
 export const OrderItemsTable: React.FC<OrderItemsTableProps> = ({ data }) => {
   return (
-    <div className=" rounded border border-[#dbdfe6] dark:border-gray-700 overflow-hidden mb-12 shadow-sm">
+    <div className="bg-[var(--color-paper)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard)] overflow-hidden mb-8">
       <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className=" border-b border-[#dbdfe6] dark:border-gray-700">
+        <table className="w-full text-left border-collapse">
+          <thead className="bg-[var(--color-ink)] text-[var(--color-paper)] border-b-2 border-[var(--color-ink)]">
             <tr>
-              <th className="py-4 px-6 text-xs uppercase tracking-wider font-semibold text-[#616f89] dark:text-gray-400 w-[45%]">
-                Product
-              </th>
-              <th className="py-4 px-6 text-xs uppercase tracking-wider font-semibold text-[#616f89] dark:text-gray-400">
-                Price
-              </th>
-              <th className="py-4 px-6 text-xs uppercase tracking-wider font-semibold text-[#616f89] dark:text-gray-400 text-center">
-                Qty
-              </th>
-              <th className="py-4 px-6 text-xs uppercase tracking-wider font-semibold text-[#616f89] dark:text-gray-400 text-right">
-                Total
-              </th>
-              <th className="py-4 px-6 text-xs uppercase tracking-wider font-semibold text-[#616f89] dark:text-gray-400 text-right">
-                Actions
-              </th>
+              <th className="py-3.5 px-5 mono-label w-[45%]">Product</th>
+              <th className="py-3.5 px-5 mono-label">Price</th>
+              <th className="py-3.5 px-5 mono-label text-center">Qty</th>
+              <th className="py-3.5 px-5 mono-label text-right">Total</th>
+              <th className="py-3.5 px-5 mono-label text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#dbdfe6] dark:divide-gray-700">
+          <tbody className="divide-y-2 divide-[var(--color-ink)]">
             {data?.map((item) => (
               <tr
                 key={item.itemid}
-                className="group hover:bg-gray-50 dark:hover:bg-gray-400transition-colors"
+                className="group hover:bg-[var(--color-bone)] transition-colors"
               >
-                <td className="py-6 px-6">
-                  <div className="flex gap-6">
-                    <div className="w-20 h-28 flex-shrink-0 rounded bg-gray-200 overflow-hidden relative">
+                <td className="py-5 px-5">
+                  <div className="flex gap-4">
+                    <div className="w-20 h-24 flex-shrink-0 border-2 border-[var(--color-ink)] bg-[var(--color-bone)] overflow-hidden relative">
                       <div
-                        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                        className="absolute inset-0 bg-cover bg-center"
                         style={{ backgroundImage: `url('${item.thumnail}')` }}
                         title={item.name}
                       />
                     </div>
                     <div className="flex flex-col justify-center">
-                      <h3 className="font-serif text-lg font-bold text-[#111318]  mb-1">
+                      <h3 className="font-display-safe text-base font-extrabold uppercase text-[var(--color-ink)] mb-1">
                         {item.name}
                       </h3>
-                      <p className="text-sm text-[#616f89] dark:text-gray-400">
+                      <p className="mono-label text-[var(--color-ink-muted)]">
                         Color: {item.color}
                       </p>
-                      <p className="text-sm text-[#616f89] dark:text-gray-400">
+                      <p className="mono-label text-[var(--color-ink-muted)]">
                         Size: {item.size}
                       </p>
                     </div>
                   </div>
                 </td>
-                <td className="py-6 px-6 text-sm font-medium text-[#111318] ">
-                  ${item.price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")}
+                <td className="py-5 px-5 font-mono text-xs font-bold text-[var(--color-ink)] tabular-nums">
+                  {formatVND(item.price)}
                 </td>
-                <td className="py-6 px-6 text-sm font-medium text-[#111318]  text-center">
+                <td className="py-5 px-5 font-mono text-xs font-extrabold text-[var(--color-ink)] text-center tabular-nums">
                   {item.quantity}
                 </td>
-                <td className="py-6 px-6 text-sm font-bold text-[#111318]  text-right">
-                  $
-                  {(item.price * item.quantity)
-                    .toFixed(2)
-                    .replace(/\d(?=(\d{3})+\.)/g, "$&,")}
+                <td className="py-5 px-5 font-mono text-sm font-extrabold text-[var(--color-flash)] text-right tabular-nums">
+                  {formatVND(item.price * item.quantity)}
                 </td>
-                <td className="py-6 px-6 text-right">
+                <td className="py-5 px-5 text-right">
                   {item.itemid.includes("1") ? (
-                    <button className="text-sm font-bold text-primary hover:text-primary/80 transition-colors">
+                    <button className="min-h-[38px] px-3 border-2 border-[var(--color-ink)] bg-[var(--color-volt)] mono-label font-extrabold text-[var(--color-ink)] cursor-pointer">
                       Track Item
                     </button>
                   ) : (
-                    <button className="text-sm font-bold text-[#616f89] hover:text-[#111318]  transition-colors">
+                    <button className="min-h-[38px] px-3 border-2 border-[var(--color-ink)] bg-[var(--color-paper)] hover:bg-[var(--color-bone)] mono-label text-[var(--color-ink)] cursor-pointer">
                       Return
                     </button>
                   )}

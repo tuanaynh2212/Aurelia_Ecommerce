@@ -14,7 +14,7 @@ export const Product = () => {
         keywords="thời trang, váy đầm, trang sức, đồng hồ, phụ kiện, Aurelia"
         url={window.location.href}
       />
-      <div className="min-h-screen bg-[var(--color-cream-50)] text-[var(--color-ink)] flex flex-col">
+      <div className="min-h-screen bg-bone text-ink flex flex-col">
         <Navbar />
         <main id="main-content" className="flex-1 pb-16">
           <BannerTitle />

@@ -7,19 +7,24 @@ import {
   CheckCircle,
   Loader2,
   Info,
-  XCircle,
+  X,
 } from "lucide-react";
 import { api_Config, UseApiUrl } from "../../../../services/api";
 import { Toaster } from "../../../Toaster";
 import { LoadingOverlay } from "../../../LoadingOverlay";
 
-const ImportExcel = ({setOpenImportModal}:{setOpenImportModal:React.Dispatch<React.SetStateAction<boolean>>}) => {
-  const [selectedFile,] = useState<File | null>(null);
-  const [previewData, setPreviewData] = useState<any[]>([]);
+const ImportExcel = ({
+  setOpenImportModal,
+}: {
+  setOpenImportModal: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+  const [selectedFile] = useState<File | null>(null);
+  const [previewData, setPreviewData] = useState<Array<Record<string, unknown>>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [datas, setDatas] = useState<any[]>([]);
+  const [datas, setDatas] = useState<Array<Record<string, unknown>>>([]);
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     setFile(file || null);
@@ -28,10 +33,12 @@ const ImportExcel = ({setOpenImportModal}:{setOpenImportModal:React.Dispatch<Rea
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json<any>(sheet);
+      const jsonData = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
       setPreviewData(jsonData.slice(0, 5));
-            jsonData.forEach(element => {
-        setDatas(prevData => [...prevData, {
+      jsonData.forEach((element) => {
+        setDatas((prevData) => [
+          ...prevData,
+          {
             id: element.id,
             name: element.name,
             type: element.type,
@@ -45,18 +52,19 @@ const ImportExcel = ({setOpenImportModal}:{setOpenImportModal:React.Dispatch<Rea
             createdAt: element.createdAt,
             updatedAt: element.updatedAt,
             thumbnail: element.thumbnail,
-            images:  JSON.parse(element.images.replace(/'/g, '"')),
+            images: JSON.parse(String(element.images).replace(/'/g, '"')),
             material: element.material,
-            variants:  JSON.parse(element.variants.replace(/'/g, '"')),
+            variants: JSON.parse(String(element.variants).replace(/'/g, '"')),
             sold: element.sold,
             discountValue: element.discountValue,
             discountType: element.discountType,
-            season: element.season
-        }]);
-
+            season: element.season,
+          },
+        ]);
       });
     }
   };
+
   const handleFileUpload = async () => {
     if (!file) {
       Toaster.error("Vui lòng chọn tệp Excel!");
@@ -65,7 +73,9 @@ const ImportExcel = ({setOpenImportModal}:{setOpenImportModal:React.Dispatch<Rea
 
     setIsLoading(true);
     try {
-      await axios.post(UseApiUrl(api_Config.Product.PostProduct), datas, { headers: { 'Content-Type': 'application/json' } });
+      await axios.post(UseApiUrl(api_Config.Product.PostProduct), datas, {
+        headers: { "Content-Type": "application/json" },
+      });
       setSuccess(true);
       Toaster.success("Import sản phẩm từ Excel thành công!");
       setTimeout(() => {
@@ -82,118 +92,142 @@ const ImportExcel = ({setOpenImportModal}:{setOpenImportModal:React.Dispatch<Rea
   return (
     <>
       <LoadingOverlay isLoading={isLoading} message="Đang import sản phẩm..." />
-      <div className="relative p-8 rounded-2xl shadow-xl bg-gradient-to-br from-blue-50/60 to-purple-100/40 backdrop-blur-lg border border-white/30 w-full max-w-4xl mx-auto mt-10">
-        <XCircle className="absolute top-4 right-4 w-6 h-6 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors" onClick={() => setOpenImportModal(false)} />
-      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-blue-300/20 via-purple-300/20 to-pink-300/20 blur-2xl rounded-3xl"></div>
-
-      <h2 className="text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 mb-6">
-        Nhập sản phẩm từ Excel
-      </h2>
-
-      <div className="p-4 mb-6 rounded-xl bg-white/60 border border-blue-200 shadow-inner">
-        <div className="flex items-center gap-2 mb-2 text-blue-700 font-semibold">
-          <Info className="w-5 h-5" />
-          <span>Hướng dẫn nhập file Excel:</span>
+      <div className="relative bg-paper border-2 border-ink shadow-hard-lg w-full max-w-4xl mx-auto my-8 overflow-hidden">
+        <div className="bg-ink text-paper px-6 py-4 flex items-center justify-between border-b-2 border-ink">
+          <div>
+            <span className="mono-label text-[10px] text-volt block">
+              [BATCH MANIFEST // XLSX IMPORT]
+            </span>
+            <h2 className="font-display-safe text-xl font-black uppercase text-paper">
+              Nhập sản phẩm từ Excel
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpenImportModal(false)}
+            className="min-w-[44px] min-h-[44px] bg-paper text-ink border-2 border-ink flex items-center justify-center hover:bg-flash hover:text-paper transition-colors cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
-        <p className="text-sm text-gray-700 leading-relaxed">
-          🧾 File Excel cần có <b>tên cột trùng với thuộc tính của Product</b> như:
-        </p>
-        <pre className="bg-white/70 p-3 rounded-md text-xs text-gray-800 overflow-x-auto mt-2">
-{`id | name | type | subcategory | brand | origin | price | description | rating | stock | createdAt | updatedAt | thumbnail | images | material | variants | sold | discountValue | discountType`}
-        </pre>
-        <p className="text-sm text-gray-600 mt-2">
-          📦 <b>Lưu ý:</b>
-          - <code>images</code> có thể nhập nhiều URL, ngăn cách bởi dấu phẩy (,).
-          - <code>variants</code> có thể để trống hoặc chứa JSON string.
-          - <code>price</code>, <code>stock</code>, <code>sold</code>, <code>rating</code>, <code>discountValue</code> là số.
-        </p>
-      </div>
 
-      <div
-        className={`w-full p-6 border-2 border-dashed rounded-xl text-center transition-all ${
-          selectedFile
-            ? "border-green-400 bg-green-50/40"
-            : "border-blue-300 hover:border-blue-400 bg-white/50"
-        }`}
-      >
-        <label
-          htmlFor="fileInput"
-          className="cursor-pointer flex flex-col items-center gap-2 text-gray-700 hover:text-blue-600 transition-all"
-        >
-          <FileSpreadsheet className="w-12 h-12 text-blue-500" />
-          <span className="font-medium">
-            {selectedFile ? selectedFile.name : "Chọn tệp Excel (.xlsx, .xls)"}
-          </span>
-        </label>
-        <input
-          id="fileInput"
-          type="file"
-          accept=".xlsx,.xls"
-          onChange={handleFileChange}
-          className="hidden"
-        />
-      </div>
+        <div className="p-6 md:p-8 space-y-6 bg-bone max-h-[82vh] overflow-y-auto">
+          <div className="p-4 bg-paper border-2 border-ink">
+            <div className="flex items-center gap-2 mb-2 text-ink font-mono text-xs font-bold uppercase">
+              <Info className="w-4 h-4 text-flash" />
+              <span>Hướng dẫn nhập file Excel:</span>
+            </div>
+            <p className="font-sans text-xs text-ink leading-relaxed">
+              File Excel cần có <b>tên cột trùng với thuộc tính của Product</b> như:
+            </p>
+            <pre className="bg-bone border border-ink p-3 font-mono text-[11px] text-ink overflow-x-auto mt-2">
+              {`id | name | type | subcategory | brand | origin | price | description | rating | stock | createdAt | updatedAt | thumbnail | images | material | variants | sold | discountValue | discountType`}
+            </pre>
+            <p className="font-sans text-xs text-ink-muted mt-2">
+              <b>Lưu ý:</b>
+              - <code>images</code> có thể nhập nhiều URL, ngăn cách bởi dấu phẩy (,).
+              - <code>variants</code> có thể để trống hoặc chứa JSON string.
+              - <code>price</code>, <code>stock</code>, <code>sold</code>, <code>rating</code>, <code>discountValue</code> là số.
+            </p>
+          </div>
 
-      {previewData.length > 0 && (
-        <div className="mt-6 bg-white/60 border border-gray-200 rounded-lg overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-              <tr>
-                {Object.keys(previewData[0]).map((key) => (
-                  <th key={key} className="p-2 text-left font-semibold">
-                    {key}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {previewData.map((row, i) => (
-                <tr key={i} className="even:bg-white odd:bg-gray-50">
-                  {Object.values(row).map((val, j) => (
-                    <td key={j} className="p-2 text-gray-700 truncate max-w-[150px]">
-                      {String(val)}
-                    </td>
+          <div
+            className={`w-full p-8 border-2 border-dashed border-ink text-center transition-colors ${
+              selectedFile || file ? "bg-volt/30" : "bg-paper hover:bg-volt/15"
+            }`}
+          >
+            <label
+              htmlFor="fileInput"
+              className="cursor-pointer flex flex-col items-center gap-2 text-ink"
+            >
+              <FileSpreadsheet className="w-10 h-10 text-ink" />
+              <span className="font-mono text-xs font-bold uppercase">
+                {file
+                  ? file.name
+                  : selectedFile
+                    ? selectedFile.name
+                    : "Chọn tệp Excel (.xlsx, .xls)"}
+              </span>
+            </label>
+            <input
+              id="fileInput"
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </div>
+
+          {previewData.length > 0 && (
+            <div className="bg-paper border-2 border-ink overflow-x-auto">
+              <table className="w-full font-mono text-xs">
+                <thead className="bg-ink text-paper">
+                  <tr>
+                    {Object.keys(previewData[0]).map((key) => (
+                      <th
+                        key={key}
+                        className="p-2.5 text-left font-bold uppercase border-r border-paper/20"
+                      >
+                        {key}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {previewData.map((row, i) => (
+                    <tr
+                      key={i}
+                      className="even:bg-paper odd:bg-bone border-t border-ink"
+                    >
+                      {Object.values(row).map((val, j) => (
+                        <td
+                          key={j}
+                          className="p-2 text-ink truncate max-w-[150px]"
+                        >
+                          {String(val)}
+                        </td>
+                      ))}
+                    </tr>
                   ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="text-xs text-gray-500 italic text-center py-2">
-            (Hiển thị trước 5 dòng đầu tiên)
-          </p>
-        </div>
-      )}
-
-      <div className="flex justify-center mt-6">
-        <button
-          onClick={handleFileUpload}
-          className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-all shadow-lg
-          ${
-            isLoading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-gradient-to-r from-blue-500 to-purple-600 hover:opacity-90 hover:scale-105"
-          }`}
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Đang import...
-            </>
-          ) : (
-            <>
-              <UploadCloud className="w-5 h-5" />
-              Tải lên & Import
-            </>
+                </tbody>
+              </table>
+              <p className="font-mono text-[10px] text-ink-muted uppercase text-center py-2 border-t border-ink">
+                (Hiển thị trước 5 dòng đầu tiên)
+              </p>
+            </div>
           )}
-        </button>
-      </div>
 
-      {success && (
-        <div className="flex justify-center items-center gap-2 mt-3 text-green-600 font-medium">
-          <CheckCircle className="w-5 h-5" />
-          Import thành công!
+          <div className="flex justify-center pt-2">
+            <button
+              type="button"
+              onClick={handleFileUpload}
+              className={`min-h-[48px] flex items-center gap-2 px-8 py-3 border-2 border-ink font-mono text-xs font-bold uppercase tracking-wider transition-colors shadow-hard-sm cursor-pointer ${
+                isLoading
+                  ? "bg-fog text-ink-muted cursor-not-allowed"
+                  : "bg-flash text-paper hover:bg-ink"
+              }`}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Đang import...
+                </>
+              ) : (
+                <>
+                  <UploadCloud className="w-4 h-4" />
+                  Tải lên & Import
+                </>
+              )}
+            </button>
+          </div>
+
+          {success && (
+            <div className="flex justify-center items-center gap-2 mt-3 text-success font-mono text-xs font-bold uppercase">
+              <CheckCircle className="w-4 h-4" />
+              Import thành công!
+            </div>
+          )}
         </div>
-      )}
       </div>
     </>
   );

@@ -1,75 +1,97 @@
 import React from "react";
 import { Package, MapPin, Store } from "lucide-react";
+import type { Cart, order } from "../../types/type";
 
 export type LeftSites = {
-  data: any;
+  data?: {
+    shopName?: string;
+    address?: string;
+    data?: order;
+  };
   onOpenMap?: () => void;
 };
 
 const LeftSite: React.FC<LeftSites> = ({ data, onOpenMap }) => {
   return (
-    <div className="py-6 lg:py-20 bg-slate-50 lg:max-h-screen lg:overflow-y-scroll">
-      <div className="max-w-4xl mx-auto space-y-8 px-4">
-        <div className="bg-white rounded-3xl shadow-md p-6 lg:p-8 border border-slate-100">
-          <div className="flex items-center gap-4 mb-3">
-            <div className="p-3 bg-blue-600 rounded-xl shadow-md">
-              <Package className="w-6 h-6 text-white" />
+    <div className="py-6 lg:py-12 bg-[var(--color-bone)] lg:max-h-screen lg:overflow-y-scroll">
+      <div className="max-w-4xl mx-auto space-y-6 px-4">
+        <div className="bg-[var(--color-paper)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard)] p-6">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2.5 bg-[var(--color-volt)] border-2 border-[var(--color-ink)]">
+              <Package className="w-5 h-5 text-[var(--color-ink)]" />
             </div>
-            <h2 className="text-xl lg:text-2xl font-bold text-slate-900">
-              Thông Tin Đơn Hàng
-            </h2>
+            <div>
+              <span className="mono-label text-[var(--color-ink-muted)]">
+                [LOGISTICS MANIFEST]
+              </span>
+              <h2 className="display-m font-display-safe text-[var(--color-ink)]">
+                Thông Tin Đơn Hàng
+              </h2>
+            </div>
           </div>
-          <p className="text-slate-500 ml-14 text-sm">
+          <p className="font-mono text-xs text-[var(--color-ink-muted)]">
             Thông tin chi tiết về đơn hàng
           </p>
         </div>
 
-        <div className="space-y-6">
-          {data?.data?.product?.map((item: any, index: number) => (
+        <div className="space-y-4">
+          {data?.data?.product?.map((item: Cart, index: number) => (
             <div
-              key={index}
-              className="bg-white rounded-2xl shadow-md p-5 border border-slate-200"
+              key={item.itemid || index}
+              className="bg-[var(--color-paper)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard-sm)] p-4"
             >
-              <div className="flex flex-col sm:flex-row gap-5">
-                <div className="relative w-full sm:w-36 h-36 rounded-xl overflow-hidden bg-slate-100">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative w-full sm:w-32 h-32 overflow-hidden bg-[var(--color-bone)] border-2 border-[var(--color-ink)]">
                   <img
                     src={item.thumnail}
                     alt={item.name}
                     className="w-full h-full object-cover"
                   />
-                  <span className="absolute top-2 right-2 bg-white px-2 py-0.5 rounded-full text-xs font-semibold text-blue-600 shadow">
-                    #{index + 1}
+                  <span className="absolute top-1.5 right-1.5 bg-[var(--color-ink)] text-[var(--color-paper)] px-2 py-0.5 mono-label text-[10px]">
+                    0{index + 1}
                   </span>
                 </div>
 
                 <div className="flex-1 space-y-3">
-                  <h3 className="text-base font-semibold text-slate-800">
+                  <h3 className="font-display-safe text-base font-extrabold uppercase text-[var(--color-ink)]">
                     {item.name}
                   </h3>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
-                    <div>
-                      <p className="text-slate-400 uppercase text-xs">Màu</p>
-                      <p className="font-medium">{item.color}</p>
+                  <div className="grid grid-cols-3 gap-3 text-xs font-mono">
+                    <div className="p-2 bg-[var(--color-bone)] border border-[var(--color-ink)]">
+                      <p className="mono-label text-[9px] text-[var(--color-ink-muted)]">
+                        MÀU
+                      </p>
+                      <p className="font-extrabold text-[var(--color-ink)]">
+                        {item.color}
+                      </p>
                     </div>
-                    <div>
-                      <p className="text-slate-400 uppercase text-xs">Size</p>
-                      <p className="font-medium">{item.size}</p>
+                    <div className="p-2 bg-[var(--color-bone)] border border-[var(--color-ink)]">
+                      <p className="mono-label text-[9px] text-[var(--color-ink-muted)]">
+                        SIZE
+                      </p>
+                      <p className="font-extrabold text-[var(--color-ink)]">
+                        {item.size}
+                      </p>
                     </div>
-                    <div>
-                      <p className="text-slate-400 uppercase text-xs">SL</p>
-                      <p className="font-medium">x{item.quantity}</p>
+                    <div className="p-2 bg-[var(--color-volt)] border border-[var(--color-ink)]">
+                      <p className="mono-label text-[9px] text-[var(--color-ink)]">
+                        SL
+                      </p>
+                      <p className="font-extrabold text-[var(--color-ink)]">
+                        x{item.quantity}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="border-t pt-3 flex flex-wrap gap-4 text-sm">
-                    <span className="font-semibold text-blue-600">
+                  <div className="border-t-2 border-dashed border-[var(--color-ink)] pt-2 flex flex-wrap justify-between gap-4 font-mono text-xs">
+                    <span className="font-extrabold text-[var(--color-flash)] tabular-nums">
                       {item.price}
                     </span>
-                    <span className="text-slate-500">
-                      {new Date(
-                        Number(item.dateBuy)
-                      ).toLocaleDateString("vi-VN")}
+                    <span className="text-[var(--color-ink-muted)]">
+                      {new Date(Number(item.dateBuy)).toLocaleDateString(
+                        "vi-VN"
+                      )}
                     </span>
                   </div>
                 </div>
@@ -78,33 +100,45 @@ const LeftSite: React.FC<LeftSites> = ({ data, onOpenMap }) => {
           ))}
         </div>
 
-        <div className="bg-white rounded-3xl shadow-lg p-6 border border-slate-100 space-y-5">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-emerald-600 rounded-xl shadow-md">
-              <Store className="w-6 h-6 text-white" />
+        <div className="bg-[var(--color-paper)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard)] p-6 space-y-4">
+          <div className="flex items-center gap-3 border-b-2 border-[var(--color-ink)] pb-3">
+            <div className="p-2 bg-[var(--color-ink)] text-[var(--color-paper)]">
+              <Store className="w-5 h-5" />
             </div>
-            <h2 className="text-lg font-bold">Thông Tin Cửa Hàng</h2>
+            <h2 className="font-display-safe text-base font-extrabold uppercase">
+              Thông Tin Cửa Hàng
+            </h2>
           </div>
 
-          <div className="bg-slate-50 rounded-xl p-4 border">
-            <p className="text-xs uppercase text-slate-500">Cửa hàng</p>
-            <p className="font-semibold">{data?.shopName}</p>
-            <p className="flex gap-2 text-sm text-slate-600 mt-1">
-              <MapPin className="w-4 h-4 mt-0.5" />
+          <div className="bg-[var(--color-bone)] p-4 border-2 border-[var(--color-ink)]">
+            <p className="mono-label text-[10px] text-[var(--color-ink-muted)]">
+              CỬA HÀNG XUẤT KHO
+            </p>
+            <p className="font-mono font-extrabold text-sm text-[var(--color-ink)] mt-0.5">
+              {data?.shopName}
+            </p>
+            <p className="flex gap-2 text-xs font-mono text-[var(--color-ink-muted)] mt-1">
+              <MapPin className="w-4 h-4 text-[var(--color-flash)] shrink-0" />
               {data?.address}
             </p>
           </div>
 
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-5 text-white">
-            <p className="text-xs uppercase opacity-90">Giao tới</p>
-            <p className="text-lg font-bold">{data?.data?.name}</p>
-            <p className="text-sm opacity-90">{data?.data?.address}</p>
+          <div className="bg-[var(--color-ink)] p-4 border-2 border-[var(--color-ink)] text-[var(--color-paper)]">
+            <p className="mono-label text-[10px] text-[var(--color-volt)]">
+              ĐIỂM ĐẾN GIAO HÀNG
+            </p>
+            <p className="font-display-safe text-base font-extrabold uppercase mt-0.5">
+              {data?.data?.name}
+            </p>
+            <p className="text-xs font-mono text-[var(--color-paper)]/80 mt-0.5">
+              {data?.data?.address}
+            </p>
           </div>
         </div>
 
         <button
           onClick={onOpenMap}
-          className="lg:hidden w-full bg-blue-600 text-white py-3 rounded-xl font-semibold shadow-md"
+          className="lg:hidden w-full min-h-[48px] bg-[var(--color-flash)] text-[var(--color-paper)] border-2 border-[var(--color-ink)] shadow-[var(--shadow-hard)] mono-label font-extrabold cursor-pointer"
         >
           Xem bản đồ giao hàng
         </button>
